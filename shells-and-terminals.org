@@ -1,0 +1,64 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+PROPERTY: header-args :tangle yes :eval yes :results silent
+#+options: author:t broken-links:nil c:nil creator:nil
+#+options: d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t num:t
+#+options: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+options: timestamp:t title:t toc:t todo:t |:t
+#+title: Emacs shells and terminal emulators
+#+date: <2022-05-22 Sun>
+#+author: Greg Tucker-Kellogg
+#+email: dbsgtk@gmail.com
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 28.1 (Org mode 9.5.3)
+#+cite_export
+:
+
+* Term mode (most basic, very bash)
+
+#+begin_src emacs-lisp
+      (use-package term
+        :config
+        (setq explicit-shell-file-name "bash")
+        )
+
+  (use-package eterm-256color
+               :hook (term-mode . eterm-256color-mode))
+#+end_src
+
+
+
+
+* Vterm
+
+OK, this rocks. Requires a little setup but looks like native. Installation at https://github.com/akermu/emacs-libvterm
+
+#+begin_src emacs-lisp
+  (use-package vterm
+    :commands vterm
+    :config
+    (setq vterm-max-scrollback 1000))
+
+#+end_src
+
+
+* Eshell
+
+#+begin_src emacs-lisp
+  (defun efs/configure-eshell ()
+    (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
+    (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+    (setq eshell-history-size 10000
+          eshell-buffer-maximum-lines 10000
+          eshell-hist-ignoredups t
+          eshell-scroll-to-bottom-on-input t)
+    )
+
+  (use-package eshell-git-prompt)
+
+  (use-package eshell
+    :config
+    (eshell-git-prompt-use-theme 'multiline2)
+    :hook (eshell-first-time-mode . efs/configure-eshell))
+#+end_src
