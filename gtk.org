@@ -1739,6 +1739,121 @@ Company and Yasnippet have some issues. This code (from https://emacs.stackexcha
 
 
 
+* Themes
+:CLOCKING:
+CLOCK: [2022-05-23 Mon 18:50]--[2022-05-23 Mon 18:50] =>  0:00
+:END:
+
+
+#+begin_src emacs-lisp
+
+    (use-package diminish)
+
+    (use-package smart-mode-line
+    :config
+    (setq sml/no-confirm-load-theme t)
+    (sml/setup)
+    (sml/apply-theme 'respectful)  ; Respect the theme colors
+    (setq sml/mode-width 'right
+        sml/name-width 60)
+
+     (setq-default mode-line-format
+     `("%e"
+    ;;     ,(when dw/exwm-enabled
+    ;;         '(:eval (format "[%d] " exwm-workspace-current-index)))
+         mode-line-front-space
+  ;;       evil-mode-line-tag
+         mode-line-mule-info
+         mode-line-client
+         mode-line-modified
+         mode-line-remote
+         mode-line-frame-identification
+         mode-line-buffer-identification
+         sml/pos-id-separator
+         (vc-mode vc-mode)
+         " "
+         mode-line-position
+         sml/pre-modes-separator
+         mode-line-modes
+         " "
+         mode-line-misc-info))
+
+    (setq rm-excluded-modes
+      (mapconcat
+        'identity
+        ; These names must start with a space!
+        '(" GitGutter" " MRev" " company"
+        " Helm" " Undo-Tree" " Projectile.*" " Z" " Ind"
+        " Org-Agenda.*" " ElDoc" " SP/s" " cider.*")
+        "\\|")))
+
+#+end_src
+#+begin_src emacs-lisp
+  (use-package doom-themes :defer t)
+
+  (defun disable-all-themes ()
+    "disable all active themes."
+    (dolist (i custom-enabled-themes)
+      (disable-theme i)))
+
+
+  (defun fresh-load-theme (theme &optional no-confirm)
+    (interactive
+     (list
+      (intern (completing-read "Load custom theme: "
+                               (mapcar #'symbol-name
+                                       (custom-available-themes))))
+      nil nil))
+    (message (concat "Theme is: " (symbol-name theme)))
+    (unless (custom-theme-name-valid-p theme)
+      (error "Invalid theme name `%s'" theme))
+    (disable-all-themes)
+    (if no-confirm
+        (load-theme theme t)
+      (load-theme theme)))
+
+
+  ;;(load-theme 'doom-moonlight t)
+  ;;(load-theme 'doom-tomorrow-night t)
+  ;;(load-theme 'doom-wilmersdorf t)
+  (fresh-load-theme 'doom-flatwhite t)
+  ;;(fresh-load-theme 'doom-plain-dark t)
+#+end_src
+
+
+#+begin_src emacs-lisp
+
+  (use-package all-the-icons)
+
+  (use-package minions
+  :hook (doom-modeline-mode . minions-mode))
+
+  (use-package doom-modeline
+  :after eshell     ;; Make sure it gets hooked after eshell
+  :hook (after-init . doom-modeline-init)
+  :custom-face
+  (mode-line ((t (:height 1.0))))
+  (mode-line-inactive ((t (:height 0.85))))
+  :custom
+  (doom-modeline-height 15)
+  (doom-modeline-bar-width 6)
+  (doom-modeline-lsp t)
+  (doom-modeline-github nil)
+  (doom-modeline-mu4e nil)
+  (doom-modeline-irc nil)
+  (doom-modeline-minor-modes t)
+  (doom-modeline-persp-name nil)
+  (doom-modeline-buffer-file-name-style 'truncate-except-project)
+  (doom-modeline-major-mode-icon nil))
+#+end_src
+
+
+
+#+begin_src emacs-lisp :eval no :tangle no
+  (org-babel-load-file (gtk/emacs-path "exwm.org"))
+#+end_src
+
+
 * Draft
 
 #+begin_src emacs-lisp :eval yes :tangle yes
@@ -1764,16 +1879,6 @@ Company and Yasnippet have some issues. This code (from https://emacs.stackexcha
     (flycheck-vale-setup))
 
 #+END_SRC
-
-
-#+BEGIN_SRC emacs-lisp 
-  (setq org-file-apps
-        '((auto-mode . emacs)
-          ("\\.x?html?\\'" . "google-chrome %s")
-          ("\\.pdf\\'" . "evince \"%s\"")
-          ("\\.pdf::\\([0-9]+\\)\\'" . "evince \"%s\" -p %1")))
-#+END_SRC
-
 
 
 #+BEGIN_SRC emacs-lisp :tangle no :eval no
@@ -1897,23 +2002,9 @@ Company and Yasnippet have some issues. This code (from https://emacs.stackexcha
 
 #+end_src
 
-#+begin_src emacs-lisp :tangle no :eval no
-  ("article"
-                                  (,@ (concat  "\\documentclass[11pt,oneside,a4paper,x11names]{article}\n"
-                                               "% -- DEFAULT PACKAGES \n[DEFAULT-PACKAGES]\n"
-                                               "% -- PACKAGES \n[PACKAGES]\n"
-                                               "% -- EXTRA \n[EXTRA]\n"
-                                               ))
-                                  ("\\section{%s}" . "\\section{%s}")
-                                  ("\\subsection{%s}" . "\\subsection{%s}")
-                                  ("\\subsubsection{%s}" . "\\subsubsection{%s}")
-                                  ("\\paragraph{%s}" . "\\paragraph{%s}")
-                                  ("\\subparagraph{%s}" . "\\subparagraph{%s}"))
-#+end_src
 
 
-
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :eval no :tangle no
   ;; unfilling
 
   (defun unfill-paragraph (&optional region)
@@ -1930,113 +2021,3 @@ Company and Yasnippet have some issues. This code (from https://emacs.stackexcha
 
 
 
-* Themes
-
-
-#+begin_src emacs-lisp
-
-    (use-package diminish)
-
-    (use-package smart-mode-line
-    :config
-    (setq sml/no-confirm-load-theme t)
-    (sml/setup)
-    (sml/apply-theme 'respectful)  ; Respect the theme colors
-    (setq sml/mode-width 'right
-        sml/name-width 60)
-
-     (setq-default mode-line-format
-     `("%e"
-    ;;     ,(when dw/exwm-enabled
-    ;;         '(:eval (format "[%d] " exwm-workspace-current-index)))
-         mode-line-front-space
-  ;;       evil-mode-line-tag
-         mode-line-mule-info
-         mode-line-client
-         mode-line-modified
-         mode-line-remote
-         mode-line-frame-identification
-         mode-line-buffer-identification
-         sml/pos-id-separator
-         (vc-mode vc-mode)
-         " "
-         mode-line-position
-         sml/pre-modes-separator
-         mode-line-modes
-         " "
-         mode-line-misc-info))
-
-    (setq rm-excluded-modes
-      (mapconcat
-        'identity
-        ; These names must start with a space!
-        '(" GitGutter" " MRev" " company"
-        " Helm" " Undo-Tree" " Projectile.*" " Z" " Ind"
-        " Org-Agenda.*" " ElDoc" " SP/s" " cider.*")
-        "\\|")))
-
-#+end_src
-#+begin_src emacs-lisp
-  (use-package doom-themes :defer t)
-
-  (defun disable-all-themes ()
-    "disable all active themes."
-    (dolist (i custom-enabled-themes)
-      (disable-theme i)))
-
-
-  (defun fresh-load-theme (theme &optional no-confirm)
-    (interactive
-     (list
-      (intern (completing-read "Load custom theme: "
-                               (mapcar #'symbol-name
-                                       (custom-available-themes))))
-      nil nil))
-    (message (concat "Theme is: " (symbol-name theme)))
-    (unless (custom-theme-name-valid-p theme)
-      (error "Invalid theme name `%s'" theme))
-    (disable-all-themes)
-    (if no-confirm
-        (load-theme theme t)
-      (load-theme theme)))
-
-
-  ;;(load-theme 'doom-moonlight t)
-  ;;(load-theme 'doom-tomorrow-night t)
-  ;;(load-theme 'doom-wilmersdorf t)
-  (fresh-load-theme 'doom-flatwhite t)
-  ;;(fresh-load-theme 'doom-plain-dark t)
-#+end_src
-
-
-#+begin_src emacs-lisp
-
-  (use-package all-the-icons)
-
-  (use-package minions
-  :hook (doom-modeline-mode . minions-mode))
-
-  (use-package doom-modeline
-  :after eshell     ;; Make sure it gets hooked after eshell
-  :hook (after-init . doom-modeline-init)
-  :custom-face
-  (mode-line ((t (:height 1.0))))
-  (mode-line-inactive ((t (:height 0.85))))
-  :custom
-  (doom-modeline-height 15)
-  (doom-modeline-bar-width 6)
-  (doom-modeline-lsp t)
-  (doom-modeline-github nil)
-  (doom-modeline-mu4e nil)
-  (doom-modeline-irc nil)
-  (doom-modeline-minor-modes t)
-  (doom-modeline-persp-name nil)
-  (doom-modeline-buffer-file-name-style 'truncate-except-project)
-  (doom-modeline-major-mode-icon nil))
-#+end_src
-
-
-
-#+begin_src emacs-lisp :eval no :tangle no
-  (org-babel-load-file (gtk/emacs-path "exwm.org"))
-#+end_src
