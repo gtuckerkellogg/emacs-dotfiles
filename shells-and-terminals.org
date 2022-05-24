@@ -32,7 +32,7 @@
 
 * Vterm
 
-OK, this rocks. Requires a little setup but looks like native. Installation at https://github.com/akermu/emacs-libvterm
+OK, this rocks. Requires a little setup but looks like native. Installation at https://github.com/akermu/emacs-libvterm. Do /not/ install libvterm, let use-package do the work
 
 #+begin_src emacs-lisp
   (use-package vterm

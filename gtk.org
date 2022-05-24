@@ -50,6 +50,8 @@
   (tooltip-mode -1)
   (scroll-bar-mode -1)
   (setq visible-bell t)
+
+
 #+END_SRC
 
 ** Enable minibuffer completion
@@ -117,6 +119,9 @@ These are almost trivial functions, but I find them useful
 
   (defun turn-off-cua-mode ()
     (cua-mode -1))
+
+  (defun turn-on-visual-line-mode ()
+    (visual-line-mode 1))
 
 
   (defun switch-to-minibuffer-window ()
@@ -196,7 +201,7 @@ Where the Org files go
 Org miscellany 
 
 #+begin_src emacs-lisp
-  (add-hook 'org-mode-hook 'turn-off-auto-fill)  
+  (add-hook 'org-mode-hook 'turn-off-auto-fill)    (add-hook 'org-mode-hook 'turn-on-visual-line-mode)  
   (add-hook 'org-mode-hook 'turn-off-cua-mode)  
   (setq org-insert-mode-line-in-empty-file t)
   (setq org-startup-indented t)
@@ -1308,6 +1313,7 @@ A citation link
 
 
 
+
 ** Let's use Sacha Chua's css for HTML export, since it looks purty
 
 #+begin_src emacs-lisp :tangle no
@@ -1820,6 +1826,10 @@ CLOCK: [2022-05-23 Mon 18:50]--[2022-05-23 Mon 18:50] =>  0:00
   ;;(fresh-load-theme 'doom-plain-dark t)
 #+end_src
 
+
+*** Getting icons.
+
+In order to use this, you must run ~(all-the-icons-install-fonts)~ after installing the package ~all-the-icons~. 
 
 #+begin_src emacs-lisp
 
