@@ -17,6 +17,7 @@
 #+XSLT:
 #+LATEX_HEADER: \usepackage{gtuckerkellogg}
 
+
 #+BEGIN_SRC emacs-lisp :results silent :exports none :eval yes
   (defun my-org-confirm-babel-evaluate (lang body)
     (cond
@@ -38,7 +39,40 @@
   (require 'cl-lib)
 #+END_SRC
 
+
+* Some functions
+
+These are almost trivial functions, but I find them useful
+
+#+BEGIN_SRC emacs-lisp
+
+
+  (defun  gtk/emacs-path (path)
+    (expand-file-name path user-emacs-directory))
+
+  (defalias 'gtk/emacsd-file 'gtk/emacs-path)
+  (defalias 'gtk/emacs-subdir 'gtk/emacs-path)
+
+
+  (defun turn-off-cua-mode ()
+    (cua-mode -1))
+
+  (defun turn-on-visual-line-mode ()
+    (visual-line-mode 1))
+
+  (defun switch-to-minibuffer-window ()
+    "switch to minibuffer window (if active)"
+    (interactive)
+    (when (active-minibuffer-window)
+      (select-window (active-minibuffer-window))))
+  (global-set-key (kbd "<f7>") 'switch-to-minibuffer-window)
+
+#+END_SRC
+
+
 * General Emacs behaviour
+
+
 
 ** emacs client and window behaviour
 
@@ -50,8 +84,7 @@
   (tooltip-mode -1)
   (scroll-bar-mode -1)
   (setq visible-bell t)
-
-
+  (setq custom-file (gtk/emacs-path "custom.el"))
 #+END_SRC
 
 ** Enable minibuffer completion
@@ -103,36 +136,6 @@ This is mostly from starter-kit-misc.
   (org-babel-load-file (expand-file-name "system-settings.org" user-emacs-directory))
 #+end_src
 
-* Some functions
-
-These are almost trivial functions, but I find them useful
-
-#+BEGIN_SRC emacs-lisp
-
-
-  (defun  gtk/emacs-path (path)
-    (expand-file-name path user-emacs-directory))
-
-  (defalias 'gtk/emacsd-file 'gtk/emacs-path)
-  (defalias 'gtk/emacs-subdir 'gtk/emacs-path)
-
-
-  (defun turn-off-cua-mode ()
-    (cua-mode -1))
-
-  (defun turn-on-visual-line-mode ()
-    (visual-line-mode 1))
-
-
-  (defun switch-to-minibuffer-window ()
-    "switch to minibuffer window (if active)"
-    (interactive)
-    (when (active-minibuffer-window)
-      (select-window (active-minibuffer-window))))
-  (global-set-key (kbd "<f7>") 'switch-to-minibuffer-window)
-
-#+END_SRC
-
 * File configuration
 
 ** First we have some of my file organization
@@ -164,75 +167,10 @@ These are almost trivial functions, but I find them useful
 
 * Org mode
 
-** Faces
-
-#+begin_src emacs-lisp
-  (dolist (face '((org-level-1 . 1.5)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-1 . 1.0)
-                  (org-level-1 . 1.1)
-                  (org-level-1 . 1.1)
-                  (org-level-1 . 1.1)))
-    (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
-  (org-reload)
-#+end_src
-
-
-The ever present Org mode is where most of my note-taking, GTD-ing,
-and writing takes place.
-
-** General Org options
-
-Where the Org files go
-
-#+begin_src emacs-lisp   
-  (setq org-directory
-        (expand-file-name "_support/org" dropbox-root))
-
-  (setq org-clock-sound (concat dropbox-root "share/sounds/good-idea-shiny-ding-3-SBA-300457978.wav"))
-
-  (setq org-use-speed-commands
-        (lambda () (and (looking-at org-outline-regexp) (looking-back "^\**"))))
-
-#+end_src  
-
-
-Org miscellany 
-
-#+begin_src emacs-lisp
-  (add-hook 'org-mode-hook 'turn-off-auto-fill)    (add-hook 'org-mode-hook 'turn-on-visual-line-mode)  
-  (add-hook 'org-mode-hook 'turn-off-cua-mode)  
-  (setq org-insert-mode-line-in-empty-file t)
-  (setq org-startup-indented t)
-  (setq org-startup-folded t)
-  (setq org-completion-use-ido nil)
-  (setq org-outline-path-complete-in-steps nil)
-#+end_src
-
-
-*** Getting smart quotes
-
-#+begin_src emacs-lisp
-
-  (use-package typo
-    :config
-    (typo-global-mode 1)
-    (setq-default typo-language "English")
-    (defun typo-off () (interactive) (typo-mode -1))
-    (defun typo-on ()  (interactive) (typo-mode t))
-    (add-hook 'org-mode-hook 'typo-on))
-
-
-#+end_src
-
-
-
-** Org Modules
+** Org modules
 
 #+begin_src emacs-lisp :tangle yes
   (add-to-list 'org-modules 'org-sticky-header)
-  (add-hook 'org-mode-hook 'org-sticky-header-mode)
   (add-to-list 'org-modules 'ox-latex)
   (add-to-list 'org-modules 'ox-odt)
   (add-to-list 'org-modules 'org-tempo)
@@ -240,46 +178,85 @@ Org miscellany
   (add-to-list 'org-modules 'org-habit)
   (add-to-list 'org-export-backends 'beamer :append)
   (add-to-list 'org-export-backends 'odt :append)
-(use-package org-sticky-header
-:ensure t)
+
+  (use-package org-sticky-header
+    :ensure t
+    :hook
+    (org-mode . org-sticky-header-mode))
 
 #+end_src
 
-I want the habits display to be a little to the right. I'll use the
-Chinese character 今 for today, and a ☺ for completed habits
+** General Org options
 
-#+begin_src emacs-lisp :tangle yes
-  (setq  org-habit-completed-glyph 9786 
-         org-habit-graph-column 80
-         org-habit-show-habits-only-for-today t 
-         org-habit-today-glyph 20170  
-         org-hide-leading-stars nil
-         org-pretty-entities nil)
+*** File organisation 
+
+#+begin_src emacs-lisp   
+  (setq org-directory
+        (expand-file-name "_support/org" dropbox-root))
+
+  (defun  gtk/org-path (path)
+    (expand-file-name path org-directory))
+
+  (setq org-clock-sound (concat dropbox-root "share/sounds/good-idea-shiny-ding-3-SBA-300457978.wav"))
+
+  (setq org-use-speed-commands
+        (lambda () (and (looking-at org-outline-regexp) (looking-back "^\**"))))
+
+  (defvar my/inbox
+    (expand-file-name (concat dropbox-root "/_inbox/inbox.org"))
+    "My inbox")
+
+  (setq org-default-notes-file my/inbox)
+
+  (defvar my/organizer (gtk/org-path  "organizer.org") 
+    "My main tasks list")
+
+  (defvar my/journal
+    (expand-file-name (concat dropbox-root "/_inbox/journal.org"))
+    "My journal")
 #+end_src
 
-** Org file locations
+*** Loading up 
 
-#+name: file-locs
 #+begin_src emacs-lisp
-     (defvar my/inbox
-       (expand-file-name (concat dropbox-root "/_inbox/inbox.org"))
-         "My inbox")
-     (setq org-default-notes-file my/inbox)
 
-     (defvar my/organizer
-        (expand-file-name (concat org-directory "/organizer.org")) 
-          "My main tasks list")
-     
-     (defvar my/journal
-       (expand-file-name (concat dropbox-root "/_inbox/journal.org"))
-         "My journal")
+  (use-package org
+    :ensure t
+    :hook
+    (org-mode . turn-off-auto-fill)
+    (org-mode . turn-on-visual-line-mode)
+    (org.mode . turn-off-cua-mode)  
+    :custom
+    (org-insert-mode-line-in-empty-file t)
+    (org-startup-indented t)
+    (org-startup-folded t)
+    (org-completion-use-ido nil)
+    (org-outline-path-complete-in-steps nil))
+ #+end_src
+
+*** Getting smart quotes
+
+#+begin_src emacs-lisp
+  (use-package typo
+    :ensure t
+    :init
+    (setq-default typo-language "English")
+    (defun typo-off () (interactive) (typo-mode -1))
+    (defun typo-on ()  (interactive) (typo-mode 1))
+    (defun local-org-typo-hook ()
+      (typo-mode 1)
+      (add-hook 'typo-disable-electricity-functions 'org-in-src-block-p nil :local))
+    (add-hook 'org-mode-hook 'local-org-typo-hook))
 #+end_src
+
+
 
 ** The agenda
 
 #+begin_src emacs-lisp
   (setq org-agenda-files (expand-file-name "agenda-files" org-directory ))
-
+  (setq org-agenda-window-setup 'only-window)
+;  (setq org-agenda-start-with-log-mode t)  
 #+end_src
 
 #+BEGIN_SRC emacs-lisp
@@ -353,7 +330,6 @@ Chinese character 今 for today, and a ☺ for completed habits
 ** My GTD setup
 
 *** My Next Action list setup
-
 #+name: next-actions
 #+begin_src emacs-lisp
 
@@ -371,6 +347,7 @@ Chinese character 今 for today, and a ☺ for completed habits
                 ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
 
   (setq org-log-into-drawer "LOGBOOK")
+;  (setq org-log-done 'time)
 #+end_src
 
 *** Categories as Areas of focus
@@ -438,42 +415,41 @@ But project tags should never be inherited
     :ensure t
     :defer nil
     :custom
-    (org-journal-dir (expand-file-name (concat org-directory "journal")))
+    (org-journal-dir (gtk/org-path "journal/"))
     (org-journal-date-format "%A, %d %B %Y")
-    :init
-    (setq org-journal-file-type 'monthly)
+    (org-journal-file-type 'monthly)
     :bind (("C-c M-j" . org-journal-new-entry)))
 
 
-    (defun org-journal-find-location ()
-      ;; Open today's journal, but specify a non-nil prefix argument in order to
-      ;; inhibit inserting the heading; org-capture will insert the heading.
-      (org-journal-new-entry t)
-      ;; Position point on the journal's top-level heading so that org-capture
-      ;; will add the new entry as a child entry.
-      (goto-char (point-min)))
+  (defun org-journal-find-location ()
+    ;; Open today's journal, but specify a non-nil prefix argument in order to
+    ;; inhibit inserting the heading; org-capture will insert the heading.
+    (org-journal-new-entry t)
+    ;; Position point on the journal's top-level heading so that org-capture
+    ;; will add the new entry as a child entry.
+    (goto-char (point-min)))
 
-      (setq org-capture-templates
-            `(
-              ("w" "Todo items (work)" entry (file+olp my/organizer "Work" "Actions")
-               "* TODO %?\n  %i")
+  (setq org-capture-templates
+        `(
+          ("w" "Todo items (work)" entry (file+olp my/organizer "Work" "Actions")
+           "* TODO %?\n  %i")
 
-              ("t" "Todo items" entry (file+headline my/organizer "Tasks")
-               "* TODO %?\n  %i")
-              ("T" "Todo items (with link)" entry (file+headline my/organizer "Tasks")
-               "* TODO %?\n  %i\n  %a")
-              ("i" "Into the inbox" entry (file+datetree my/inbox)
-               "* %?\n\nEntered on %U\n  %i" )
-              ("j" "Journal entry" entry (function org-journal-find-location)
-               "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
-              ("R" "Weekly review"  entry (file+headline my/organizer  "Weekly Review")
-               (file ,(expand-file-name (concat org-directory "templates/weekly-review.org")))
-               )
-              ;; ("j" "Journal entries" entry (file+datetree my/journal)
-              ;;  "* %?\n\nEntered on %U\n  %i\n  %a" )
-              ;; ("J" "Journal entries from nowhere" entry (file+datetree my/journal)
-              ;;  "* %?\n\nEntered on %U\n  %i\n" )
-               ))
+          ("t" "Todo items" entry (file+headline my/organizer "Tasks")
+           "* TODO %?\n  %i")
+          ("T" "Todo items (with link)" entry (file+headline my/organizer "Tasks")
+           "* TODO %?\n  %i\n  %a")
+          ("i" "Into the inbox" entry (file+datetree my/inbox)
+           "* %?\n\nEntered on %U\n  %i" )
+          ("j" "Journal entry" entry (function org-journal-find-location)
+           "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
+          ("R" "Weekly review"  entry (file+headline my/organizer  "Weekly Review")
+           (file ,(expand-file-name (concat org-directory "templates/weekly-review.org")))
+           )
+          ;; ("j" "Journal entries" entry (file+datetree my/journal)
+          ;;  "* %?\n\nEntered on %U\n  %i\n  %a" )
+          ;; ("J" "Journal entries from nowhere" entry (file+datetree my/journal)
+          ;;  "* %?\n\nEntered on %U\n  %i\n" )
+          ))
 #+end_src 
 
  
@@ -770,6 +746,11 @@ This is probably going to need revision for version 8.0, to use the filter syste
   (org-reload)
 #+end_src
 
+#+RESULTS:
+: Successfully reloaded Org
+: Org mode version 9.5.3 (9.5.3-g8e69ad @ /home/gtk/.emacs.d/straight/build/org/)
+
+
 
 
 ** Org Babel
@@ -825,13 +806,38 @@ all events are correctly placed in the agenda.
 
 
 ** Org visuals
+
+#+begin_src emacs-lisp
+  (dolist (face '((org-level-1 . 1.2)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)))
+    (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
+  (set-face-attribute 'org-level-1 nil :weight 'bold)
+#+end_src
+
+I want the habits display to be a little to the right. I'll use the
+Chinese character 今 for today, and a ☺ for completed habits
+
+#+begin_src emacs-lisp :tangle yes
+  (setq  org-habit-completed-glyph 9786 
+         org-habit-graph-column 80
+         org-habit-show-habits-only-for-today t 
+         org-habit-today-glyph 20170  
+         org-hide-leading-stars nil
+         org-pretty-entities nil)
+#+end_src
+
+
 #+begin_src emacs-lisp
   (setq org-attach-method 'ln)
-  (setq org-agenda-span 'day)
 
     (setq org-use-property-inheritance '("PRIORITY" "STYLE" "CATEGORY"))
-  (setq org-agenda-start-day "-1d")
-  (setq org-agenda-span 3)
+  (setq org-agenda-start-day "0d")
+  (setq org-agenda-span 'week)
   (setq org-agenda-start-on-weekday nil)
   (setq org-agenda-skip-scheduled-if-done t)
   (setq org-agenda-skip-deadline-if-done t)
@@ -1115,11 +1121,11 @@ This is yasnippet behavior, cribbed from emacswiki.
 
     (defvar markdown-cite-format)
     (setq markdown-cite-format
-	  '(
-	    (?\C-m . "[@%l]")
-	    (?p . "[@%l]")
-	    (?t . "@%l")
-	    ))
+          '(
+            (?\C-m . "[@%l]")
+            (?p . "[@%l]")
+            (?t . "@%l")
+            ))
 
     ;; (defun markdown-reftex-citation ()
     ;;   (interactive)
@@ -1132,12 +1138,13 @@ This is yasnippet behavior, cribbed from emacswiki.
       :ensure t
       :commands (markdown-mode gfm-mode)
       :mode (("README\\.md\\'" . gfm-mode)
-	     ("\\.md\\'" . markdown-mode)
-	     ("\\.markdown\\'" . markdown-mode))
+             ("\\.md\\'" . markdown-mode)
+             ("\\.markdown\\'" . markdown-mode))
       :init
       (setq markdown-command "pandoc"))
 
   (add-hook 'markdown-mode-hook 'flyspell-mode)
+  (add-hook 'markdown-mode-hook 'turn-on-visual-line-mode)
   (add-hook 'markdown-mode-hook 'turn-off-auto-fill)
 
   (add-hook 'markdown-mode-hook 'orgtbl-mode)
@@ -1209,7 +1216,7 @@ This is yasnippet behavior, cribbed from emacswiki.
       :config
       (setq auto-insert-directory (gtk/emacs-path "insert")))
 
-					    ;(add-hook 'markdown-mode-hook 'pandoc-mode)
+                                            ;(add-hook 'markdown-mode-hook 'pandoc-mode)
 
 
 
@@ -1618,22 +1625,33 @@ org-mode.
 
 #+begin_src emacs-lisp
 
-    (use-package magit
-    :ensure t
+  (add-to-list 'warning-suppress-types 'with-editor) 
+  (add-to-list 'warning-suppress-types '(with-editor)) 
+  (add-to-list 'warning-suppress-log-types 'with-editor)
+  (add-to-list 'warning-suppress-log-types '(with-editor)) 
+  (use-package with-editor
     :config
-    (bind-key "C-c m" 'magit-status)
-    (bind-key "C-c g" 'magit-file-dispatch))
+    (define-key (current-global-map)
+      [remap async-shell-command] #'with-editor-async-shell-command)
+    (define-key (current-global-map)
+      [remap shell-command] #'with-editor-shell-command))
+
+      (use-package magit
+      :ensure t
+      :config
+      (bind-key "C-c m" 'magit-status)
+      (bind-key "C-c g" 'magit-file-dispatch))
 
 
-  (use-package gist)
+    (use-package gist)
 
-  ;; (use-package magit-gitflow
-  ;;   :config
-  ;;   (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)) 
+    ;; (use-package magit-gitflow
+    ;;   :config
+    ;;   (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)) 
 
-  (use-package git-gutter
-    :config
-    (global-git-gutter-mode +1))
+    (use-package git-gutter
+      :config
+      (global-git-gutter-mode +1))
 #+end_src
 
 
