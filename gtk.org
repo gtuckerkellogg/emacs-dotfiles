@@ -1347,12 +1347,6 @@ I have some keys that I'd like to be always bound
 
   (global-set-key (kbd "M-+") 'count-words)
 
-  (use-package magit
-    :ensure t
-    :config
-    (bind-key "C-c m" 'magit-status)
-    (bind-key "C-c g" 'magit-file-dispatch))
-
 
 #+END_SRC
 
@@ -1623,14 +1617,23 @@ org-mode.
 
 
 #+begin_src emacs-lisp
-  ;;(use-package gist)
+
+    (use-package magit
+    :ensure t
+    :config
+    (bind-key "C-c m" 'magit-status)
+    (bind-key "C-c g" 'magit-file-dispatch))
+
+
+  (use-package gist)
 
   ;; (use-package magit-gitflow
   ;;   :config
   ;;   (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)) 
 
-  ;; (require 'git-gutter)
-  ;;(global-git-gutter-mode -1)
+  (use-package git-gutter
+    :config
+    (global-git-gutter-mode +1))
 #+end_src
 
 
