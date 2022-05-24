@@ -455,6 +455,9 @@ But project tags should never be inherited
 
       (setq org-capture-templates
             `(
+              ("w" "Todo items (work)" entry (file+olp my/organizer "Work" "Actions")
+               "* TODO %?\n  %i")
+
               ("t" "Todo items" entry (file+headline my/organizer "Tasks")
                "* TODO %?\n  %i")
               ("T" "Todo items (with link)" entry (file+headline my/organizer "Tasks")
