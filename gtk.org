@@ -1162,7 +1162,7 @@ use paredit for lispy languages
 
 #+begin_src emacs-lisp
   (org-babel-load-file (gtk/emacs-path "code-functions.org"))  
-  ;(org-babel-load-file (gtk/emacs-path "shells-and-terminals.org"))
+  (org-babel-load-file (gtk/emacs-path "shells-and-terminals.org"))
 #+end_src
 
 ** Emacs lisp

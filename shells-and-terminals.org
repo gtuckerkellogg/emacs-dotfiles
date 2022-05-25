@@ -38,6 +38,7 @@ OK, this rocks. Requires a little setup but looks like native. Installation at h
   (use-package vterm
     :commands vterm
     :config
+    (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")
     (setq vterm-max-scrollback 1000))
 
 #+end_src

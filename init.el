@@ -1,4 +1,4 @@
-
+(setq native-comp-async-report-warnings-errors nil)
 ;; don't use package, use straight.el 
 ;;(setq package-enable-at-startup nil)
 (defvar bootstrap-version)
