@@ -29,6 +29,8 @@
 #+END_SRC
 
 
+
+
 * Information only
 
 #+name: me
@@ -69,6 +71,7 @@ These are almost trivial functions, but I find them useful
 #+END_SRC
 
 
+
 * General Emacs behaviour
 
 
@@ -81,6 +84,7 @@ These are almost trivial functions, but I find them useful
   (setq inhibit-startup-message t)
   (tool-bar-mode -1)
   (tooltip-mode -1)
+  (menu-bar-mode -1)
   (scroll-bar-mode -1)
   (setq visible-bell t)
   (setq custom-file (gtk/emacs-path "custom.el"))
@@ -162,40 +166,6 @@ This is mostly from starter-kit-misc.
        (straight-use-package package))
 
 #+end_src
-
-* TODO Git
-
-The moment I evaluate this, I can’t enter an R buffer without “error in process sentinel: Wrong type argument: listp, with-editor”
-
-#+begin_src emacs-lisp :eval yes :tangle no
-  (require 'warnings)
-  (add-to-list 'warning-suppress-types 'with-editor)
-  (add-to-list 'warning-suppress-types '(with-editor))
-  (add-to-list 'warning-suppress-log-types 'with-editor)
-  (add-to-list 'warning-suppress-log-types '(with-editor))
-
-  ;; (use-package with-editor
-  ;;   :config
-  ;;   (define-key (current-global-map)
-  ;;     [remap async-shell-command] #'with-editor-async-shell-command)
-  ;;   (define-key (current-global-map)
-  ;;     [remap shell-command] #'with-editor-shell-command))
-
-  (use-package magit
-    :config
-    (bind-key "C-c m" 'magit-status)
-    (bind-key "C-c g" 'magit-file-dispatch))
-
-
-                                          ;  (use-package gist)
-
-  ;; (use-package magit-gitflow :config (add-hook 'magit-mode-hook
-  ;;   'turn-on-magit-gitflow))
-
-  ;; (use-package git-gutter :config (global-git-gutter-mode +1))
-#+end_src
-
-
 
 * Org mode
 
@@ -1135,7 +1105,7 @@ I have some keys that I'd like to be always bound
 
 * Ivy, not ido or helm
 
-#+BEGIN_SRC emacs-lisp :eval no :tangle no
+#+BEGIN_SRC emacs-lisp :eval yes :tangle yes
   (use-package ivy
   :ensure t
   :config
@@ -1152,15 +1122,16 @@ I have some keys that I'd like to be always bound
 
 ** Common
 
+use paredit for lispy languages 
 
 #+begin_src emacs-lisp
-  (use-package paredit 
-    :ensure t
-    :config
-    (show-paren-mode t)
-    :bind (("M-[" . paredit-wrap-square)
-           ("M-{" . paredit-wrap-curly))
-    :diminish nil)
+   (use-package paredit 
+       :ensure t
+       :config
+       (show-paren-mode t)
+       :bind (("M-[" . paredit-wrap-square)
+              ("M-{" . paredit-wrap-curly))
+       :diminish nil)
 
   (define-key lisp-mode-shared-map (kbd "C-c l") "lambda") 
   (define-key lisp-mode-shared-map (kbd "RET") 'reindent-then-newline-and-indent)
@@ -1171,12 +1142,19 @@ I have some keys that I'd like to be always bound
 
 
 #+begin_src emacs-lisp
+    (use-package smartparens
+      :init
+      (require 'smartparens-config)
+      (add-hook 'org-mode-hook 'smartparens-mode)
+      (add-hook 'text-mode-hook 'smartparens-mode)
+      (add-hook 'markdown-mode-hook 'smartparens-mode))
+#+end_src
+
+#+begin_src emacs-lisp
   (use-package rainbow-delimiters
     :config
     (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)) 
-
-
 #+end_src
 
 
@@ -1197,7 +1175,11 @@ I have some keys that I'd like to be always bound
   (use-package elisp-mode :straight (:type built-in)
     :init
     (add-hook  'emacs-lisp-mode-hook #'turn-on-eldoc-mode)
-    (add-hook  'emacs-lisp-mode-hook #'gtk/run-prog-hook) 
+    (add-hook  'emacs-lisp-mode-hook #'gtk/run-prog-hook)
+    (add-hook  'emacs-lisp-mode-hook #'enable-paredit-mode)
+
+'gtk/run-prog-hook
+    
     (add-hook  'emacs-lisp-mode-hook #'turn-on-elisp-slime-nav-mode)
     :bind (:map emacs-lisp-mode-map
                 ("C-c v" . eval-buffer)
@@ -1211,48 +1193,35 @@ I have some keys that I'd like to be always bound
 #+begin_src emacs-lisp :eval yes :tangle yes
 
   (use-package ess
-    :demand t
     :mode ("\\.R\\'" . R-mode)
     :init
     (progn 
       (setq-default ess-language "R")
       (setq ess-eval-visibly 'nowait)
       (require 'ess-r-mode)
-
-                                          ;(require 'r-autoyas)
-      (add-to-list 'ess-style-alist
-                   '(my-style
-                     (ess-indent-level . 4)
-                     (ess-first-continued-statement-offset . 2)
-                     (ess-continued-statement-offset . 0)
-                     (ess-brace-offset . -4)
-                     (ess-expression-offset . 4)
-                     (ess-else-offset . 0)
-                     (ess-close-brace-offset . 0)
-                     (ess-brace-imaginary-offset . 0)
-                     (ess-continued-brace-offset . 0)
-                     (ess-arg-function-offset . 4)
-                     (ess-arg-function-offset-new-line . '(4))
-                     ))
-                                          ;(setq ess-default-style 'RRR)
-                                          ;         (setq ess-smart-S-assign-key ";")
-                                          ;         (ess-toggle-S-assign nil)
-                                          ;         (ess-toggle-S-assign nil)
+  (add-hook 'ess-r-mode-hook 'smartparens-mode)    
+      (setq ess-default-style 'RRR)
+      (setq ess-smart-S-assign-key ";")
+      (ess-toggle-S-assign nil)
+      (ess-toggle-S-assign nil)
       (ess-toggle-underscore nil)))
 
-  (use-package poly-markdown
-    :ensure t)
 
 
-  (use-package poly-R
-    :ensure t)
 
-  (use-package polymode 
-    :ensure t
-    :mode
-    ("\\.Snw" . poly-noweb+r-mode)
-    ("\\.Rnw" . poly-noweb+r-mode)
-    ("\\.Rmd" . poly-markdown+r-mode))
+  ;; (use-package poly-markdown
+  ;;   :ensure t)
+
+
+  ;; (use-package poly-R
+  ;;   :ensure t)
+
+  ;; (use-package polymode 
+  ;;   :ensure t
+  ;;   :mode
+  ;;   ("\\.Snw" . poly-noweb+r-mode)
+  ;;   ("\\.Rnw" . poly-noweb+r-mode)
+  ;;   ("\\.Rmd" . poly-markdown+r-mode))
 #+end_src
 
 ** Lua
@@ -1304,7 +1273,8 @@ I have some keys that I'd like to be always bound
                      (point)))))
     :config
     (add-hook 'cider-mode-hook #'eldoc-mode)
-    (add-hook 'cider-repl-mode-hook #'paredit-mode)
+    (add-hook 'cider-mode-hook #'enable-paredit-mode)
+    (add-hook 'cider-repl-mode-hook #'enable-paredit-mode)
     (add-hook 'cider-mode-hook 'projectile-mode)
     (setq cider-repl-print-length 100
           nrepl-hide-special-buffers t
@@ -1473,6 +1443,36 @@ Company and Yasnippet have some issues. This code (from https://emacs.stackexcha
 
 
 #+end_src
+
+
+* DONE Git
+CLOSED: [2022-05-25 Wed 13:00]
+:LOGBOOK:
+- State "DONE"       from "TODO"       [2022-05-25 Wed 13:00] \\
+  What a nuisance. Needed to move this to the end /and/ explicitly add the executable
+:END:
+
+The moment I evaluate this, I can’t enter an R buffer without “error in process sentinel: Wrong type argument: listp, with-editor”
+
+#+begin_src emacs-lisp :eval yes :tangle yes
+
+  ;(custom-set-variables '(with-editor-emacsclient-executable "gnu/store/p4nv1zvdq2ply1qakqhyac3mr7xny9zl-emacs-28.1/bin/emacsclient"))
+  (use-package with-editor)
+  (use-package magit
+    :config
+    (bind-key "C-c m" 'magit-status)
+    (bind-key "C-c g" 'magiett-file-dispatch))
+
+
+  (use-package gist)
+
+  ;; (use-package magit-gitflow :config (add-hook 'magit-mode-hook
+  ;;   'turn-on-magit-gitflow))
+
+   (use-package git-gutter :config (global-git-gutter-mode +1))
+#+end_src
+
+
 
 
 * multiple cursors

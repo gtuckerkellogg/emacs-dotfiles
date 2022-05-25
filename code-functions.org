@@ -43,9 +43,7 @@ a lambda doesn't already exist in the list.
   (add-hook 'gtk/prog-mode-hook 'gtk/local-column-number-mode)
   (add-hook 'gtk/prog-mode-hook 'gtk/local-comment-auto-fill)
   (add-hook 'gtk/prog-mode-hook 'gtk/turn-on-save-place-mode)
-  (add-hook 'gtk/prog-mode-hook 'enable-paredit-mode)
 
-  ;(add-hook 'gtk/prog-mode-hook 'enable-pa
 #+end_src
 
 #+begin_src emacs-lisp 
