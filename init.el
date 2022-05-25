@@ -1,6 +1,6 @@
 
 ;; don't use package, use straight.el 
-(setq package-enable-at-startup nil)
+;;(setq package-enable-at-startup nil)
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
