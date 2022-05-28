@@ -1194,17 +1194,22 @@ use paredit for lispy languages
 
   (use-package ess
     :mode ("\\.R\\'" . R-mode)
-    :init
-    (progn 
-      (setq-default ess-language "R")
-      (setq ess-eval-visibly 'nowait)
-      (require 'ess-r-mode)
-  (add-hook 'ess-r-mode-hook 'smartparens-mode)    
-      (setq ess-default-style 'RRR)
-      (setq ess-smart-S-assign-key ";")
-      (ess-toggle-S-assign nil)
-      (ess-toggle-S-assign nil)
-      (ess-toggle-underscore nil)))
+    :config
+    (add-hook 'ess-r-mode-hook 'smartparens-mode)
+    (setq-default ess-language "R")
+    (setq ess-default-style 'RRR))
+
+  ;;   :init
+  ;;   (progn 
+
+  ;;
+  ;;     (require 'ess-r-mode)
+
+
+  ;;     (setq ess-smart-S-assign-key ";")
+  ;;     (ess-toggle-S-assign nil)
+  ;;     (ess-toggle-S-assign nil)
+  ;;     (ess-toggle-underscore nil)))
 
 
 
@@ -1571,7 +1576,7 @@ CLOCK: [2022-05-23 Mon 18:50]--[2022-05-23 Mon 18:50] =>  0:00
   ;;(load-theme 'doom-tomorrow-night t)
   ;;(load-theme 'doom-wilmersdorf t)
   (fresh-load-theme 'doom-flatwhite t)
-  ;;(fresh-load-theme 'doom-plain-dark t)
+  ;;(fresh-load-theme 'doom-plain t)
 #+end_src
 
 
