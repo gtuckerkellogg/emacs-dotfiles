@@ -16,7 +16,6 @@
 #+XSLT:
 #+LATEX_HEADER: \usepackage{gtuckerkellogg}
 
-
 #+BEGIN_SRC emacs-lisp :results silent :exports none :eval yes
   (defun my-org-confirm-babel-evaluate (lang body)
     (cond
@@ -44,6 +43,7 @@
 * Some functions
 
 These are almost trivial functions, but I find them useful
+
 
 #+BEGIN_SRC emacs-lisp
 
@@ -84,7 +84,7 @@ These are almost trivial functions, but I find them useful
   (setq inhibit-startup-message t)
   (tool-bar-mode -1)
   (tooltip-mode -1)
-  (menu-bar-mode -1)
+  (menu-bar-mode +1)
   (scroll-bar-mode -1)
   (setq visible-bell t)
   (setq custom-file (gtk/emacs-path "custom.el"))
@@ -169,7 +169,7 @@ This is mostly from starter-kit-misc.
 
 * Org mode
 
-** Org modules
+** Org modules 
 
 #+begin_src emacs-lisp :tangle yes
   (add-to-list 'org-modules 'org-sticky-header)
@@ -233,7 +233,10 @@ This is mostly from starter-kit-misc.
     (org-startup-indented t)
     (org-startup-folded t)
     (org-completion-use-ido nil)
-    (org-outline-path-complete-in-steps nil))
+    (org-outline-path-complete-in-steps nil)
+    :bind
+    (("C-c C-x C-2" . org-cite-insert)
+     ("C-c C-x C-3" . default-indent-new-line)))
  #+end_src
 
 *** Getting smart quotes
@@ -251,6 +254,9 @@ This is mostly from starter-kit-misc.
     (add-hook 'org-mode-hook 'local-org-typo-hook))
 #+end_src
 
+
+
+*** Sparsity
 
 
 ** The agenda
@@ -535,7 +541,20 @@ all events are correctly placed in the agenda.
 
 ** Org visuals
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :eval yes :tangle yes
+
+  (set-face-attribute 'fixed-pitch nil
+                      :font "Fira Code Retina"
+                      :weight 'light
+                      :height 180)
+
+  ;; Set the variable pitch face
+  (set-face-attribute 'variable-pitch nil
+                      ;; :font "Cantarell"
+                      :font "Cantarell"
+                      :height 180
+                      :weight 'light)
+
   (dolist (face '((org-level-1 . 1.2)
                   (org-level-2 . 1.1)
                   (org-level-3 . 1.05)
@@ -545,6 +564,17 @@ all events are correctly placed in the agenda.
                   (org-level-7 . 1.1)))
     (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
   (set-face-attribute 'org-level-1 nil :weight 'bold)
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-drawer nil  :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+  ;(set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+
 #+end_src
 
 I want the habits display to be a little to the right. I'll use the
@@ -562,7 +592,7 @@ Chinese character 今 for today, and a ☺ for completed habits
 
 #+begin_src emacs-lisp
   (setq org-attach-method 'ln)
-
+(require 'org-faces) (require 'org-indent)
     (setq org-use-property-inheritance '("PRIORITY" "STYLE" "CATEGORY"))
   (setq org-agenda-start-day "0d")
   (setq org-agenda-span 'week)
@@ -583,9 +613,9 @@ Chinese character 今 for today, and a ☺ for completed habits
                             :family (face-attribute 'default :family)
                             )))
 
-  (set-face-attribute 'default nil
-                    :font "Fira Code Retina"
-                    :height 180)
+  ;; (set-face-attribute 'default nil
+  ;;                   :font "Fira Code Retina"
+  ;;                   :height 180)
 
   (setq org-fontify-done-headline t)
 
@@ -621,7 +651,7 @@ Chinese character 今 for today, and a ☺ for completed habits
 
   ;  (use-package ivy-bibtex
   ;    :init
-  ;    (setq bibtex-completion-bibliography '((concat (getenv "BIBINPUTS") "/library.bib"))
+  ;    (Setq bibtex-completion-bibliography '((concat (getenv "BIBINPUTS") "/library.bib"))
   ;          bibtex-completion-library-path '((getenv "BIBINPUTS"))))
 
    ;; (define-key org-mode-map (kbd "C-c ]") 'org-ref-insert-link)
@@ -1067,7 +1097,6 @@ A citation link
 
 
 
-
 * Key bindings
 
 I have some keys that I'd like to be always bound
@@ -1109,7 +1138,10 @@ I have some keys that I'd like to be always bound
   (use-package ivy
   :ensure t
   :config
-  (ivy-mode 1))
+  (ivy-mode 1)
+  ;:bind
+  ;(("C-M-RET" . ivy-immediate-done))
+  )
   (use-package counsel
     :config
     (counsel-mode 1))
@@ -1612,7 +1644,9 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 #+end_src
 
 
+
 * Draft
+
 
 #+begin_src emacs-lisp :eval yes :tangle yes
 
@@ -1638,6 +1672,64 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 #+END_SRC
 
+
+
+#+begin_src emacs-lisp
+
+  (use-package hide-mode-line)
+  (use-package org-appear)
+  (defun gtk/org-present-prepare-slide ()
+    (org-overview)
+    (org-show-entry)
+    (org-show-children))
+
+  (defun gtk/org-present-hook ()
+    (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
+                                       (header-line (:height 4.5) variable-pitch)
+                                       (org-document-title (:height 1.75) org-document-title)
+                                       (org-code (:height 1.55) org-code)
+                                       (org-verbatim (:height 1.55) org-verbatim)
+                                       (org-block (:height 1.25) org-block)
+                                       (org-block-begin-line (:height 0.7) org-block)))
+    (setq header-line-format " ")
+    (org-display-inline-images)
+    (org-appear-mode -1)
+    (gtk/org-present-prepare-slide)
+    )
+
+  (defun gtk/org-present-quit-hook ()
+    (setq-local face-remapping-alist '((default variable-pitch default)))
+    (setq header-line-format nil)
+    (org-present-small)
+    (org-remove-inline-images)
+    (org-appear-mode 1))
+
+
+
+  (defun gtk/org-present-prev ()
+    (interactive)
+    (org-present-prev)
+    (gtk/org-present-prepare-slide))
+
+  (defun gtk/org-present-next ()
+    (interactive)
+    (org-present-next)
+    (gtk/org-present-prepare-slide)
+    (when (fboundp 'live-crafter-add-timestamp)
+      (live-crafter-add-timestamp (substring-no-properties (org-get-heading t t t t)))))
+
+  (use-package org-present
+    :bind (:map org-present-mode-keymap
+                ("C-c C-j" . gtk/org-present-next)
+                ("C-c C-k" . gtk/org-present-prev))
+    :config
+    (add-hook 'org-present-mode-quit-hook #'gtk/org-present-quit-hook))
+
+
+
+
+
+#+end_src
 
 #+BEGIN_SRC emacs-lisp :tangle no :eval no
 
@@ -1733,6 +1825,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 
 #+BEGIN_SRC emacs-lisp :tangle yes
+
   (setq org-file-apps
         '((auto-mode . emacs)
           (directory . "setsid xdg-open \"%s\"")
