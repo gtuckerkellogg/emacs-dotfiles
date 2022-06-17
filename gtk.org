@@ -18,6 +18,7 @@
 
 
 #+BEGIN_SRC emacs-lisp :results silent :exports none :eval yes
+  ;; these languages that don't need confirmation
   (defun my-org-confirm-babel-evaluate (lang body)
     (cond
      ((string= lang "latex") nil)
@@ -61,7 +62,7 @@ These are almost trivial functions, but I find them useful
   (defun turn-on-visual-line-mode ()
     (visual-line-mode 1))
 
-  (defun switch-to-minibuffer-window ()
+    (defun switch-to-minibuffer-window ()
     "switch to minibuffer window (if active)"
     (interactive)
     (when (active-minibuffer-window)
@@ -71,9 +72,7 @@ These are almost trivial functions, but I find them useful
 #+END_SRC
 
 
-
 * General Emacs behaviour
-
 
 
 ** emacs client and window behaviour
@@ -84,10 +83,12 @@ These are almost trivial functions, but I find them useful
   (setq inhibit-startup-message t)
   (tool-bar-mode -1)
   (tooltip-mode -1)
-  (menu-bar-mode -1)
+  (menu-bar-mode +1)
   (scroll-bar-mode -1)
   (setq visible-bell t)
+  (setq-default fill-column 100)
   (setq custom-file (gtk/emacs-path "custom.el"))
+  (global-auto-revert-mode)
 #+END_SRC
 
 ** Enable minibuffer completion
@@ -178,6 +179,7 @@ This is mostly from starter-kit-misc.
   (add-to-list 'org-modules 'org-tempo)
   (add-to-list 'org-modules 'org-agenda)
   (add-to-list 'org-modules 'org-habit)
+  (add-to-list 'org-modules 'org-ref)
   (add-to-list 'org-export-backends 'beamer :append)
   (add-to-list 'org-export-backends 'odt :append)
 
@@ -185,6 +187,13 @@ This is mostly from starter-kit-misc.
     :ensure t
     :hook
     (org-mode . org-sticky-header-mode))
+
+
+  (use-package org-auto-tangle
+    :defer t
+    :hook (org-mode . org-auto-tangle-mode)
+    :config
+    (setq org-auto-tangle-default t))
 
 #+end_src
 
@@ -231,7 +240,7 @@ This is mostly from starter-kit-misc.
     :custom
     (org-insert-mode-line-in-empty-file t)
     (org-startup-indented t)
-    (org-startup-folded t)
+    (org-startup-folded 'nofold)
     (org-completion-use-ido nil)
     (org-outline-path-complete-in-steps nil))
  #+end_src
@@ -383,6 +392,7 @@ My default tags should be context
           (:endgroup . nil)
           ("FLAGGED" . ?f)
           ("noexport" . ?n)
+          ("ignoreheading" . ?I)
           ))
 
 #+END_SRC
@@ -871,6 +881,9 @@ This is yasnippet behavior, cribbed from emacswiki.
       :init
       (setq markdown-command "pandoc"))
 
+  (use-package visual-fill-column)
+  (setq fill-column 90)
+  (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
   (add-hook 'markdown-mode-hook 'flyspell-mode)
   (add-hook 'markdown-mode-hook 'turn-on-visual-line-mode)
   (add-hook 'markdown-mode-hook 'turn-off-auto-fill)
@@ -1506,45 +1519,58 @@ CLOCK: [2022-05-23 Mon 18:50]--[2022-05-23 Mon 18:50] =>  0:00
 
 #+begin_src emacs-lisp
 
-    (use-package diminish)
+        (use-package modus-themes
+          :init
+          (setq modus-themes-mode-line '(accented borderless padded))
+          (setq modus-themes-paren-match '(bold))
+          (setq modus-themes-scale-headings t)
+          (setq modus-themes-headings '((1 . (rainbow overline background 1.4))
+                                        (2 . (rainbow background 1.3))
+                                        (3 . (rainbow bold 1.2))
+                                        (4 . (semilight 1.1))))
+          (setq modus-themes-region '(bg-only)))
+       ; (fresh-load-theme 'modus-operandi t) 
 
-    (use-package smart-mode-line
-    :config
-    (setq sml/no-confirm-load-theme t)
-    (sml/setup)
-    (sml/apply-theme 'respectful)  ; Respect the theme colors
-    (setq sml/mode-width 'right
-        sml/name-width 60)
+          (use-package diminish)
 
-     (setq-default mode-line-format
-     `("%e"
-    ;;     ,(when dw/exwm-enabled
-    ;;         '(:eval (format "[%d] " exwm-workspace-current-index)))
-         mode-line-front-space
-  ;;       evil-mode-line-tag
-         mode-line-mule-info
-         mode-line-client
-         mode-line-modified
-         mode-line-remote
-         mode-line-frame-identification
-         mode-line-buffer-identification
-         sml/pos-id-separator
-         (vc-mode vc-mode)
-         " "
-         mode-line-position
-         sml/pre-modes-separator
-         mode-line-modes
-         " "
-         mode-line-misc-info))
+          (use-package smart-mode-line
+          :config
+          (setq sml/no-confirm-load-theme t)
+          (sml/setup)
+          (sml/apply-theme 'respectful)  ; Respect the theme colors
+          (setq sml/mode-width 'right
+              sml/name-width 60)
 
-    (setq rm-excluded-modes
-      (mapconcat
-        'identity
-        ; These names must start with a space!
-        '(" GitGutter" " MRev" " company"
-        " Helm" " Undo-Tree" " Projectile.*" " Z" " Ind"
-        " Org-Agenda.*" " ElDoc" " SP/s" " cider.*")
-        "\\|")))
+           (setq-default mode-line-format
+
+           `("%e"
+          ;;     ,(when dw/exwm-enabled
+          ;;         '(:eval (format "[%d] " exwm-workspace-current-index)))
+               mode-line-front-space
+        ;;       evil-mode-line-tag
+               mode-line-mule-info
+               mode-line-client
+               mode-line-modified
+               mode-line-remote
+               mode-line-frame-identification
+               mode-line-buffer-identification
+               sml/pos-id-separator
+               (vc-mode vc-mode)
+               " "
+               mode-line-position
+               sml/pre-modes-separator
+               mode-line-modes
+               " "
+               mode-line-misc-info))
+
+          (setq rm-excluded-modes
+            (mapconcat
+              'identity
+              ; These names must start with a space!
+              '(" GitGutter" " MRev" " company"
+              " Helm" " Undo-Tree" " Projectile.*" " Z" " Ind"
+              " Org-Agenda.*" " ElDoc" " SP/s" " cider.*")
+              "\\|")))
 
 #+end_src
 #+begin_src emacs-lisp
@@ -1575,7 +1601,8 @@ CLOCK: [2022-05-23 Mon 18:50]--[2022-05-23 Mon 18:50] =>  0:00
   ;;(load-theme 'doom-moonlight t)
   ;;(load-theme 'doom-tomorrow-night t)
   ;;(load-theme 'doom-wilmersdorf t)
-  (fresh-load-theme 'doom-flatwhite t)
+  (fresh-load-theme 'modus-operandi t)
+  ;(fresh-load-theme 'doom-flatwhite t)
   ;;(fresh-load-theme 'doom-plain t)
 #+end_src
 
@@ -1645,93 +1672,9 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 
 #+BEGIN_SRC emacs-lisp :tangle no :eval no
-
-    (use-package treemacs
-      :ensure t
-      :defer t
-      :init
-      (with-eval-after-load 'winum
-        (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-      :config
-      (progn
-        (setq treemacs-collapse-dirs                 (if (treemacs--find-python3) 3 0)
-              treemacs-deferred-git-apply-delay      0.5
-              treemacs-display-in-side-window        t
-              treemacs-eldoc-display                 t
-              treemacs-file-event-delay              5000
-              treemacs-file-follow-delay             0.2
-              treemacs-follow-after-init             t
-              treemacs-git-command-pipe              ""
-              treemacs-goto-tag-strategy             'refetch-index
-              treemacs-indentation                   2
-              treemacs-indentation-string            " "
-              treemacs-is-never-other-window         nil
-              treemacs-max-git-entries               5000
-              treemacs-missing-project-action        'ask
-              treemacs-no-png-images                 nil
-              treemacs-no-delete-other-windows       t
-              treemacs-project-follow-cleanup        nil
-              treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-              treemacs-recenter-distance             0.1
-              treemacs-recenter-after-file-follow    nil
-              treemacs-recenter-after-tag-follow     nil
-              treemacs-recenter-after-project-jump   'always
-              treemacs-recenter-after-project-expand 'on-distance
-              treemacs-show-cursor                   nil
-              treemacs-show-hidden-files             t
-              treemacs-silent-filewatch              nil
-              treemacs-silent-refresh                nil
-              treemacs-sorting                       'alphabetic-desc
-              treemacs-space-between-root-nodes      t
-              treemacs-tag-follow-cleanup            t
-              treemacs-tag-follow-delay              1.5
-              treemacs-width                         35)
-
-        ;; The default width and height of the icons is 22 pixels. If you are
-        ;; using a Hi-DPI display, uncomment this to double the icon size.
-        ;;(treemacs-resize-icons 44)
-
-        (treemacs-follow-mode t)
-        (treemacs-filewatch-mode t)
-        (treemacs-fringe-indicator-mode t)
-        (pcase (cons (not (null (executable-find "git")))
-                     (not (null (treemacs--find-python3))))
-          (`(t . t)
-           (treemacs-git-mode 'deferred))
-          (`(t . _)
-           (treemacs-git-mode 'simple))))
-      :bind
-      (:map global-map
-            ("M-0"       . treemacs-select-window)
-            ("C-x t 1"   . treemacs-delete-other-windows)
-            ("C-x t t"   . treemacs)
-            ("C-x t B"   . treemacs-bookmark)
-            ("C-x t C-t" . treemacs-find-file)
-            ("C-x t M-t" . treemacs-find-tag)))
-
-    (use-package treemacs-projectile
-      :after treemacs projectile
-      :ensure t)
-
-    (use-package treemacs-icons-dired
-      :after treemacs dired
-      :ensure t
-      :config (treemacs-icons-dired-mode))
-
-    (use-package treemacs-magit
-      :after treemacs magit
-      :ensure t)
-
-  (global-set-key (kbd "C-c d") 'dired-jump)
-
-#+END_SRC
-
-
-#+BEGIN_SRC emacs-lisp :tangle no :eval no
-
   (use-package org-ref
-    :after org)
-
+      :after org)
+  (define-key org-mode-map (kbd "C-c ]") 'org-ref-insert-link)
 #+END_SRC
 
 
@@ -1767,7 +1710,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 
 
-#+begin_src emacs-lisp :eval no :tangle no
+#+begin_src emacs-lisp :eval yes :tangle no
   ;; unfilling
 
   (defun unfill-paragraph (&optional region)
@@ -1778,8 +1721,6 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
               (emacs-lisp-docstring-fill-column t))
           (fill-paragraph nil region)))
 #+end_src
-
-
 
 
 
