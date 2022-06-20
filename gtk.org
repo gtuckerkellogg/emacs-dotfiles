@@ -1,7 +1,8 @@
 #+TITLE:     Greg Tucker-Kellogg's Emacs configuration
+#+AUTHOR:    Greg Tucker-Kellogg
+
 
 * Front matter                                                :ignoreheading:
-#+AUTHOR:    Greg Tucker-Kellogg
 #+DESCRIPTION:
 #+PROPERTY: header-args :tangle yes :eval yes :results silent
 #+KEYWORDS:
@@ -15,7 +16,6 @@
 #+LINK_HOME: 
 #+XSLT:
 #+LATEX_HEADER: \usepackage{gtuckerkellogg}
-
 #+BEGIN_SRC emacs-lisp :results silent :exports none :eval yes
   ;; these languages that don't need confirmation
   (defun my-org-confirm-babel-evaluate (lang body)
@@ -25,10 +25,7 @@
      (t "default")))
 
   (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
-
 #+END_SRC
-
-
 
 
 * Information only
@@ -43,11 +40,8 @@
 
 * Some functions
 
-These are almost trivial functions, but I find them useful
-
-
+These are almost trivial functions, but I find them useful What is going on here and why is everything double-spaced. Oh maybe this is an interaction between visual line mode and visual-fill-column-mode.
 #+BEGIN_SRC emacs-lisp
-
 
   (defun  gtk/emacs-path (path)
     (expand-file-name path user-emacs-directory))
@@ -60,7 +54,12 @@ These are almost trivial functions, but I find them useful
     (cua-mode -1))
 
   (defun turn-on-visual-line-mode ()
+    (interactive)
     (visual-line-mode 1))
+
+  (defun turn-off-visual-line-mode ()
+    (interactiv)e
+    (visual-line-mode -1))
 
     (defun switch-to-minibuffer-window ()
     "switch to minibuffer window (if active)"
@@ -168,6 +167,145 @@ This is mostly from starter-kit-misc.
 
 #+end_src
 
+* Themes
+:CLOCKING:
+CLOCK: [2022-05-23 Mon 18:50]--[2022-05-23 Mon 18:50] =>  0:00
+:END:
+
+
+#+begin_src emacs-lisp
+
+  (use-package modus-themes
+     :config
+     (setq modus-themes-mode-line '(accented borderless padded)
+           modus-themes-paren-match '(bold)
+           modus-themes-deuteranopia t
+           modus-themes-scale-headings t
+           modus-themes-intense-mouseovers t
+           modus-themes-bold-constructs t
+           modus-themes-org-blocks 'tinted-background
+           modus-themes-headings '((1 . (rainbow overline background 1.4))
+                                   (2 . (rainbow background 1.3))
+                                   (3 . (rainbow bold 1.2))
+                                   (4 . (semilight 1.1)))
+           modus-themes-region '(bg-only)
+	 
+      ))
+
+    (use-package diminish)
+
+    (use-package smart-mode-line
+    :config
+    (setq sml/no-confirm-load-theme t)
+    (sml/setup)
+    (sml/apply-theme 'respectful)  ; Respect the theme colors
+    (setq sml/mode-width 'right
+        sml/name-width 60)
+
+     (setq-default mode-line-format
+
+     `("%e"
+    ;;     ,(when dw/exwm-enabled
+    ;;         '(:eval (format "[%d] " exwm-workspace-current-index)))
+         mode-line-front-space
+  ;;       evil-mode-line-tag
+         mode-line-mule-info
+         mode-line-client
+         mode-line-modified
+         mode-line-remote
+         mode-line-frame-identification
+         mode-line-buffer-identification
+         sml/pos-id-separator
+         (vc-mode vc-mode)
+         " "
+         mode-line-position
+         sml/pre-modes-separator
+         mode-line-modes
+         " "
+         mode-line-misc-info))
+
+    (setq rm-excluded-modes
+      (mapconcat
+        'identity
+        ; These names must start with a space!
+        '(" GitGutter" " MRev" " company"
+        " Helm" " Undo-Tree" " Projectile.*" " Z" " Ind"
+        " Org-Agenda.*" " ElDoc" " SP/s" " cider.*")
+        "\\|")))
+
+#+end_src
+#+begin_src emacs-lisp
+  (use-package doom-themes :defer t)
+
+  (defun disable-all-themes ()
+    "disable all active themes."
+    (dolist (i custom-enabled-themes)
+      (disable-theme i)))
+
+
+  (defun fresh-load-theme (theme &optional no-confirm)
+    (interactive
+     (list
+      (intern (completing-read "Load custom theme: "
+                               (mapcar #'symbol-name
+                                       (custom-available-themes))))
+      nil nil))
+    (message (concat "Theme is: " (symbol-name theme)))
+    (unless (custom-theme-name-valid-p theme)
+      (error "Invalid theme name `%s'" theme))
+    (disable-all-themes)
+    (if no-confirm
+        (load-theme theme t)
+      (load-theme theme)))
+
+
+  ;;(load-theme 'doom-moonlight t)
+  ;;(load-theme 'doom-tomorrow-night t)
+  ;;(load-theme 'doom-wilmersdorf t)
+  (fresh-load-theme 'modus-operandi t)
+  ;(fresh-load-theme 'doom-flatwhite t)
+  ;;(fresh-load-theme 'doom-plain t)
+#+end_src
+
+
+*** Getting icons.
+
+In order to use this, you must run ~(all-the-icons-install-fonts)~ after installing the package ~all-the-icons~. 
+
+#+begin_src emacs-lisp
+
+  (use-package all-the-icons)
+
+  (use-package minions
+  :hook (doom-modeline-mode . minions-mode))
+
+  (use-package doom-modeline
+  :after eshell     ;; Make sure it gets hooked after eshell
+  :hook (after-init . doom-modeline-init)
+  :custom-face
+  (mode-line ((t (:height 1.0))))
+  (mode-line-inactive ((t (:height 0.85))))
+  :custom
+  (doom-modeline-height 15)
+  (doom-modeline-bar-width 6)
+  (doom-modeline-lsp t)
+  (doom-modeline-github nil)
+  (doom-modeline-mu4e nil)
+  (doom-modeline-irc nil)
+  (doom-modeline-minor-modes t)
+  (doom-modeline-persp-name nil)
+  (doom-modeline-buffer-file-name-style 'truncate-except-project)
+  (doom-modeline-major-mode-icon nil))
+#+end_src
+
+
+
+#+begin_src emacs-lisp :eval no :tangle no
+  (org-babel-load-file (gtk/emacs-path "exwm.org"))
+#+end_src
+
+
+
 * Org mode
 
 ** Org modules 
@@ -272,7 +410,7 @@ This is mostly from starter-kit-misc.
 
 #+begin_src emacs-lisp
   (setq org-agenda-files (expand-file-name "agenda-files" org-directory ))
-  (setq org-agenda-window-setup 'only-window)
+  (setq org-agenda-window-setup 'current-window)
   (setq org-agenda-start-with-log-mode t)  
 #+end_src
 
@@ -290,8 +428,6 @@ This is mostly from starter-kit-misc.
             (alltodo "")))
           ("P" todo "PROJECT")
           ))
-
-
 #+end_src
 
 #+BEGIN_SRC emacs-lisp :tangle yes :eval yes
@@ -351,20 +487,19 @@ This is mostly from starter-kit-misc.
 #+begin_src emacs-lisp
 
   (setq org-todo-keywords
-             '((sequence "NEXT(n)" "TODO(t)" "PROJECT(p)" "|" "DONE(d@/!)")
-               (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
+             '((type "NEXT(n)" "TODO(t)" "PROJECT(p)" "|" "DONE(d@/!)")
+               (type "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
 
   (setq org-todo-state-tags-triggers
-        (quote (("CANCELLED" ("CANCELLED" . t))
-                ("WAITING" ("WAITING" . t))
-                ("HOLD" ("WAITING" . t) ("HOLD" . t))
-                (done ("WAITING") ("HOLD"))
-                ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
-                ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
-                ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
+        '(("CANCELLED" ("CANCELLED" . t))
+          ("WAITING" ("WAITING" . t))
+          ("HOLD" ("WAITING" . t) ("HOLD" . t))
+          (done ("WAITING") ("HOLD"))
+          ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
+          ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
+          ("DONE" ("WAITING") ("CANCELLED") ("HOLD"))))
 
   (setq org-log-into-drawer "LOGBOOK")
-  (setq org-log-done 'time)
 #+end_src
 
 *** Categories as Areas of focus
@@ -411,9 +546,9 @@ But project tags should never be inherited
 ** Key bindings in Org
 
 #+begin_src emacs-lisp
-  (global-set-key (kbd "<f10>") 'org-cycle-agenda-files)
+  (global-set-key (kbd "C-'") 'org-cycle-agenda-files)
 ;  (define-key org-mode-map (kbd "C-c )") 'reftex-citation)
-  (define-key org-mode-map "\C-cl" 'org-store-link)
+  (global-set-key "\C-cl" 'org-store-link)
   (define-key org-mode-map "\C-ci" 'org-insert-link)
   (global-set-key (kbd  "C-c a") 'org-agenda)
   (global-set-key "\C-cj" 'org-clock-goto)
@@ -490,7 +625,6 @@ But project tags should never be inherited
   (use-package org-bullets
     :after org
     :hook (org-mode . org-bullets-mode))
-  (org-reload)
 #+end_src
 
 
@@ -593,7 +727,7 @@ Chinese character 今 for today, and a ☺ for completed habits
 #+begin_src emacs-lisp :tangle yes
   (setq  org-habit-completed-glyph 9786 
          org-habit-graph-column 80
-         org-habit-show-habits-only-for-today t 
+         org-habit-show-habits-only-for-today t
          org-habit-today-glyph 20170  
          org-hide-leading-stars nil
          org-pretty-entities nil)
@@ -642,6 +776,25 @@ Chinese character 今 for today, and a ☺ for completed habits
     (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face)
 
 #+end_src
+
+
+
+** General export
+*** Removing captions in Beamer
+
+#+BEGIN_SRC emacs-lisp
+  (defun gtk/unnumbered-beamer-caption (contents backend info)
+    (when (eq backend 'beamer)
+      (replace-regexp-in-string "\\\\caption\{" "\\\\caption*{" contents)))
+
+  (add-to-list 'org-export-filter-final-output-functions 'gtk/unnumbered-beamer-caption)
+#+END_SRC
+
+
+
+
+
+
 
 
 
@@ -911,9 +1064,7 @@ This is yasnippet behavior, cribbed from emacswiki.
       :init
       (setq markdown-command "pandoc"))
 
-  (use-package visual-fill-column)
   (setq fill-column 90)
-  (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
   (add-hook 'markdown-mode-hook 'flyspell-mode)
   (add-hook 'markdown-mode-hook 'turn-on-visual-line-mode)
   (add-hook 'markdown-mode-hook 'turn-off-auto-fill)
@@ -1543,140 +1694,6 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 
 
-* Themes
-:CLOCKING:
-CLOCK: [2022-05-23 Mon 18:50]--[2022-05-23 Mon 18:50] =>  0:00
-:END:
-
-
-#+begin_src emacs-lisp
-
-        (use-package modus-themes
-          :init
-          (setq modus-themes-mode-line '(accented borderless padded))
-          (setq modus-themes-paren-match '(bold))
-          (setq modus-themes-scale-headings t)
-          (setq modus-themes-headings '((1 . (rainbow overline background 1.4))
-                                        (2 . (rainbow background 1.3))
-                                        (3 . (rainbow bold 1.2))
-                                        (4 . (semilight 1.1))))
-          (setq modus-themes-region '(bg-only)))
-       ; (fresh-load-theme 'modus-operandi t) 
-
-          (use-package diminish)
-
-          (use-package smart-mode-line
-          :config
-          (setq sml/no-confirm-load-theme t)
-          (sml/setup)
-          (sml/apply-theme 'respectful)  ; Respect the theme colors
-          (setq sml/mode-width 'right
-              sml/name-width 60)
-
-           (setq-default mode-line-format
-
-           `("%e"
-          ;;     ,(when dw/exwm-enabled
-          ;;         '(:eval (format "[%d] " exwm-workspace-current-index)))
-               mode-line-front-space
-        ;;       evil-mode-line-tag
-               mode-line-mule-info
-               mode-line-client
-               mode-line-modified
-               mode-line-remote
-               mode-line-frame-identification
-               mode-line-buffer-identification
-               sml/pos-id-separator
-               (vc-mode vc-mode)
-               " "
-               mode-line-position
-               sml/pre-modes-separator
-               mode-line-modes
-               " "
-               mode-line-misc-info))
-
-          (setq rm-excluded-modes
-            (mapconcat
-              'identity
-              ; These names must start with a space!
-              '(" GitGutter" " MRev" " company"
-              " Helm" " Undo-Tree" " Projectile.*" " Z" " Ind"
-              " Org-Agenda.*" " ElDoc" " SP/s" " cider.*")
-              "\\|")))
-
-#+end_src
-#+begin_src emacs-lisp
-  (use-package doom-themes :defer t)
-
-  (defun disable-all-themes ()
-    "disable all active themes."
-    (dolist (i custom-enabled-themes)
-      (disable-theme i)))
-
-
-  (defun fresh-load-theme (theme &optional no-confirm)
-    (interactive
-     (list
-      (intern (completing-read "Load custom theme: "
-                               (mapcar #'symbol-name
-                                       (custom-available-themes))))
-      nil nil))
-    (message (concat "Theme is: " (symbol-name theme)))
-    (unless (custom-theme-name-valid-p theme)
-      (error "Invalid theme name `%s'" theme))
-    (disable-all-themes)
-    (if no-confirm
-        (load-theme theme t)
-      (load-theme theme)))
-
-
-  ;;(load-theme 'doom-moonlight t)
-  ;;(load-theme 'doom-tomorrow-night t)
-  ;;(load-theme 'doom-wilmersdorf t)
-  (fresh-load-theme 'modus-operandi t)
-  ;(fresh-load-theme 'doom-flatwhite t)
-  ;;(fresh-load-theme 'doom-plain t)
-#+end_src
-
-
-*** Getting icons.
-
-In order to use this, you must run ~(all-the-icons-install-fonts)~ after installing the package ~all-the-icons~. 
-
-#+begin_src emacs-lisp
-
-  (use-package all-the-icons)
-
-  (use-package minions
-  :hook (doom-modeline-mode . minions-mode))
-
-  (use-package doom-modeline
-  :after eshell     ;; Make sure it gets hooked after eshell
-  :hook (after-init . doom-modeline-init)
-  :custom-face
-  (mode-line ((t (:height 1.0))))
-  (mode-line-inactive ((t (:height 0.85))))
-  :custom
-  (doom-modeline-height 15)
-  (doom-modeline-bar-width 6)
-  (doom-modeline-lsp t)
-  (doom-modeline-github nil)
-  (doom-modeline-mu4e nil)
-  (doom-modeline-irc nil)
-  (doom-modeline-minor-modes t)
-  (doom-modeline-persp-name nil)
-  (doom-modeline-buffer-file-name-style 'truncate-except-project)
-  (doom-modeline-major-mode-icon nil))
-#+end_src
-
-
-
-#+begin_src emacs-lisp :eval no :tangle no
-  (org-babel-load-file (gtk/emacs-path "exwm.org"))
-#+end_src
-
-
-
 * Draft
 
 
@@ -1735,7 +1752,6 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
     (org-present-small)
     (org-remove-inline-images)
     (org-appear-mode 1))
-
 
 
   (defun gtk/org-present-prev ()
@@ -1816,5 +1832,11 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 #+end_src
 
 
+
+#+begin_src emacs-lisp
+  (use-package org-contrib)
+  (require 'org-checklist)
+  (org-reload)
+#+end_src
 
 
