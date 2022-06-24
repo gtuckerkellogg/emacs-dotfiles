@@ -787,11 +787,7 @@ Chinese character 今 for today, and a ☺ for completed habits
     (when (eq backend 'beamer)
       (replace-regexp-in-string "\\\\caption\{" "\\\\caption*{" contents)))
 
-  (add-to-list 'org-export-filter-final-output-functions 'gtk/unnumbered-beamer-caption)
 #+END_SRC
-
-
-
 
 
 
@@ -1837,6 +1833,33 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
   (use-package org-contrib)
   (require 'org-checklist)
   (org-reload)
+  (add-to-list 'org-export-filter-final-output-functions 'gtk/unnumbered-beamer-caption)
 #+end_src
 
 
+* Org roam
+
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :ensure t
+    :custom
+    (org-roam-directory (expand-file-name  "roam/" org-directory))
+    (org-roam-complete-everywhere t)
+    (org-roam-capture-templates
+     '(("d" "default" plain "%?"
+        :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)
+       ("l" "programming languages" plain
+        "* Characteristics:\n\n- Family: %?\n- Inspired by: \n\n* Reference\n\n"
+        :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)))
+    :bind
+    (("C-c n l" . org-roam-buffer-toggle)
+     ("C-c n f" . org-roam-node-find)
+     ("C-c n i" . org-roam-node-insert)
+     ("C-c n c" . completion-at-point)
+     )
+    :config (org-roam-setup))
+
+
+#+end_src
