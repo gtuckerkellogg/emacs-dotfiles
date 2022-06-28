@@ -58,7 +58,7 @@ These are almost trivial functions, but I find them useful What is going on here
     (visual-line-mode 1))
 
   (defun turn-off-visual-line-mode ()
-    (interactiv)e
+    (interactive)
     (visual-line-mode -1))
 
     (defun switch-to-minibuffer-window ()
@@ -67,6 +67,7 @@ These are almost trivial functions, but I find them useful What is going on here
     (when (active-minibuffer-window)
       (select-window (active-minibuffer-window))))
   (global-set-key (kbd "<f7>") 'switch-to-minibuffer-window)
+  (global-set-key (kbd "C-z") 'undo)
 
 #+END_SRC
 
