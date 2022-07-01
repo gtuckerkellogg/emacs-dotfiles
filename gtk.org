@@ -184,9 +184,6 @@ This is mostly from starter-kit-misc.
 #+end_src
 
 * Themes
-:CLOCKING:
-CLOCK: [2022-05-23 Mon 18:50]--[2022-05-23 Mon 18:50] =>  0:00
-:END:
 
 This is my modus stuff
 
@@ -210,7 +207,7 @@ This is my modus stuff
 
           ))
 
-  #+end_src
+#+end_src
 
 
 *  Mode line behaviour
@@ -1563,6 +1560,12 @@ org-mode.
 
 
 
+
+** Stan
+
+#+begin_src emacs-lisp
+  (use-package stan-mode)
+#+end_src
 
 ** Require js2-mode
 
