@@ -2,9 +2,9 @@
 #+AUTHOR:    Greg Tucker-Kellogg
 
 
-* Front matter                                                :ignoreheading:
+* Front matter :ignore:
 #+DESCRIPTION:
-#+PROPERTY: header-args :tangle yes :eval yes :results silent
+#+PROPERTY: header-args :tangle no :results silent
 #+KEYWORDS:
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
@@ -16,7 +16,9 @@
 #+LINK_HOME: 
 #+XSLT:
 #+LATEX_HEADER: \usepackage{gtuckerkellogg}
-#+BEGIN_SRC emacs-lisp :results silent :exports none :eval yes
+
+
+#+BEGIN_SRC emacs-lisp :results silent :exports none :tangle yes
   ;; these languages that don't need confirmation
   (defun my-org-confirm-babel-evaluate (lang body)
     (cond
@@ -31,7 +33,7 @@
 * Information only
 
 #+name: me
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq user-full-name "Greg Tucker-Kellogg"
         user-mail-address "dbsgtk@gmail.com")
   (require 'cl-lib)
@@ -41,7 +43,8 @@
 * Some functions
 
 These are almost trivial functions, but I find them useful What is going on here and why is everything double-spaced. Oh maybe this is an interaction between visual line mode and visual-fill-column-mode.
-#+BEGIN_SRC emacs-lisp
+
+#+BEGIN_SRC emacs-lisp :tangle yes
 
   (defun  gtk/emacs-path (path)
     (expand-file-name path user-emacs-directory))
@@ -93,7 +96,7 @@ These are almost trivial functions, but I find them useful What is going on here
 ** emacs client and window behaviour
 
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (server-start)
   (setq inhibit-startup-message t)
   (tool-bar-mode -1)
@@ -108,7 +111,7 @@ These are almost trivial functions, but I find them useful What is going on here
 
 ** Enable minibuffer completion
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (icomplete-mode 1)
   (setq scroll-step 0)
   (setq scroll-conservatively 10000)
@@ -119,7 +122,7 @@ These are almost trivial functions, but I find them useful What is going on here
 I'm trying to wean myself off the old school double spacing for
 sentence ending.  Also in LaTeX.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (define-key global-map (kbd "C-+") 'text-scale-increase)
   (define-key global-map (kbd "C--") 'text-scale-decrease)
   (setq sentence-end-double-space nil)
@@ -130,7 +133,7 @@ sentence ending.  Also in LaTeX.
 
 ** backups and ignored extensions
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 
   (add-to-list 'completion-ignored-extensions ".los")
   (setq backup-directory-alist `(("." . ,(expand-file-name
@@ -142,7 +145,7 @@ sentence ending.  Also in LaTeX.
 
 This is mostly from starter-kit-misc.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :eval yes
   (auto-compression-mode t) ;; open compressed files without an issue
   (recentf-mode 1) ;; keep a list of recent files
   (show-paren-mode 1)
@@ -151,7 +154,7 @@ This is mostly from starter-kit-misc.
 
 ** System specific settings
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (org-babel-load-file (expand-file-name "system-settings.org" user-emacs-directory))
 #+end_src
 
@@ -159,8 +162,7 @@ This is mostly from starter-kit-misc.
 
 ** First we have some of my file organization
 
-#name: other-lisp
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (set-default 'tramp-default-proxies-alist (quote ((".*" "\\`root\\'" "/ssh:%h:"))))
 
   (defvar dropbox-root  
@@ -187,32 +189,32 @@ This is mostly from starter-kit-misc.
 
 This is my modus stuff
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 
-  (use-package modus-themes
-    :config
-    (setq modus-themes-mode-line '(accented borderless padded)
-          modus-themes-paren-match '(bold)
-          modus-themes-deuteranopia t
-          modus-themes-slanted-constructs t
-          modus-themes-scale-headings t
-          modus-themes-intense-mouseovers t
-          modus-themes-bold-constructs t
-          modus-themes-org-blocks 'tinted-background
-          modus-themes-headings '((1 . (rainbow overline background 1.4))
-                                  (2 . (rainbow background 1.3))
-                                  (3 . (rainbow bold 1.2))
-                                  (4 . (semilight 1.1)))
-          modus-themes-region '(bg-only)
+    (use-package modus-themes
+      :config
+      (setq modus-themes-mode-line '(accented borderless padded)
+            modus-themes-paren-match '(bold)
+            modus-themes-deuteranopia t
+            modus-themes-slanted-constructs t
+            modus-themes-scale-headings t
+            modus-themes-intense-mouseovers t
+            modus-themes-bold-constructs t
+            modus-themes-org-blocks 'tinted-background
+            modus-themes-headings '((1 . (rainbow overline background 1.4))
+                                    (2 . (rainbow background 1.3))
+                                    (3 . (rainbow bold 1.1))
+                                    (4 . (semilight 1.1)))
+            modus-themes-region '(bg-only)
 
-          ))
-
+            )
+      )
 #+end_src
 
 
 *  Mode line behaviour
 
-#+BEGIN_SRC
+#+BEGIN_SRC emacs-lisp :tangle yes
 
   (use-package diminish)
 
@@ -256,7 +258,9 @@ This is my modus stuff
            "\\|")))
 
 #+end_src
-#+begin_src emacs-lisp
+
+
+#+begin_src emacs-lisp :tangle yes
   (use-package doom-themes :defer t)
 
   (defun disable-all-themes ()
@@ -281,10 +285,10 @@ This is my modus stuff
       (load-theme theme)))
 
 
-  ;;(load-theme 'doom-moonlight t)
-  ;;(load-theme 'doom-tomorrow-night t)
-  ;;(load-theme 'doom-wilmersdorf t)
-  (fresh-load-theme 'modus-operandi t)
+  ;;(fresh-load-theme 'doom-moonlight t)
+  ;;(fresh-load-theme 'doom-tomorrow-night t)
+  ;;(fresh-load-theme 'doom-wilmersdorf t)
+  ;;(fresh-load-theme 'modus-operandi t)
   ;(fresh-load-theme 'doom-flatwhite t)
   ;;(fresh-load-theme 'doom-plain t)
 #+end_src
@@ -294,30 +298,32 @@ This is my modus stuff
 
 In order to use this, you must run ~(all-the-icons-install-fonts)~ after installing the package ~all-the-icons~. 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 
   (use-package all-the-icons)
 
   (use-package minions
-  :hook (doom-modeline-mode . minions-mode))
+    :config (minions-mode 1))
+
 
   (use-package doom-modeline
-  :after eshell     ;; Make sure it gets hooked after eshell
-  :hook (after-init . doom-modeline-init)
-  :custom-face
-  (mode-line ((t (:height 1.0))))
-  (mode-line-inactive ((t (:height 0.85))))
-  :custom
-  (doom-modeline-height 15)
-  (doom-modeline-bar-width 6)
-  (doom-modeline-lsp t)
-  (doom-modeline-github nil)
-  (doom-modeline-mu4e nil)
-  (doom-modeline-irc nil)
-  (doom-modeline-minor-modes t)
-  (doom-modeline-persp-name nil)
-  (doom-modeline-buffer-file-name-style 'truncate-except-project)
-  (doom-modeline-major-mode-icon nil))
+    :ensure t
+    :init (doom-modeline-mode 1)
+    :hook (after-init . doom-modeline-init)
+    :custom-face
+    (mode-line ((t (:height 1.0))))
+    (mode-line-inactive ((t (:height 0.85))))
+    :custom
+    (doom-modeline-height 15)
+    (doom-modeline-bar-width 6)
+    (doom-modeline-lsp t)
+    (doom-modeline-github nil)
+    (doom-modeline-mu4e nil)
+    (doom-modeline-irc nil)
+    (doom-modeline-minor-modes t)
+    (doom-modeline-persp-name nil)
+    (doom-modeline-buffer-file-name-style 'truncate-except-project)
+    (doom-modeline-major-mode-icon t))
 #+end_src
 
 
@@ -336,13 +342,14 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
   (add-to-list 'org-modules 'org-sticky-header)
   (add-to-list 'org-modules 'ox-latex)
   (add-to-list 'org-modules 'ox-odt)
+  (add-to-list 'org-modules 'ox-extra)
   (add-to-list 'org-modules 'org-tempo)
   (add-to-list 'org-modules 'org-agenda)
   (add-to-list 'org-modules 'org-habit)
   (add-to-list 'org-modules 'org-ref)
   (add-to-list 'org-export-backends 'beamer :append)
   (add-to-list 'org-export-backends 'odt :append)
-
+  (org-reload)
   (use-package org-sticky-header
     :ensure t
     :hook
@@ -361,7 +368,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 *** File organisation 
 
-#+begin_src emacs-lisp   
+#+begin_src emacs-lisp :tangle yes :eval yes
   (setq org-directory
         (expand-file-name "_support/org" dropbox-root))
 
@@ -389,7 +396,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 *** Loading up 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 
   (use-package org
     :ensure t
@@ -399,7 +406,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
     (org.mode . turn-off-cua-mode)  
     :custom
     (org-insert-mode-line-in-empty-file t)
-    (org-startup-indented t)
+    (org-startup-indented nil)
     (org-startup-folded 'nofold)
     (org-completion-use-ido nil)
     (org-outline-path-complete-in-steps nil)
@@ -410,7 +417,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 *** Getting smart quotes
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (use-package typo
     :ensure t
     :init
@@ -425,24 +432,21 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 
 
-*** Sparsity
-
-
 ** The agenda
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (setq org-agenda-files (expand-file-name "agenda-files" org-directory ))
   (setq org-agenda-window-setup 'current-window)
   (setq org-agenda-start-with-log-mode t)  
 #+end_src
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq diary-file (expand-file-name (concat dropbox-root "/diary"))) 
 #+end_src 
 
 
 #+name agenda-commands
-#+begin_src emacs-lisp :eval yes
+#+begin_src emacs-lisp :tangle yes
 
   (setq org-agenda-custom-commands
         '(("n" "Agenda and all TODOs"
@@ -452,7 +456,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
           ))
 #+end_src
 
-#+BEGIN_SRC emacs-lisp :tangle yes :eval yes
+#+BEGIN_SRC emacs-lisp :tangle yes
 
         (use-package org-super-agenda
          :init
@@ -506,7 +510,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 *** My Next Action list setup
 #+name: next-actions
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 
   (setq org-todo-keywords
              '((type "NEXT(n)" "TODO(t)" "PROJECT(p)" "|" "DONE(d@/!)")
@@ -528,7 +532,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 I use David Allen's "Areas of Focus" for general categories across org stuff
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (setq org-global-properties
         '(("CATEGORY_ALL" 
            . "Family Finance Work Health Relationships Self Explore Other")))
@@ -540,7 +544,7 @@ I use David Allen's "Areas of Focus" for general categories across org stuff
 
 My default tags should be context
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-tag-persistent-alist
         '((:startgroup . nil)
           ("@Office" . ?o)
@@ -555,19 +559,18 @@ My default tags should be context
           (:endgroup . nil)
           ("FLAGGED" . ?f)
           ("noexport" . ?n)
-          ("ignoreheading" . ?I)
+          ("ignore" . ?I)
           ))
-
 #+END_SRC
 
 But project tags should never be inherited
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (setq org-tags-exclude-from-inheritance '("Project"))
 #+END_SRC
 ** Key bindings in Org
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (global-set-key (kbd "C-'") 'org-cycle-agenda-files)
 ;  (define-key org-mode-map (kbd "C-c )") 'reftex-citation)
   (global-set-key "\C-cl" 'org-store-link)
@@ -579,12 +582,11 @@ But project tags should never be inherited
   (global-set-key "\C-c'" 'org-cycle-agenda-files)
   (define-key global-map "\C-cx"
     (lambda () (interactive) (org-capture nil "i")))
-
 #+end_src
 
 ** Org capture behavior
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp  :tangle yes
 
   (use-package org-journal
     :ensure t
@@ -630,7 +632,7 @@ But project tags should never be inherited
  
 ** Archiving and refiling
 
-#+begin_src emacs-lisp :eval yes
+#+begin_src emacs-lisp :eval tangle yes
   (setq org-refile-use-outline-path 'file
         org-refile-use-cache nil)
 
@@ -643,7 +645,7 @@ But project tags should never be inherited
 
 ** Bullets
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (use-package org-bullets
     :after org
     :hook (org-mode . org-bullets-mode))
@@ -651,12 +653,10 @@ But project tags should never be inherited
 
 
 
-
-
 ** Org Babel
 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
@@ -703,43 +703,52 @@ all events are correctly placed in the agenda.
 #+end_src       
 
 
-
+This is some stuff
 
 ** Org visuals
+:PROPERTIES:
+:test:     some drawer value
+:END:
 
-#+begin_src emacs-lisp :eval yes :tangle yes
+#+begin_src emacs-lisp :tangle yes
 
-  (set-face-attribute 'fixed-pitch nil
-                      :font "Fira Code Retina"
-                      :weight 'light
-                      :height 180)
+        (set-face-attribute 'fixed-pitch nil
+                            :font "Fira Code Retina"
+                            :height 1.0
+                            )
 
-  ;; Set the variable pitch face
-  (set-face-attribute 'variable-pitch nil
-                      ;; :font "Cantarell"
-                      :font "Cantarell"
-                      :height 180
-                      :weight 'light)
 
-  (dolist (face '((org-level-1 . 1.2)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)))
-    (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
-  (set-face-attribute 'org-level-1 nil :weight 'bold)
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'org-drawer nil  :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-  ;(set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+        (set-face-attribute 'variable-pitch nil
+                            ;; :font "Cantarell"
+                            :font "Cantarell"
+                            :weight 'light
+                            :height 1.1)
+
+  (set-face-attribute 'org-default nil :inherit 'variable-pitch)
+
+        (dolist (face '((org-level-1 . 1.2)
+                        (org-level-2 . 1.1)
+                        (org-level-3 . 1.05)
+                        (org-level-4 . 1.0)
+                        (org-level-5 . 1.1)
+                        (org-level-6 . 1.1)
+                        (org-level-7 . 1.1)))
+          (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
+         (set-face-attribute 'org-level-1 nil :weight 'bold)
+       (set-face-attribute 'org-level-2 nil :weight 'bold)
+      (set-face-attribute 'modus-themes-fixed-pitch nil :inherit 'fixed-pitch :height 0.9)
+      (set-face-attribute 'modus-themes-variable-pitch nil :inherit 'variable-pitch :height 1.0)
+       (set-face-attribute 'org-block-begin-line nil :inherit '(shadow fixed-pitch) :height 1.0 :weight 'bold)
+
+  ;     (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+       (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
+       (set-face-attribute 'org-drawer nil  :inherit '(font-lock-comment-face fixed-pitch) :height 0.8)
+      ;;   (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+      ;;   (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+      ;;   (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+      ;;   (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+      ;;   (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+      ;;   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
 
 #+end_src
 
@@ -755,17 +764,17 @@ Chinese character 今 for today, and a ☺ for completed habits
          org-pretty-entities nil)
 #+end_src
 
+#+begin_src emacs-lisp :tangle yes
+    (setq org-attach-method 'ln)
+  (require 'org-faces)
+      (setq org-use-property-inheritance '("PRIORITY" "STYLE" "CATEGORY"))
+    (setq org-agenda-start-day "0d")
+    (setq org-agenda-span 'week)
+    (setq org-agenda-start-on-weekday nil)
+    (setq org-agenda-skip-scheduled-if-done t)
+    (setq org-agenda-skip-deadline-if-done t)
 
-#+begin_src emacs-lisp
-  (setq org-attach-method 'ln)
-(require 'org-faces) (require 'org-indent)
-    (setq org-use-property-inheritance '("PRIORITY" "STYLE" "CATEGORY"))
-  (setq org-agenda-start-day "0d")
-  (setq org-agenda-span 'week)
-  (setq org-agenda-start-on-weekday nil)
-  (setq org-agenda-skip-scheduled-if-done t)
-  (setq org-agenda-skip-deadline-if-done t)
-
+    (setq org-fontify-done-headline t)
     (defun org-column-view-uses-fixed-width-face ()
       ;; copy from org-faces.el
       (when (fboundp 'set-face-attribute)
@@ -779,36 +788,43 @@ Chinese character 今 for today, and a ☺ for completed habits
                             :family (face-attribute 'default :family)
                             )))
 
-  ;; (set-face-attribute 'default nil
-  ;;                   :font "Fira Code Retina"
-  ;;                   :height 180)
 
-  (setq org-fontify-done-headline t)
-
-  ;; (custom-set-faces
-  ;;  '(org-done ((t (:foreground "PaleGreen"   
-  ;;                  :weight normal
-  ;;                  :strike-through t))))
-  ;;  '(org-headline-done 
-  ;;             ((((class color) (min-colors 16) (background dark)) 
-  ;;                (:foreground "LightSalmon" :strike-through nil)))))
-
-    (when (and (fboundp 'daemonp) (daemonp))
-      (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face))
-    (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face)
+      ;; (when (and (fboundp 'daemonp) (daemonp))
+      ;;   (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face))
+      ;; (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face)
 
 #+end_src
 
 
 
 ** General export
+
+*** org-memoir
+
+#+begin_src emacs-lisp :tangle yes
+  (add-to-list 'org-latex-classes  `("memoir-article"
+         (,@ (concat  "\\documentclass[11pt,article,oneside,a4paper,x11names]{memoir}\n"
+                      "% -- DEFAULT PACKAGES \n[DEFAULT-PACKAGES]\n"
+                      "% -- PACKAGES \n[PACKAGES]\n"
+                      "% -- EXTRA \n[EXTRA]\n"
+                      "\\counterwithout{section}{chapter}\n"
+                      ))
+         ("\\section{%s}" . "\\section{%s}")
+         ("\\subsection{%s}" . "\\subsection{%s}")
+         ("\\subsubsection{%s}" . "\\subsubsection{%s}")
+         ("\\paragraph{%s}" . "\\paragraph{%s}")
+         ("\\subparagraph{%s}" . "\\subparagraph{%s}")))
+
+#+end_src
+
+
+
 *** Removing captions in Beamer
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
   (defun gtk/unnumbered-beamer-caption (contents backend info)
     (when (eq backend 'beamer)
       (replace-regexp-in-string "\\\\caption\{" "\\\\caption*{" contents)))
-
 #+END_SRC
 
 
@@ -818,7 +834,7 @@ Chinese character 今 for today, and a ☺ for completed habits
 
 ** Other exporters
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 (require 'ox-md)
 #+END_SRC
 
@@ -826,9 +842,9 @@ Chinese character 今 for today, and a ☺ for completed habits
 
 ** Org-ref
 
-#+begin_src emacs-lisp :eval no :tangle no 
+#+begin_src emacs-lisp :tangle yes
 
-  (require 'oc-biblatex)
+  (require 'oc-biblatex) 
 
   ;  (use-package ivy-bibtex
   ;    :init
@@ -848,7 +864,7 @@ Chinese character 今 for today, and a ☺ for completed habits
 This is yasnippet behavior, cribbed from emacswiki.  
 
 
-#+begin_src emacs-lisp :eval yes :tangle yes
+#+begin_src emacs-lisp 
 
   (use-package yasnippet
     :config
@@ -921,7 +937,7 @@ This is yasnippet behavior, cribbed from emacswiki.
 
 ** Make dired remove some junk in default view with dired-x
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
     (use-package dired+
       :config
       ;(setq dired-omit-files "^\\.?#\\|^\\.$\\|^\\.\\.$")
@@ -936,7 +952,8 @@ This is yasnippet behavior, cribbed from emacswiki.
 #+end_src
 
 ** Discoverability 
-#+begin_src emacs-lisp
+
+#+begin_src emacs-lisp :tangle yes
   
 (use-package which-key
   :init (which-key-mode)
@@ -949,7 +966,7 @@ This is yasnippet behavior, cribbed from emacswiki.
 
 ** Command log
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (use-package command-log-mode)
   (use-package posframe)
 
@@ -983,7 +1000,7 @@ This is yasnippet behavior, cribbed from emacswiki.
 * Writing
 ** Spelling
 
-#+begin_src emacs-lisp :eval yes :tangle yes
+#+begin_src emacs-lisp :tangle yes
   (use-package flyspell
     :init
     (bind-key "S-<f8>" 'flyspell-mode)
@@ -1010,7 +1027,7 @@ This is yasnippet behavior, cribbed from emacswiki.
 ** LaTeX
 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (setq-default TeX-master t)
   (setq TeX-PDF-mode t)
 
@@ -1031,7 +1048,7 @@ This is yasnippet behavior, cribbed from emacswiki.
 
 ** RefTeX
 
-#+begin_src emacs-lisp :tangle no :eval no
+#+begin_src emacs-lisp :tangle yes
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 
 (setq TeX-view-program-selection
@@ -1056,7 +1073,7 @@ This is yasnippet behavior, cribbed from emacswiki.
 
 ** handle text mode and markdown 
 
-#+BEGIN_SRC emacs-lisp :eval yes tangle :yes
+#+BEGIN_SRC emacs-lisp :tangle yes
 
     (defvar markdown-cite-format)
     (setq markdown-cite-format
@@ -1172,7 +1189,7 @@ editing of documents.
 
 A citation link
 
-#+begin_src emacs-lisp :eval no :tangle no
+#+begin_src emacs-lisp 
     (org-add-link-type 
      "cite" nil
      (lambda (path desc format)
@@ -1221,28 +1238,11 @@ A citation link
 
 ** Pre-processing hooks for export
 
-#+begin_src emacs-lisp 
-  
-  (defun my/org-export-ignoreheadings-hook (backend)
-    "My backend aware export preprocess hook."
-    (save-excursion
-      (let* ((tag "ignoreheading"))
-        (org-map-entries (lambda ()
-                           (delete-region (point-at-bol) (point-at-eol)))
-                         (concat ":" tag ":")))
-      ))
-  
-  (setq org-export-before-processing-hook 'my/org-export-ignoreheadings-hook)
-  
-#+end_src
-
-
-
 
 
 ** Publishing
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (let ((publishing-dir (expand-file-name "Public" dropbox-root)))
     (setq org-publish-project-alist
           `(("public"
@@ -1266,7 +1266,7 @@ A citation link
 
 ** Let's use Sacha Chua's css for HTML export, since it looks purty
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp 
 
 (setq org-export-html-style "<link rel=\"stylesheet\" type=\"text/css\" href=\"http://sachachua.com/blog/wp-content/themes/sacha-v3/style.css\" />
 <link rel=\"stylesheet\" type=\"text/css\" href=\"http://sachachua.com/org-export.css\" />")
@@ -1284,7 +1284,8 @@ A citation link
 I have some keys that I'd like to be always bound
 
 #+name: gtk-keys
-#+BEGIN_SRC emacs-lisp
+
+#+BEGIN_SRC emacs-lisp :tangle yes
 
 
   (global-set-key (kbd "C-c C-w") 'copy-region-as-kill)
@@ -1299,7 +1300,7 @@ I have some keys that I'd like to be always bound
 
 * Projectile
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
       (use-package projectile
         :straight t
         :ensure    projectile
@@ -1316,7 +1317,7 @@ I have some keys that I'd like to be always bound
 
 * Ivy, not ido or helm
 
-#+BEGIN_SRC emacs-lisp :eval yes :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle yes
   (use-package ivy
   :ensure t
   :config
@@ -1338,7 +1339,7 @@ I have some keys that I'd like to be always bound
 
 use paredit for lispy languages 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
    (use-package paredit 
        :ensure t
        :config
@@ -1355,7 +1356,7 @@ use paredit for lispy languages
 #+end_src
 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
     (use-package smartparens
       :init
       (require 'smartparens-config)
@@ -1364,7 +1365,7 @@ use paredit for lispy languages
       (add-hook 'markdown-mode-hook 'smartparens-mode))
 #+end_src
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (use-package rainbow-delimiters
     :config
     (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
@@ -1374,7 +1375,7 @@ use paredit for lispy languages
 
 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (org-babel-load-file (gtk/emacs-path "code-functions.org"))  
   (org-babel-load-file (gtk/emacs-path "shells-and-terminals.org"))
 #+end_src
@@ -1382,7 +1383,7 @@ use paredit for lispy languages
 ** Emacs lisp
 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 
   (use-package elisp-slime-nav)
 
@@ -1404,9 +1405,9 @@ use paredit for lispy languages
 ** R
 
 #+name: R and ess
-#+begin_src emacs-lisp :eval yes :tangle yes
+#+begin_src emacs-lisp :tangle yes
 
-  (use-package ess
+  (use-package ess 
     :mode ("\\.R\\'" . R-mode)
     :config
     (add-hook 'ess-r-mode-hook 'smartparens-mode)
@@ -1464,7 +1465,7 @@ use paredit for lispy languages
 
 ** Clojure
 
-#+begin_src emacs-lisp :eval yes :tangle yes
+#+begin_src emacs-lisp :tangle yes
 
   (use-package cider
     :init
@@ -1526,7 +1527,7 @@ use paredit for lispy languages
 I had to remove cython and yasnippet extensions to not screw up
 org-mode.
 
-#+BEGIN_SRC emacs-lisp :eval yes
+#+BEGIN_SRC emacs-lisp :eval yes :tangle yes
   (use-package elpy
     :ensure t
     :init
@@ -1563,7 +1564,7 @@ org-mode.
 
 ** Stan
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (use-package stan-mode)
 #+end_src
 
@@ -1576,101 +1577,14 @@ org-mode.
 
 * Company mode
 
-#+BEGIN_SRC emacs-lisp :eval yes
+#+BEGIN_SRC emacs-lisp :tangle yes
   (use-package company
     :config
     (setq company-idle-delay 0 )
     (add-hook 'after-init-hook 'global-company-mode))
 #+END_SRC
 
-* Yas and company compatibility
-:LOGBOOK:
-- Note taken on [2022-05-23 Mon 15:53] \\
-  I disabled this because it may not be needed.
-:END:
-
-
-Company and Yasnippet have some issues. This code (from https://emacs.stackexchange.com/questions/7908/how-to-make-yasnippet-and-company-work-nicer) makes them work better together
-
-#+begin_src emacs-lisp :eval no :tangle no
-
-  (defun check-expansion ()
-    (save-excursion
-      (if (looking-at "\\_>") t
-        (backward-char 1)
-        (if (looking-at "\\.") t
-      (backward-char 1)
-      (if (looking-at "->") t nil)))))
-
-  (defun do-yas-expand ()
-    (let ((yas/fallback-behavior 'return-nil))
-      (yas/expand)))
-
-  (defun tab-indent-or-complete ()
-    (interactive)
-    (cond
-     ((minibufferp)
-      (minibuffer-complete))
-     (t
-      (indent-for-tab-command)
-      (if (or (not yas/minor-mode)
-          (null (do-yas-expand)))
-      (if (check-expansion)
-          (progn
-            (company-manual-begin)
-            (if (null company-candidates)
-            (progn
-              (company-abort)
-              (indent-for-tab-command)))))))))
-
-  (defun tab-complete-or-next-field ()
-    (interactive)
-    (if (or (not yas/minor-mode)
-        (null (do-yas-expand)))
-        (if company-candidates
-        (company-complete-selection)
-      (if (check-expansion)
-        (progn
-          (company-manual-begin)
-          (if (null company-candidates)
-          (progn
-            (company-abort)
-            (yas-next-field))))
-        (yas-next-field)))))
-
-  (defun expand-snippet-or-complete-selection ()
-    (interactive)
-    (if (or (not yas/minor-mode)
-        (null (do-yas-expand))
-        (company-abort))
-        (company-complete-selection)))
-
-  (defun abort-company-or-yas ()
-    (interactive)
-    (if (null company-candidates)
-        (yas-abort-snippet)
-      (company-abort)))
-
-  ;(global-set-key [tab] 'tab-indent-or-complete)
-  ;(global-set-key (kbd "TAB") 'tab-indent-or-complete)
-  (global-set-key [(control return)] 'company-complete-common)
-
-  (define-key company-active-map [tab] 'expand-snippet-or-complete-selection)
-  (define-key company-active-map (kbd "TAB") 'expand-snippet-or-complete-selection)
-
-  (define-key yas-minor-mode-map [tab] nil)
-  (define-key yas-minor-mode-map (kbd "TAB") nil)
-
-  (define-key yas-keymap [tab] 'tab-complete-or-next-field)
-  (define-key yas-keymap (kbd "TAB") 'tab-complete-or-next-companfield)
-  (define-key yas-keymap [(control tab)] 'yas-next-field)
-  (define-key yas-keymap (kbd "C-g") 'abort-company-or-yas)
-
-
-#+end_src
-
-
-* DONE Git
+* Git
 CLOSED: [2022-05-25 Wed 13:00]
 :LOGBOOK:
 - State "DONE"       from "TODO"       [2022-05-25 Wed 13:00] \\
@@ -1679,7 +1593,7 @@ CLOSED: [2022-05-25 Wed 13:00]
 
 The moment I evaluate this, I can’t enter an R buffer without “error in process sentinel: Wrong type argument: listp, with-editor”
 
-#+begin_src emacs-lisp :eval yes :tangle yes
+#+begin_src emacs-lisp  :tangle yes
 
   ;(custom-set-variables '(with-editor-emacsclient-executable "gnu/store/p4nv1zvdq2ply1qakqhyac3mr7xny9zl-emacs-28.1/bin/emacsclient"))
   (use-package with-editor)
@@ -1702,7 +1616,7 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 * multiple cursors
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle yes
 
   (use-package multiple-cursors
     :config
@@ -1721,7 +1635,7 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 * Draft
 
 
-#+begin_src emacs-lisp :eval yes :tangle yes
+#+begin_src emacs-lisp :tangle yes
 
   (use-package julia-repl)
 
@@ -1733,7 +1647,7 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 #+end_src
 
-#+BEGIN_SRC emacs-lisp :eval yes :tangle yes
+#+BEGIN_SRC emacs-lisp :tangle yes
     (use-package yaml-mode
       :init
       (add-hook 'yaml-mode-hook #'turn-off-auto-fill))
@@ -1747,7 +1661,7 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
 
   (use-package hide-mode-line)
   (use-package org-appear)
@@ -1803,7 +1717,7 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 #+end_src
 
-#+BEGIN_SRC emacs-lisp :tangle no :eval no
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package org-ref
       :after org)
   (define-key org-mode-map (kbd "C-c ]") 'org-ref-insert-link)
@@ -1826,7 +1740,7 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 #+END_SRC
 
 
-#+begin_src emacs-lisp :tangle no :eval no
+#+begin_src emacs-lisp :tangle yes
 (use-package lsp-mode
   :hook (python-mode . lsp)
   :commands lsp)
@@ -1843,7 +1757,7 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 
 
-#+begin_src emacs-lisp :eval yes :tangle no
+#+begin_src emacs-lisp :tangle yes
   ;; unfilling
 
   (defun unfill-paragraph (&optional region)
@@ -1857,17 +1771,18 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (use-package org-contrib)
   (require 'org-checklist)
   (org-reload)
   (add-to-list 'org-export-filter-final-output-functions 'gtk/unnumbered-beamer-caption)
+  (add-to-list 'org-export-filter-parse-tree-functions 'org-export-ignore-headlines)
 #+end_src
 
 
 * Org roam
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle yes
   (use-package org-roam
     :ensure t
     :custom
@@ -1890,4 +1805,42 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
     :config (org-roam-setup))
 
 
+#+end_src
+
+* Draft
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package org-modern
+    :ensure t
+    :init
+    (org-indent-mode -1)
+    (modify-all-frames-parameters
+     '((right-divider-width . 20)
+       (internal-border-width . 20)))
+    (dolist (face '(window-divider
+                    window-divider-first-pixel
+                    window-divider-last-pixel))
+      (face-spec-reset-face face)
+      (set-face-foreground face (face-attribute 'default :background)))
+    (set-face-background 'fringe (face-attribute 'default :background))
+    :custom
+    (org-auto-align-tags nil)
+    (org-tags-column 0)
+    (org-catch-invisible-edits 'show-and-error)
+    (org-special-ctrl-a/e t)
+    (org-insert-heading-respect-content t)
+    (org-hide-emphasis-markers t)
+    (org-agenda-block-separator ?─)
+    (org-pretty-entities t)
+    :config
+    (global-org-modern-mode)
+    (modus-themes-load-operandi)
+    )
+#+end_src
+
+
+* Go!
+
+#+begin_src emacs-lisp :tangle yes
+  (modus-themes-load-operandi)
 #+end_src
