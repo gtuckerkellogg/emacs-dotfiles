@@ -350,10 +350,10 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
   (add-to-list 'org-export-backends 'beamer :append)
   (add-to-list 'org-export-backends 'odt :append)
   (org-reload)
-  (use-package org-sticky-header
-    :ensure t
-    :hook
-    (org-mode . org-sticky-header-mode))
+  ;; (use-package org-sticky-header
+  ;;   :ensure t
+  ;;   :hook
+  ;;   (org-mode . org-sticky-header-mode))
 
 
   (use-package org-auto-tangle
