@@ -30,7 +30,11 @@
 #+END_SRC
 
 
-* Information only
+
+
+* General Emacs behaviour
+
+** Information only
 
 #+name: me
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -39,8 +43,7 @@
   (require 'cl-lib)
 #+END_SRC
 
-
-* Some functions
+** Some functions
 
 These are almost trivial functions, but I find them useful What is going on here and why is everything double-spaced. Oh maybe this is an interaction between visual line mode and visual-fill-column-mode.
 
@@ -49,24 +52,7 @@ These are almost trivial functions, but I find them useful What is going on here
   (defun  gtk/emacs-path (path)
     (expand-file-name path user-emacs-directory))
 
-  (defalias 'gtk/emacsd-file 'gtk/emacs-path)
   (defalias 'gtk/emacs-subdir 'gtk/emacs-path)
-
-  (use-package visual-fill-column
-    :init
-    (setq visual-fill-column-width 110
-          visual-fill-column-center-text t))
-
-  (defun turn-on-visual-fill-column ()
-    (interactive)
-    ;; Center the presentation and wrap lines
-    (visual-fill-column-mode 1)
-    (visual-line-mode 1))
-
-  (defun turn-off-visual-fill-column ()
-    ;; Center the presentation and wrap lines
-    (visual-fill-column-mode 0)
-    (visual-line-mode 0))
 
   (defun turn-off-cua-mode ()
     (cua-mode -1))
@@ -79,7 +65,7 @@ These are almost trivial functions, but I find them useful What is going on here
     (interactive)
     (visual-line-mode -1))
 
-    (defun switch-to-minibuffer-window ()
+  (defun switch-to-minibuffer-window ()
     "switch to minibuffer window (if active)"
     (interactive)
     (when (active-minibuffer-window)
@@ -88,10 +74,6 @@ These are almost trivial functions, but I find them useful What is going on here
   (global-set-key (kbd "C-z") 'undo)
 
 #+END_SRC
-
-
-* General Emacs behaviour
-
 
 ** emacs client and window behaviour
 
@@ -106,8 +88,30 @@ These are almost trivial functions, but I find them useful What is going on here
   (setq visible-bell t)
   (setq-default fill-column 100)
   (setq custom-file (gtk/emacs-path "custom.el"))
+  (load custom-file)
   (global-auto-revert-mode)
 #+END_SRC
+
+** Visual fill column
+
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package visual-fill-column
+  :init
+  (setq visual-fill-column-width 110
+	visual-fill-column-center-text t)
+  :config
+  (defun turn-on-visual-fill-column ()
+    (interactive)
+    ;; Center the presentation and wrap lines
+    (visual-fill-column-mode 1)
+    (visual-line-mode 1))
+  (defun turn-off-visual-fill-column ()
+    ;; Center the presentation and wrap lines
+    (visual-fill-column-mode 0)
+    (visual-line-mode 0))
+  )
+#+end_src
 
 ** Enable minibuffer completion
 
@@ -197,22 +201,23 @@ This is my modus stuff
 	  modus-themes-paren-match '(bold rainbow)
 	  modus-themes-deuteranopia t
 	  modus-themes-slanted-constructs t
-	  modus-themes-scale-headings t
+	  modus-themes-scale-headings nil
 	  modus-themes-intense-mouseovers t
 	  modus-themes-bold-constructs t
-	  modus-themes-org-blocks 'tinted-background
-	  modus-themes-headings '((1 . (rainbow overline background 1.4))
-				  (2 . (rainbow background 1.3))
+	  modus-themes-org-blocks 'grayscale-background
+	  modus-themes-headings '((1 . (rainbow background overline bold 1.3))
+				  (2 . (rainbow background 1.2))
 				  (3 . (rainbow bold 1.1))
-				  (4 . (semilight 1.1)))
-	  ;modus-themes-region '(bg-only)
-
+				  (t . (semilight 1.0)))
 	  )
     )
+
+  (modus-themes-load-operandi)
 #+end_src
 
 
-*  Mode line behaviour
+* Mode line behaviour
+
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 
@@ -273,25 +278,69 @@ This is my modus stuff
     (interactive
      (list
       (intern (completing-read "Load custom theme: "
-                               (mapcar #'symbol-name
-                                       (custom-available-themes))))
-      nil nil))
-    (message (concat "Theme is: " (symbol-name theme)))
+			       (mapcar #'symbol-name
+				       (custom-available-themes))))
+      nil
+      ))
     (unless (custom-theme-name-valid-p theme)
       (error "Invalid theme name `%s'" theme))
+    (message (concat "Theme is: " (symbol-name theme)))
+    (when (custom-theme-p theme)
+      (put theme 'theme-settings nil)
+      (put theme 'theme-feature nil)
+      (put theme 'theme-documentation nil))
+    (let ((file (locate-file (concat (symbol-name theme) "-theme.el")
+			     (custom-theme--load-path)
+			     '("" "c")))
+	  (custom--inhibit-theme-enable t))
+      ;; Check file safety with `custom-safe-themes', prompting the
+      ;; user if necessary.
+      (cond ((not file)
+	     (error "Unable to find theme file for `%s'" theme))
+	    ((or no-confirm
+		 (eq custom-safe-themes t)
+		 (and (memq 'default custom-safe-themes)
+		      (equal (file-name-directory file)
+			     (expand-file-name "themes/" data-directory))))
+	     ;; Theme is safe; load byte-compiled version if available.
+	     (load (file-name-sans-extension file) nil t nil t))
+	    ((with-temp-buffer
+	       (insert-file-contents file)
+	       (let ((hash (secure-hash 'sha256 (current-buffer))))
+		 (when (or (member hash custom-safe-themes)
+			   (custom-theme-load-confirm hash))
+		   (eval-buffer nil nil file)
+		   t))))
+	    (t
+	     (error "Unable to load theme `%s'" theme))))
+    ;; Optimization: if the theme changes the `default' face, put that
+    ;; entry first.  This avoids some `frame-set-background-mode' rigmarole
+    ;; by assigning the new background immediately.
+    (let* ((settings (get theme 'theme-settings))
+	   (tail settings)
+	   found)
+      (while (and tail (not found))
+	(and (eq (nth 0 (car tail)) 'theme-face)
+	     (eq (nth 1 (car tail)) 'default)
+	     (setq found (car tail)))
+	(setq tail (cdr tail)))
+      (when found
+	(put theme 'theme-settings (cons found (delq found settings)))))
+    ;; Finally, enable the theme.
     (disable-all-themes)
-    (if no-confirm
-        (load-theme theme t)
-      (load-theme theme)))
+    (enable-theme theme)
+    t)
 
 
-  ;;(fresh-load-theme 'doom-moonlight t)
+
+  ;;(fresh-load-theme 'doom-moonlight)
   ;;(fresh-load-theme 'doom-tomorrow-night t)
   ;;(fresh-load-theme 'doom-wilmersdorf t)
-  ;;(fresh-load-theme 'modus-operandi t)
-  ;(fresh-load-theme 'doom-flatwhite t)
+  ;;(fresh-load-theme 'modus-operandi)
+					  ;(fresh-load-theme 'doom-flatwhite)
   ;;(fresh-load-theme 'doom-plain t)
 #+end_src
+
 
 
 *** Getting icons.
@@ -1000,25 +1049,28 @@ This is yasnippet behavior, cribbed from emacswiki.
 * Writing
 ** Spelling
 
+
 #+begin_src emacs-lisp :tangle yes
-  (use-package flyspell
-    :init
-    (bind-key "S-<f8>" 'flyspell-mode)
-    :config
-    (defun gtk/flyspell-check-next-error ()
-      (interactive)
-      (flyspell-goto-next-error)
-      (ispell-word))
-    (bind-keys :map flyspell-mode-map
-               ("<f8>" . gtk/flyspell-check-next-error)
-               ("M-S-<f8>" . flyspell-prog-mode))
-    (setq ispell-extra-args nil)
-    (setq ispell-program-name "hunspell")
-    (setq ispell-dictionary "en_GB")
-    ;(ispell-set-spellchecker-params)
-    ;(ispell-hunspell-add-multi-dic "en_GB,en_med")
-    ;(ispell-hunspell-add-multi-dic "en_US,en_med")
-    )
+    (use-package flyspell
+      :init
+      (bind-key "S-<f8>" 'flyspell-mode)
+      :config
+      (defun gtk/flyspell-check-next-error ()
+	(interactive)
+	(flyspell-goto-next-error)
+	(ispell-word))
+      (bind-keys :map flyspell-mode-map
+		 ("<f8>" . gtk/flyspell-check-next-error)
+		 ("M-S-<f8>" . flyspell-prog-mode))
+      (setq ispell-extra-args nil)
+      (setq ispell-program-name "hunspell")
+      (ispell-set-spellchecker-params)
+  ;    (ispell-hunspell-add-multi-dic "en_GB,en_med_glut")
+  ;    (ispell-hunspell-add-multi-dic "en_US,en_med_glut")
+      (setq ispell-dictionary "en_GB")
+      )
+
+    (setq ispell-personal-dictionary "~/.hunspell_personal")
 
 
 
@@ -1741,17 +1793,19 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 
 #+begin_src emacs-lisp :tangle yes
-(use-package lsp-mode
-  :hook (python-mode . lsp)
-  :commands lsp)
+  (use-package lsp-mode
+    :init
+    (setq lsp-keymap-prefix "C-c C-l")
+    :hook (python-mode . lsp)
+    :commands lsp)
 
-;; optionally
-(use-package lsp-ui :commands lsp-ui-mode)
-(use-package company-lsp :commands company-lsp)
-;;(use-package helm-lsp :commands helm-lsp-workspace-symbol)
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
-;; optionally if you want to use debugger
-;;(use-package dap-mode)
+  ;; optionally
+  (use-package lsp-ui :commands lsp-ui-mode)
+  (use-package company-lsp :commands company-lsp)
+  ;;(use-package helm-lsp :commands helm-lsp-workspace-symbol)
+  (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+  ;; optionally if you want to use debugger
+  ;;(use-package dap-mode)
 
 #+end_src
 
