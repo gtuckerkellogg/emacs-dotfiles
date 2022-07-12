@@ -43,6 +43,7 @@
   (require 'cl-lib)
 #+END_SRC
 
+
 ** Some functions
 
 These are almost trivial functions, but I find them useful What is going on here and why is everything double-spaced. Oh maybe this is an interaction between visual line mode and visual-fill-column-mode.
@@ -75,7 +76,29 @@ These are almost trivial functions, but I find them useful What is going on here
 
 #+END_SRC
 
+** Key bindings
+
+I have some keys that I'd like to be always bound
+
+#+name: gtk-keys
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+
+
+  (global-set-key (kbd "C-c C-w") 'copy-region-as-kill)
+
+  (global-set-key (kbd "C-c q") 'auto-fill-mode)
+
+  (global-set-key (kbd "M-+") 'count-words)
+
+
+#+END_SRC
+
+
+
+
 ** emacs client and window behaviour
+
 
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1331,57 +1354,51 @@ A citation link
 
 
 
-* Key bindings
-
-I have some keys that I'd like to be always bound
-
-#+name: gtk-keys
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-
-
-  (global-set-key (kbd "C-c C-w") 'copy-region-as-kill)
-
-  (global-set-key (kbd "C-c q") 'auto-fill-mode)
-
-  (global-set-key (kbd "M-+") 'count-words)
-
-
-#+END_SRC
-
-
 * Projectile
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-      (use-package projectile
-        :straight t
-        :ensure    projectile
-        :config
-        (projectile-global-mode t)
-        (setq projectile-completion-system 'ivy)
-        :diminish   projectile-mode)
-
-    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-
-    ;(persp-mode)
-    ;(require 'persp-projectile)
+  (use-package projectile
+    :ensure    projectile
+    :config
+    (projectile-global-mode t)
+    :custom
+    (projectile-completion-system 'ivy)
+    :bind-keymap ("C-c p" . projectile-command-map)
+    :diminish   projectile-mode)
 #+END_SRC
 
 * Ivy, not ido or helm
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package ivy
-  :ensure t
-  :config
-  (ivy-mode 1)
-  ;:bind
-  ;(("C-M-RET" . ivy-immediate-done))
-  )
+
   (use-package counsel
+    :after ivy
+    :config (counsel-mode 1))
+
+
+  (use-package ivy
+    :defer 0.1
+    :diminish
+    :bind (("C-c C-r" . ivy-resume)
+	   ("C-x B" . ivy-switch-buffer-other-window))
+    :custom
+    (ivy-count-format "(%d/%d) ")
+    (ivy-use-virtual-buffers t)
+    :config (ivy-mode))
+
+
+  (use-package ivy-rich
+    :after ivy
+    :custom
+    (ivy-rich-path-style 'abbrev)
     :config
-    (counsel-mode 1))
+    (ivy-rich-mode 1)
+    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
 
-
+  (use-package swiper
+    :after ivy
+    :bind (("C-s" . swiper)
+	   ("C-r" . swiper)))
 #+END_SRC
 
 

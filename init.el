@@ -1,5 +1,16 @@
 (setq native-comp-async-report-warnings-errors nil)
-;; don't use package, use straight.el 
+;; don't use package, use straight.el
+
+(defconst gtk/system-type (replace-regexp-in-string "/" "-" (format "%s" system-type)))
+(defconst gtk/system-string (concat gtk/system-type "-emacs-" emacs-version))
+
+(setq straight-use-package-by-default t  
+      straight-recipes-gnu-elpa-use-mirror t
+      straight-build-dir (expand-file-name
+			  (concat "straight/build" "-" gtk/system-string)
+			  user-emacs-directory)
+      straight-repository-branch "develop")
+
 ;;(setq package-enable-at-startup nil)
 (defvar bootstrap-version)
 (let ((bootstrap-file
