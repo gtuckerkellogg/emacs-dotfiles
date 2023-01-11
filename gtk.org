@@ -484,7 +484,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
     (org-outline-path-complete-in-steps nil)
     :bind
     (("C-c C-x C-2" . org-cite-insert)
-     ("C-c C-x C-3" . default-indent-new-line)))
+     ("C-c C-x C-3" . ivy-immediate-done)))
  #+end_src
 
 *** Getting smart quotes
@@ -1914,4 +1914,19 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 #+begin_src emacs-lisp :tangle yes
   (modus-themes-load-operandi)
+#+end_src
+
+
+* Docker
+
+#+begin_src emacs-lisp :tangle yes
+
+  (use-package dockerfile-mode)
+#+end_src
+
+
+* Quarto
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package quarto-mode)
 #+end_src
