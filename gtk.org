@@ -1,3 +1,4 @@
+
 #+TITLE:     Greg Tucker-Kellogg's Emacs configuration
 #+AUTHOR:    Greg Tucker-Kellogg
 
@@ -874,21 +875,61 @@ Chinese character 今 for today, and a ☺ for completed habits
 *** org-memoir
 
 #+begin_src emacs-lisp :tangle yes
+
+  (setq org-latex-pdf-process '("latexmk -shell-escape -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f")
+	)
+
   (add-to-list 'org-latex-classes  `("memoir-article"
-         (,@ (concat  "\\documentclass[11pt,article,oneside,a4paper,x11names]{memoir}\n"
-                      "% -- DEFAULT PACKAGES \n[DEFAULT-PACKAGES]\n"
-                      "% -- PACKAGES \n[PACKAGES]\n"
-                      "% -- EXTRA \n[EXTRA]\n"
-                      "\\counterwithout{section}{chapter}\n"
-                      ))
-         ("\\section{%s}" . "\\section{%s}")
-         ("\\subsection{%s}" . "\\subsection{%s}")
-         ("\\subsubsection{%s}" . "\\subsubsection{%s}")
-         ("\\paragraph{%s}" . "\\paragraph{%s}")
-         ("\\subparagraph{%s}" . "\\subparagraph{%s}")))
+	 (,@ (concat  "\\documentclass[11pt,article,oneside,a4paper,x11names]{memoir}\n"
+		      "% -- DEFAULT PACKAGES \n[DEFAULT-PACKAGES]\n"
+		      "% -- PACKAGES \n[PACKAGES]\n"
+		      "% -- EXTRA \n[EXTRA]\n"
+		      "\\counterwithout{section}{chapter}\n"
+		      ))
+	 ("\\section{%s}" . "\\section{%s}")
+	 ("\\subsection{%s}" . "\\subsection{%s}")
+	 ("\\subsubsection{%s}" . "\\subsubsection{%s}")
+	 ("\\paragraph{%s}" . "\\paragraph{%s}")
+	 ("\\subparagraph{%s}" . "\\subparagraph{%s}")))
 
 #+end_src
 
+
+*** Minted for code
+
+#+begin_src emacs-lisp :tangle yes
+
+  (setq org-latex-src-block-backend 'minted)
+  ;(setq org-latex-packages-alist '())
+  (add-to-list 'org-latex-packages-alist '("cache=false" "minted"))
+  (add-to-list 'org-latex-packages-alist '("" "color"))
+  (add-to-list 'org-latex-packages-alist '("" "gtkminted") 'append)
+  (add-to-list 'org-latex-packages-alist '("" "csquotes"))
+  (add-to-list 'org-latex-minted-langs '(groovy "groovy"))
+  (add-to-list 'org-latex-minted-langs '(R "r"))
+  (add-to-list 'org-latex-minted-langs '(clojure "clojure"))
+
+
+    (setq org-latex-minted-options
+	    '(("linenos" "true")
+	      ("fontsize" "\\footnotesize")
+	      ("stepnumber" "1")
+	      ("numbersep" "10pt")
+	      ))
+
+  (setq my-org-minted-config (concat "%% minted package configuration settings\n"
+				       "\\definecolor{bg}{HTML}{E5E5E5}\n" 
+				       "\\usemintedstyle{trac}\n"
+				       "\\usepackage{upquote}\n"
+				       "\\renewcommand{\\theFancyVerbLine}{\\sffamily\\tiny \\textcolor[rgb]{1.0,0,0}{\\arabic{FancyVerbLine}}}\n"
+				       "\\AtBeginDocument{%\n"
+				       "%\\def\\PYZsq{\\textquotesingle}%\n"
+				       "}\n"
+				       "%% end minted package configuration"
+					))
+
+
+#+end_src
 
 
 *** Removing captions in Beamer
@@ -1599,22 +1640,25 @@ org-mode.
 #+BEGIN_SRC emacs-lisp :eval yes :tangle yes
   (use-package elpy
     :ensure t
+    :config
+    (setq elpy-rpc-python-command "python3")
     :init
-    (elpy-enable))
+    (elpy-enable)
+    )
 
     (defun gtk/elpy-send-line-or-region ()
       (interactive)
       (if (region-active-p)
-          (call-interactively 'elpy-shell-send-region-or-buffer)
-        (let ((region (elpy-shell--region-without-indentation
-                       (line-beginning-position) (line-end-position))))
-          (when (string-match "\t" region)
-            (warn (format-message
-                   "%s (%d): line or region contained tabs, this might cause weird errors"
-                   (buffer-name)
-                   (line-number-at-pos))))
-          (python-shell-send-string region)
-          (next-line))))
+	  (call-interactively 'elpy-shell-send-region-or-buffer)
+	(let ((region (elpy-shell--region-without-indentation
+		       (line-beginning-position) (line-end-position))))
+	  (when (string-match "\t" region)
+	    (warn (format-message
+		   "%s (%d): line or region contained tabs, this might cause weird errors"
+		   (buffer-name)
+		   (line-number-at-pos))))
+	  (python-shell-send-string region)
+	  (next-line))))
 
   (when (load "flycheck" t t)
     (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
@@ -1929,4 +1973,42 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 #+begin_src emacs-lisp :tangle yes
   (use-package quarto-mode)
+#+end_src
+
+* Snakemake
+
+#+begin_src emacs-lisp :tangle yes
+    (use-package snakemake-mode)
+#+end_src
+
+
+
+* Rust
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package toml-mode)
+
+  (use-package rust-mode
+    :hook (rust-mode . lsp)
+    :bind
+    ("C-c g" . rust-run)
+    ("C-c t" . rust-test)
+    ("C-c b" . cargo-process-build)
+    :init
+    (which-function-mode 1)
+    (setq compilation-error-regexp-alist-alist
+	(cons '(cargo "^\\([^ \n]+\\):\\([0-9]+\\):\\([0-9]+\\): \\([0-9]+\\):\\([0-9]+\\) \\(?:[Ee]rror\\|\\([Ww]arning\\)\\):" 1 (2 . 4) (3 . 5) (6))
+	  compilation-error-regexp-alist-alist))
+    :config
+    (setq rust-format-on-save t))
+
+
+  (use-package cargo
+    :hook (rust-mode . cargo-minor-mode)
+    :diminish cargo-minor-mode)
+
+  (use-package flycheck-rust
+    :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
+  (straight-use-package '(nextflow-mode :type git :host github :repo "emiller88/nextflow-mode"))
 #+end_src
