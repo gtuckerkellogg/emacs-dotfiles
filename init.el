@@ -32,8 +32,9 @@
 
 (use-package exec-path-from-shell)
 
-(when (memq system-type '(gnu/linux darwin gnu))
-  (exec-path-from-shell-initialize))
+;(when (memq system-type '(gnu/linux darwin gnu))
+;  (setq exec-path-from-shell-arguments nil)
+;  (exec-path-from-shell-initialize))
 
 (use-package org)
 (org-reload)

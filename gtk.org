@@ -357,10 +357,11 @@ This is my modus stuff
 
 
 
-  ;;(fresh-load-theme 'doom-moonlight)
+  ;;(fresh-load-theme 'doom-moonlight t)
   ;;(fresh-load-theme 'doom-tomorrow-night t)
   ;;(fresh-load-theme 'doom-wilmersdorf t)
-  ;;(fresh-load-theme 'modus-operandi)
+  ;;(fresh-load-theme 'modus-operandi t)
+  ;;(fresh-load-theme 'modus-vivendi t)
 					  ;(fresh-load-theme 'doom-flatwhite)
   ;;(fresh-load-theme 'doom-plain t)
 #+end_src
@@ -373,6 +374,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 #+begin_src emacs-lisp :tangle yes
 
+  
   (use-package all-the-icons)
 
   (use-package minions
@@ -420,6 +422,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
   (add-to-list 'org-modules 'org-agenda)
   (add-to-list 'org-modules 'org-habit)
   (add-to-list 'org-modules 'org-ref)
+  (add-to-list 'org-modules 'ol) 
   (add-to-list 'org-export-backends 'beamer :append)
   (add-to-list 'org-export-backends 'odt :append)
   (org-reload)
@@ -428,6 +431,45 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
   ;;   :hook
   ;;   (org-mode . org-sticky-header-mode))
 
+  (org-export-define-derived-backend 'beamer 'latex
+  :menu-entry
+  '(?l 1
+       ((?B "As LaTeX buffer (Beamer)" org-beamer-export-as-latex)
+  	(?b "As LaTeX file (Beamer)" org-beamer-export-to-latex)
+  	(?P "As PDF file (Beamer)" org-beamer-export-to-pdf)
+  	(?O "As PDF file and open (Beamer)"
+  	    (lambda (a s v b)
+  	      (if a (org-beamer-export-to-pdf t s v b)
+  		(org-open-file (org-beamer-export-to-pdf nil s v b)))))))
+  :options-alist
+  '((:headline-levels nil "H" org-beamer-frame-level)
+    (:latex-class "LATEX_CLASS" nil "beamer" t)
+    (:beamer-subtitle-format nil nil org-beamer-subtitle-format)
+    (:beamer-column-view-format "COLUMNS" nil org-beamer-column-view-format)
+    (:beamer-theme "BEAMER_THEME" nil org-beamer-theme)
+    (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
+    (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
+    (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
+    (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
+    (:beamer-header "BEAMER_HEADER" nil nil newline)
+    (:beamer-environments-extra nil nil org-beamer-environments-extra)
+    (:beamer-frame-default-options nil nil org-beamer-frame-default-options)
+    (:beamer-outline-frame-options nil nil org-beamer-outline-frame-options)
+    (:beamer-outline-frame-title nil nil org-beamer-outline-frame-title))
+  :translate-alist '((strike-through . org-beamer-bold)
+  		     (export-block . org-beamer-export-block)
+  		     (export-snippet . org-beamer-export-snippet)
+  		     (headline . org-beamer-headline)
+  		     (item . org-beamer-item)
+  		     (keyword . org-beamer-keyword)
+  		     (link . org-beamer-link)
+  		     (plain-list . org-beamer-plain-list)
+  		     (radio-target . org-beamer-radio-target)
+  		     (template . org-beamer-template)))
+
+  
+  (use-package org-sticky-header)
+  (use-package org-ref)
 
   (use-package org-auto-tangle
     :defer t
@@ -483,9 +525,13 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
     (org-startup-folded 'nofold)
     (org-completion-use-ido nil)
     (org-outline-path-complete-in-steps nil)
+    :config
+    (with-eval-after-load 'ox-extra
+      (ox-extras-activate '(latex-header-blocks ignore-headlines)))
     :bind
     (("C-c C-x C-2" . org-cite-insert)
      ("C-c C-x C-3" . ivy-immediate-done)))
+
  #+end_src
 
 *** Getting smart quotes
@@ -901,9 +947,9 @@ Chinese character 今 for today, and a ☺ for completed habits
 
   (setq org-latex-src-block-backend 'minted)
   ;(setq org-latex-packages-alist '())
-  (add-to-list 'org-latex-packages-alist '("cache=false" "minted"))
+  ;(add-to-list 'org-latex-packages-alist '("cache=false" "minted"))
   (add-to-list 'org-latex-packages-alist '("" "color"))
-  (add-to-list 'org-latex-packages-alist '("" "gtkminted") 'append)
+;  (add-to-list 'org-latex-packages-alist '("" "gtkminted") 'append)
   (add-to-list 'org-latex-packages-alist '("" "csquotes"))
   (add-to-list 'org-latex-minted-langs '(groovy "groovy"))
   (add-to-list 'org-latex-minted-langs '(R "r"))
@@ -912,7 +958,7 @@ Chinese character 今 for today, and a ☺ for completed habits
 
     (setq org-latex-minted-options
 	    '(("linenos" "true")
-	      ("fontsize" "\\footnotesize")
+	      ("fontsize" "\\small")
 	      ("stepnumber" "1")
 	      ("numbersep" "10pt")
 	      ))
@@ -957,8 +1003,15 @@ Chinese character 今 for today, and a ☺ for completed habits
 
 #+begin_src emacs-lisp :tangle yes
 
-  (require 'oc-biblatex) 
+  (require 'oc-biblatex)
 
+  (use-package org-ref)
+
+  (setq org-ref-insert-cite-function
+      (lambda ()
+	(org-cite-insert nil)))
+
+  (define-key org-mode-map (kbd "C-c ]") 'org-ref-insert-link)
   ;  (use-package ivy-bibtex
   ;    :init
   ;    (Setq bibtex-completion-bibliography '((concat (getenv "BIBINPUTS") "/library.bib"))
@@ -1165,25 +1218,27 @@ This is yasnippet behavior, cribbed from emacswiki.
 ** RefTeX
 
 #+begin_src emacs-lisp :tangle yes
-(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+(use-package tex
+  :straight auctex)
 
-(setq TeX-view-program-selection
-      '((output-dvi "DVI Viewer")
-        (output-pdf "PDF Viewer")
-        (output-html "Google Chrome")))
-(setq TeX-view-program-list
-      '(("DVI Viewer" "evince %o")
-        ("PDF Viewer" "open %o")
-        ("Google Chrome" "google-chrome %o")))
+  (setq TeX-view-program-selection
+	'((output-dvi "DVI Viewer")
+	  (output-pdf "PDF Viewer")
+	  (output-html "Google Chrome")))
+  (setq TeX-view-program-list
+	'(("DVI Viewer" "evince %o")
+	  ("PDF Viewer" "open %o")
+	  ("Google Chrome" "google-chrome %o")))
 
-(setq reftex-plug-into-AUCTeX t)
-(defun org-mode-reftex-setup ()
-  (load-library "reftex")
-  (and (buffer-file-name)
-       (file-exists-p (buffer-file-name))
-       (reftex-parse-all))
-  (define-key org-mode-map (kbd "C-c )") 'reftex-citation))
-(add-hook 'org-mode-hook 'org-mode-reftex-setup)
+  (setq reftex-plug-into-AUCTeX t)
+  (defun org-mode-reftex-setup ()
+    (load-library "reftex")
+    (and (buffer-file-name)
+	 (file-exists-p (buffer-file-name))
+	 (reftex-parse-all))
+    (define-key org-mode-map (kbd "C-c )") 'reftex-citation))
+  (add-hook 'org-mode-hook 'org-mode-reftex-setup)
 #+end_src
 
 
@@ -1193,11 +1248,11 @@ This is yasnippet behavior, cribbed from emacswiki.
 
     (defvar markdown-cite-format)
     (setq markdown-cite-format
-          '(
-            (?\C-m . "[@%l]")
-            (?p . "[@%l]")
-            (?t . "@%l")
-            ))
+	  '(
+	    (?\C-m . "[@%l]")
+	    (?p . "[@%l]")
+	    (?t . "@%l")
+	    ))
 
     ;; (defun markdown-reftex-citation ()
     ;;   (interactive)
@@ -1210,8 +1265,8 @@ This is yasnippet behavior, cribbed from emacswiki.
       :ensure t
       :commands (markdown-mode gfm-mode)
       :mode (("README\\.md\\'" . gfm-mode)
-             ("\\.md\\'" . markdown-mode)
-             ("\\.markdown\\'" . markdown-mode))
+	     ("\\.md\\'" . markdown-mode)
+	     ("\\.markdown\\'" . markdown-mode))
       :init
       (setq markdown-command "pandoc"))
 
@@ -1258,17 +1313,17 @@ This is yasnippet behavior, cribbed from emacswiki.
     (save-excursion
       (goto-char (1- (point)))
       (not (or (markdown-code-block-at-point-p)
-               (markdown-inline-code-at-point-p)
-               (markdown-citation-at-point-p)
-               (markdown-in-comment-p)
-               (let ((faces (get-text-property (point) 'face)))
-                 (if (listp faces)
-                     (or (memq 'markdown-reference-face faces)
-                         (memq 'markdown-markup-face faces)
-                         (memq 'markdown-url-face faces))
-                   (memq faces '(markdown-reference-face
-                                 markdown-markup-face
-                                 markdown-url-face))))))))
+	       (markdown-inline-code-at-point-p)
+	       (markdown-citation-at-point-p)
+	       (markdown-in-comment-p)
+	       (let ((faces (get-text-property (point) 'face)))
+		 (if (listp faces)
+		     (or (memq 'markdown-reference-face faces)
+			 (memq 'markdown-markup-face faces)
+			 (memq 'markdown-url-face faces))
+		   (memq faces '(markdown-reference-face
+				 markdown-markup-face
+				 markdown-url-face))))))))
 
   (add-hook 'markdown-mode-hook (lambda () (setq flyspell-generic-check-word-predicate 'markdown-flyspell-check-word-p)))
   (put 'markdown-mode-hook 'flyspell-generic-check-word-predicate 'markdown-flyspell-check-word-p)
@@ -1287,11 +1342,16 @@ This is yasnippet behavior, cribbed from emacswiki.
 
     (use-package autoinsert
       :config
-      (setq auto-insert-directory (gtk/emacs-path "insert")))
+      (setq auto-insert-directory (gtk/emacs-path "insert"))
+      (add-to-list 'auto-insert-alist '(("letter\\.tex" . "a letter") .
+					"letter-template.tex"
+					))
 
-                                            ;(add-hook 'markdown-mode-hook 'pandoc-mode)
+      )
 
+					    ;(add-hook 'markdown-mode-hook 'pandoc-mode)
 
+;; rec-letter.tex
 
 #+END_SRC
 
@@ -1361,18 +1421,26 @@ A citation link
 #+begin_src emacs-lisp :tangle yes
   (let ((publishing-dir (expand-file-name "Public" dropbox-root)))
     (setq org-publish-project-alist
-          `(("public"
-             :base-directory ,user-emacs-directory
-             :base-extension "org"
-             :publishing-directory ,publishing-dir
-             :publishing-function org-publish-org-to-html
-             )
-            ("FOS"
-             :base-directory ,(expand-file-name "_support/DBS/FOS-web" dropbox-root)
-             :base-extension "org\\|css"
-             :publishing-directory "/ftp:dbsgtk@staff.science.nus.edu.sg:/home/"
-             :publishing-function org-publish-org-to-html
-             ))))
+	  `(("public"
+	     :base-directory ,user-emacs-directory
+	     :base-extension "org"
+	     :publishing-directory ,publishing-dir
+	     :publishing-function org-publish-org-to-html
+	     )
+	    ("Grift"
+	       :base-directory ,(expand-file-name "_support/GreatestGrift" dropbox-root)
+	       :base-extension "org"	       
+	       :publishing-directory ,(expand-file-name "_support/GreatestGrift/Publish" dropbox-root)
+	       :publishing-function org-publish-org-to-latex
+	       :body-only t
+	       :make-index t
+	     )
+	    ("FOS"
+	     :base-directory ,(expand-file-name "_support/DBS/FOS-web" dropbox-root)
+	     :base-extension "org\\|css"
+	     :publishing-directory "/ftp:dbsgtk@staff.science.nus.edu.sg:/home/"
+	     :publishing-function org-publish-org-to-html
+	     ))))
 
 #+end_src
 
@@ -1398,14 +1466,15 @@ A citation link
 * Projectile
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package projectile
-    :ensure    projectile
-    :config
-    (projectile-global-mode t)
-    :custom
-    (projectile-completion-system 'ivy)
-    :bind-keymap ("C-c p" . projectile-command-map)
-    :diminish   projectile-mode)
+    (use-package projectile
+      :ensure    projectile
+      :config
+      (projectile-global-mode t)
+      (setq projectile-create-missing-test-files t)
+      :custom
+      (projectile-completion-system 'ivy)
+      :bind-keymap ("C-c p" . projectile-command-map)
+      :diminish   projectile-mode)
 #+END_SRC
 
 * Ivy, not ido or helm
@@ -1517,41 +1586,60 @@ use paredit for lispy languages
 #+name: R and ess
 #+begin_src emacs-lisp :tangle yes
 
-  (use-package ess 
-    :mode ("\\.R\\'" . R-mode)
-    :config
-    (add-hook 'ess-r-mode-hook 'smartparens-mode)
-    (setq-default ess-language "R")
-    (setq ess-default-style 'RRR))
+   (use-package ess 
+     :mode ("\\.R\\'" . R-mode)
+     :config
+     (add-hook 'ess-r-mode-hook 'smartparens-mode)
+     (setq-default ess-language "R")
+     (setq ess-default-style 'RRR))
 
-  ;;   :init
-  ;;   (progn 
-
-  ;;
-  ;;     (require 'ess-r-mode)
-
-
-  ;;     (setq ess-smart-S-assign-key ";")
-  ;;     (ess-toggle-S-assign nil)
-  ;;     (ess-toggle-S-assign nil)
-  ;;     (ess-toggle-underscore nil)))
+  (with-eval-after-load 'projectile
+    (projectile-register-project-type
+     'r '("DESCRIPTION")
+     :project-file "DESCRIPTION"
+     :compile "R CMD INSTALL --with-keep.source ."
+     :test "R CMD check -o /tmp/ ."
+     :src-dir '("R/" "src/")
+     :test-dir "test/" 
+     :test-prefix "test-"))
 
 
 
+   ;;   :init
+   ;;   (progn 
 
-  ;; (use-package poly-markdown
-  ;;   :ensure t)
+   ;;
+   ;;     (require 'ess-r-mode)
 
 
-  ;; (use-package poly-R
-  ;;   :ensure t)
+   ;;     (setq ess-smart-S-assign-key ";")
+   ;;     (ess-toggle-S-assign nil)
+   ;;     (ess-toggle-S-assign nil)
+   ;;     (ess-toggle-underscore nil)))
 
-  ;; (use-package polymode 
-  ;;   :ensure t
-  ;;   :mode
-  ;;   ("\\.Snw" . poly-noweb+r-mode)
-  ;;   ("\\.Rnw" . poly-noweb+r-mode)
-  ;;   ("\\.Rmd" . poly-markdown+r-mode))
+
+
+
+   ;; (use-package poly-markdown
+   ;;   :ensure t)
+
+
+ (use-package poly-R
+     :ensure t)
+
+   ;; (use-package polymode 
+   ;;   :ensure t
+   ;;   :mode
+   ;;   ("\\.Snw" . poly-noweb+r-mode)
+   ;;   ("\\.Rnw" . poly-noweb+r-mode)
+   ;;   ("\\.Rmd" . poly-markdown+r-mode))
+
+
+  (use-package quarto-mode
+  :mode (("\\.Rmd" . poly-quarto-mode)
+  	 ("\\.qmd" . poly-quarto-mode)))
+  
+
 #+end_src
 
 ** Lua
@@ -1978,7 +2066,11 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 * Snakemake
 
 #+begin_src emacs-lisp :tangle yes
-    (use-package snakemake-mode)
+  (use-package snakemake-mode
+    :hook
+    (snakemake-mode . lsp)
+    :config
+    (add-to-list 'lsp-language-id-configuration '(snakemake-mode . "python") 'append))
 #+end_src
 
 
@@ -2011,4 +2103,29 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
     :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
   (straight-use-package '(nextflow-mode :type git :host github :repo "emiller88/nextflow-mode"))
+#+end_src
+
+* Github copilot
+
+#+begin_src emacs-lisp :tangle no
+
+  (use-package copilot
+    :straight (:host github :repo "zerolfx/copilot.el")
+    :ensure t)
+  (setq copilot-node-executable "/home/gtk/.nvm/versions/node/v20.8.0/bin/node")
+  (add-hook 'prog-mode-hook 'copilot-mode)
+  (defun my-tab ()
+    (interactive)
+    (or (copilot-accept-completion)
+	(company-indent-or-complete-common nil)))
+
+					  ; modify company-mode behaviors
+  (with-eval-after-load 'company
+    ; disable inline previews
+    (delq 'company-preview-if-just-one-frontend company-frontends)
+    ; enable tab completion
+    (define-key company-mode-map (kbd "<tab>") 'my-tab)
+    (define-key company-mode-map (kbd "TAB") 'my-tab)
+    (define-key company-active-map (kbd "<tab>") 'my-tab)
+    (define-key company-active-map (kbd "TAB") 'my-tab))
 #+end_src
