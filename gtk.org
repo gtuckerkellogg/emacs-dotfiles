@@ -423,9 +423,10 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
        org-habit
        org-ref
        ol
-       org-contrib
+       ox
        org-indent
        ))
+  (org-reload)
 
   (org-export-define-derived-backend 'beamer 'latex
   :menu-entry
