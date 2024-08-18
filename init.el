@@ -11,7 +11,7 @@
 			  user-emacs-directory)
       straight-repository-branch "develop")
 
-;;(setq package-enable-at-startup nil)
+(setq package-enable-at-startup nil)
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -32,8 +32,8 @@
 
 (use-package exec-path-from-shell)
 
-(when (memq system-type '(gnu/linux darwin gnu))
-  (exec-path-from-shell-initialize))
+;(when (memq system-type '(gnu/linux darwin gnu))
+;  (exec-path-from-shell-initialize))
 
 (use-package org)
 (org-reload)

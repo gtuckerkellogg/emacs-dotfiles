@@ -1,11 +1,9 @@
 #+TITLE:     Greg Tucker-Kellogg's Emacs configuration
 #+AUTHOR:    Greg Tucker-Kellogg
-
-
-* Front matter :ignore:
 #+DESCRIPTION:
 #+PROPERTY: header-args :tangle no :results silent
 #+KEYWORDS:
+#+STARTUP: noindent
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
@@ -64,7 +62,7 @@ These are almost trivial functions, but I find them useful What is going on here
 
   (defun turn-off-visual-line-mode ()
     (interactive)
-    (visual-line-mode -1))
+    (visual-line-mode  1))
 
   (defun switch-to-minibuffer-window ()
     "switch to minibuffer window (if active)"
@@ -109,7 +107,7 @@ I have some keys that I'd like to be always bound
   (menu-bar-mode +1)
   (scroll-bar-mode -1)
   (setq visible-bell t)
-  (setq-default fill-column 100)
+  (setq-default fill-column 110)
   (setq custom-file (gtk/emacs-path "custom.el"))
   (load custom-file)
   (global-auto-revert-mode)
@@ -212,33 +210,6 @@ This is mostly from starter-kit-misc.
 
 #+end_src
 
-* Themes
-
-This is my modus stuff
-
-#+begin_src emacs-lisp :tangle yes
-
-  (use-package modus-themes
-    :config
-    (setq modus-themes-mode-line '(accented borderless padded)
-	  modus-themes-paren-match '(bold rainbow)
-	  modus-themes-deuteranopia t
-	  modus-themes-slanted-constructs t
-	  modus-themes-scale-headings nil
-	  modus-themes-intense-mouseovers t
-	  modus-themes-bold-constructs t
-	  modus-themes-org-blocks 'grayscale-background
-	  modus-themes-headings '((1 . (rainbow background overline bold 1.3))
-				  (2 . (rainbow background 1.2))
-				  (3 . (rainbow bold 1.1))
-				  (t . (semilight 1.0)))
-	  )
-    )
-
-  (modus-themes-load-operandi)
-#+end_src
-
-
 * Mode line behaviour
 
 
@@ -257,10 +228,7 @@ This is my modus stuff
     (setq-default mode-line-format
 
                   `("%e"
-                    ;;     ,(when dw/exwm-enabled
-                    ;;         '(:eval (format "[%d] " exwm-workspace-current-index)))
                     mode-line-front-space
-                    ;;       evil-mode-line-tag
                     mode-line-mule-info
                     mode-line-client
                     mode-line-modified
@@ -366,6 +334,7 @@ This is my modus stuff
 
 
 
+
 *** Getting icons.
 
 In order to use this, you must run ~(all-the-icons-install-fonts)~ after installing the package ~all-the-icons~. 
@@ -381,7 +350,6 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
   (use-package doom-modeline
     :ensure t
     :init (doom-modeline-mode 1)
-    :hook (after-init . doom-modeline-init)
     :custom-face
     (mode-line ((t (:height 1.0))))
     (mode-line-inactive ((t (:height 0.85))))
@@ -408,31 +376,51 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 * Org mode
 
-** Org modules 
+** Org modules and backends
 
 #+begin_src emacs-lisp :tangle yes
-  (add-to-list 'org-modules 'org-sticky-header)
-  (add-to-list 'org-modules 'ox-latex)
-  (add-to-list 'org-modules 'ox-odt)
-  (add-to-list 'org-modules 'ox-extra)
-  (add-to-list 'org-modules 'org-tempo)
-  (add-to-list 'org-modules 'org-agenda)
-  (add-to-list 'org-modules 'org-habit)
-  (add-to-list 'org-modules 'org-ref)
-  (add-to-list 'org-export-backends 'beamer :append)
-  (add-to-list 'org-export-backends 'odt :append)
-  (org-reload)
-  ;; (use-package org-sticky-header
-  ;;   :ensure t
-  ;;   :hook
-  ;;   (org-mode . org-sticky-header-mode))
+    (mapcar
+     (lambda (x) (add-to-list 'org-modules x))
+     '(org-indent
+       org-contrib
+       org-sticky-header
+       ox-latex
+       ox-odt
+       org-tempo
+       org-agenda
+       org-habit
+       ))
+
+  (use-package org-contrib)
+  (use-package ox-extra)
+  (use-package org-sticky-header)
 
 
-  (use-package org-auto-tangle
-    :defer t
-    :hook (org-mode . org-auto-tangle-mode)
-    :config
-    (setq org-auto-tangle-default t))
+    (mapcar
+     (lambda (x) (add-to-list 'org-export-backends x :append))
+     '(beamer
+       odt))
+
+    (defun org-beamer-bold (bold contents _info)
+    "Transcode BLOCK object into Beamer code.
+  CONTENTS is the text being bold.  INFO is a plist used as
+  a communication channel."
+    (format "\\textbf%s{%s}"
+  	  (or (org-beamer--element-has-overlay-p bold) "")
+  	  contents))
+
+
+    (org-reload)
+    ;; (use-package org-sticky-header
+    ;;   :ensure t
+    ;;   :hook
+    ;;   (org-mode . org-sticky-header-mode))
+
+    (use-package org-auto-tangle
+      :defer t
+      :hook (org-mode . org-auto-tangle-mode)
+      :config
+      (setq org-auto-tangle-default t))
 
 #+end_src
 
@@ -485,6 +473,8 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
     :bind
     (("C-c C-x C-2" . org-cite-insert)
      ("C-c C-x C-3" . default-indent-new-line)))
+
+
  #+end_src
 
 *** Getting smart quotes
@@ -777,50 +767,56 @@ all events are correctly placed in the agenda.
 
 This is some stuff
 
-** Org visuals
+** Org visuals 
 :PROPERTIES:
 :test:     some drawer value
 :END:
 
+
+This is a thing
+- this is another thing
+- foo
+- bar
+
+  
 #+begin_src emacs-lisp :tangle yes
 
-	(set-face-attribute 'fixed-pitch nil
-			    :font "Fira Code Retina"
-			    :height 1.0
-			    )
+
+  (set-face-attribute 'fixed-pitch nil
+		      :font "JetBrains Mono"
+		      :height 1.0
+		      )
 
 
-	(set-face-attribute 'variable-pitch nil
-			    ;; :font "Cantarell"
-			    :font "Cantarell"
-			    :weight 'light
-			    :height 1.1)
+  (set-face-attribute 'variable-pitch nil
+		      :font "Cantarell"
+		      ;;:font "Iosevka Aile"
+		      :weight 'light
+		      :height 1.0)
 
-  (set-face-attribute 'org-default nil :inherit 'variable-pitch)
+  (set-face-attribute 'default nil :font "JetBrains Mono" :weight 'light)
 
-	(dolist (face '((org-level-1 . 1.2)
-			(org-level-2 . 1.1)
-			(org-level-3 . 1.05)
-			(org-level-4 . 1.0)
-			(org-level-5 . 1.1)
-			(org-level-6 . 1.1)
-			(org-level-7 . 1.1)))
-	  (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
-  (set-face-attribute 'org-level-1 nil :weight 'bold)
+  (dolist (face '((org-level-1 . 1.2)
+		  (org-level-2 . 1.1)
+		  (org-level-3 . 1.05)
+		  (org-level-4 . 1.0)
+		  (org-level-5 . 1.1)
+		  (org-level-6 . 1.1)
+		  (org-level-7 . 1.1)))
+    (set-face-attribute (car face) nil :inherit 'variable-pitch :weight 'regular :height (cdr face)))
+  (set-face-attribute 'org-level-1 nil :weight 'normal)
   (set-face-attribute 'org-level-2 nil :weight 'bold)
-  (set-face-attribute 'modus-themes-fixed-pitch nil :inherit 'fixed-pitch :height 0.9)
-  (set-face-attribute 'modus-themes-variable-pitch nil :inherit 'variable-pitch :height 1.0)
-  (set-face-attribute 'org-block-begin-line nil :inherit '(shadow) :height 1.0 :weight 'bold)
+  (set-face-attribute 'org-block-begin-line nil :inherit '(shadow fixed-pitch) :height 1.0 :weight 'bold)
 
-  ;     (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-       (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
-       (set-face-attribute 'org-drawer nil  :inherit '(font-lock-comment-face fixed-pitch) :height 0.8)
-      ;;   (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-      ;;   (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-      ;;   (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-      ;;   (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-      ;;   (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-      ;;   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-drawer nil  :inherit '(font-lock-comment-face fixed-pitch) :height 0.8)
+  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
 
 #+end_src
 
@@ -832,14 +828,14 @@ Chinese character 今 for today, and a ☺ for completed habits
          org-habit-graph-column 80
          org-habit-show-habits-only-for-today t
          org-habit-today-glyph 20170  
-         org-hide-leading-stars nil
+         org-hide-leading-stars t
          org-pretty-entities nil)
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
     (setq org-attach-method 'ln)
   (require 'org-faces)
-      (setq org-use-property-inheritance '("PRIORITY" "STYLE" "CATEGORY"))
+  (setq org-use-property-inheritance '("PRIORITY" "STYLE" "CATEGORY"))
     (setq org-agenda-start-day "0d")
     (setq org-agenda-span 'week)
     (setq org-agenda-start-on-weekday nil)
@@ -850,19 +846,19 @@ Chinese character 今 for today, and a ☺ for completed habits
     (defun org-column-view-uses-fixed-width-face ()
       ;; copy from org-faces.el
       (when (fboundp 'set-face-attribute)
-        ;; Make sure that a fixed-width face is used when we have a column
-        ;; table.
-        (set-face-attribute 'org-column nil
-                            :height (face-attribute 'default :height)
-                            :family (face-attribute 'default :family))
-        (set-face-attribute 'org-column-title nil
-                            :height (face-attribute 'default :height)
-                            :family (face-attribute 'default :family)
-                            )))
+	;; Make sure that a fixed-width face is used when we have a column
+	;; table.
+	(set-face-attribute 'org-column nil
+			    :height (face-attribute 'default :height)
+			    :family (face-attribute 'default :family))
+	(set-face-attribute 'org-column-title nil
+			    :height (face-attribute 'default :height)
+			    :family (face-attribute 'default :family)
+			    )))
 
 
-      ;; (when (and (fboundp 'daemonp) (daemonp))
-      ;;   (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face))
+  (when (and (fboundp 'daemonp) (daemonp))
+      (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face))
       ;; (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face)
 
 #+end_src
@@ -870,6 +866,21 @@ Chinese character 今 for today, and a ☺ for completed habits
 
 
 ** General export
+
+*** Latex
+
+#+begin_src emacs-lisp :tangle yes
+  (setq org-latex-pdf-process
+	'("latexmk -f -pdf -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
+
+ 	
+(use-package auctex
+  :defer t
+  :ensure t)
+
+
+
+#+end_src
 
 *** org-memoir
 
@@ -916,7 +927,13 @@ Chinese character 今 for today, and a ☺ for completed habits
 
 #+begin_src emacs-lisp :tangle yes
 
-  (require 'oc-biblatex) 
+  (require 'oc-biblatex)
+
+  (use-package org-ref)
+  (setq org-ref-insert-cite-function
+      (lambda ()
+	(org-cite-insert nil)))
+  (define-key org-mode-map (kbd "C-c ]") 'org-ref-insert-link)
 
   ;  (use-package ivy-bibtex
   ;    :init
@@ -1152,11 +1169,11 @@ This is yasnippet behavior, cribbed from emacswiki.
 
     (defvar markdown-cite-format)
     (setq markdown-cite-format
-          '(
-            (?\C-m . "[@%l]")
-            (?p . "[@%l]")
-            (?t . "@%l")
-            ))
+	  '(
+	    (?\C-m . "[@%l]")
+	    (?p . "[@%l]")
+	    (?t . "@%l")
+	    ))
 
     ;; (defun markdown-reftex-citation ()
     ;;   (interactive)
@@ -1169,8 +1186,8 @@ This is yasnippet behavior, cribbed from emacswiki.
       :ensure t
       :commands (markdown-mode gfm-mode)
       :mode (("README\\.md\\'" . gfm-mode)
-             ("\\.md\\'" . markdown-mode)
-             ("\\.markdown\\'" . markdown-mode))
+	     ("\\.md\\'" . markdown-mode)
+	     ("\\.markdown\\'" . markdown-mode))
       :init
       (setq markdown-command "pandoc"))
 
@@ -1179,31 +1196,11 @@ This is yasnippet behavior, cribbed from emacswiki.
   (add-hook 'markdown-mode-hook 'turn-on-visual-line-mode)
   (add-hook 'markdown-mode-hook 'turn-off-auto-fill)
 
-  (add-hook 'markdown-mode-hook 'orgtbl-mode)
-    (defun my-buffer-face-mode-variable ()
-      "Set font to a variable width (proportional) fonts in current buffer"
-      (interactive)
-      ;;      (setq buffer-face-mode-face '(:family "Bitstream Charter"))
-      (setq buffer-face-mode-face '(:family "Open Sans"))
-      (buffer-face-mode))
-
-    (defun my-buffer-face-mode-fixed ()
-      "Sets a fixed width (monospace) font in current buffer"
-      (interactive)
-      (setq buffer-face-mode-face '(:family "Fira Code Retina"))
-      (buffer-face-mode))
-
-    ;; use a variable font for markdown mode
-
-    (add-hook 'markdown-mode-hook 'my-buffer-face-mode-variable)
-
-    ;; Control + scroll to change font type
-    (global-set-key [s-mouse-4] 'my-buffer-face-mode-fixed)
-    (global-set-key [s-mouse-5] 'my-buffer-face-mode-variable)
+;;  (add-hook 'markdown-mode-hook 'orgtbl-mode)
 
 
     ;; Shift + scroll to change font size
-    (global-set-key [C-mouse-4] 'text-scale-increase)
+  (global-set-key [C-mouse-4] 'text-scale-increase)
   (global-set-key [C-mouse-5] 'text-scale-decrease)
 
   (defun markdown-citation-at-point-p ()
@@ -1217,17 +1214,17 @@ This is yasnippet behavior, cribbed from emacswiki.
     (save-excursion
       (goto-char (1- (point)))
       (not (or (markdown-code-block-at-point-p)
-               (markdown-inline-code-at-point-p)
-               (markdown-citation-at-point-p)
-               (markdown-in-comment-p)
-               (let ((faces (get-text-property (point) 'face)))
-                 (if (listp faces)
-                     (or (memq 'markdown-reference-face faces)
-                         (memq 'markdown-markup-face faces)
-                         (memq 'markdown-url-face faces))
-                   (memq faces '(markdown-reference-face
-                                 markdown-markup-face
-                                 markdown-url-face))))))))
+	       (markdown-inline-code-at-point-p)
+	       (markdown-citation-at-point-p)
+	       (markdown-in-comment-p)
+	       (let ((faces (get-text-property (point) 'face)))
+		 (if (listp faces)
+		     (or (memq 'markdown-reference-face faces)
+			 (memq 'markdown-markup-face faces)
+			 (memq 'markdown-url-face faces))
+		   (memq faces '(markdown-reference-face
+				 markdown-markup-face
+				 markdown-url-face))))))))
 
   (add-hook 'markdown-mode-hook (lambda () (setq flyspell-generic-check-word-predicate 'markdown-flyspell-check-word-p)))
   (put 'markdown-mode-hook 'flyspell-generic-check-word-predicate 'markdown-flyspell-check-word-p)
@@ -1248,7 +1245,7 @@ This is yasnippet behavior, cribbed from emacswiki.
       :config
       (setq auto-insert-directory (gtk/emacs-path "insert")))
 
-                                            ;(add-hook 'markdown-mode-hook 'pandoc-mode)
+					    ;(add-hook 'markdown-mode-hook 'pandoc-mode)
 
 
 
@@ -1357,14 +1354,25 @@ A citation link
 * Projectile
 
 #+BEGIN_SRC emacs-lisp :tangle yes
+
   (use-package projectile
     :ensure    projectile
     :config
     (projectile-global-mode t)
+    (projectile-create-missing-test-files 't)
+    :bind-keymap ("C-c p ". projectile-command-map)
+    :diminish   projectile-mode
     :custom
     (projectile-completion-system 'ivy)
-    :bind-keymap ("C-c p" . projectile-command-map)
-    :diminish   projectile-mode)
+    :config
+    (projectile-register-project-type 'r
+  					'("DESCRIPTION")
+  					:project-file "DESCRIPTION"
+  					:compile: "R CMD build"
+  					:src-dir "R/"
+  					:test-dir "tests/"
+  					:test-prefix "test-")
+    )
 #+END_SRC
 
 * Ivy, not ido or helm
@@ -1402,6 +1410,15 @@ A citation link
 #+END_SRC
 
 
+* Company mode
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package company
+    :config
+    (setq company-idle-delay 0 )
+    (add-hook 'after-init-hook 'global-company-mode))
+#+END_SRC
+
 * Programming languages 
 
 ** Common
@@ -1426,12 +1443,12 @@ use paredit for lispy languages
 
 
 #+begin_src emacs-lisp :tangle yes
-    (use-package smartparens
-      :init
-      (require 'smartparens-config)
-      (add-hook 'org-mode-hook 'smartparens-mode)
-      (add-hook 'text-mode-hook 'smartparens-mode)
-      (add-hook 'markdown-mode-hook 'smartparens-mode))
+  (use-package smartparens
+    :init
+    (require 'smartparens-config)
+    (add-hook 'org-mode-hook 'smartparens-mode)
+    (add-hook 'text-mode-hook 'smartparens-mode)
+    (add-hook 'markdown-mode-hook 'smartparens-mode))
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
@@ -1476,41 +1493,47 @@ use paredit for lispy languages
 #+name: R and ess
 #+begin_src emacs-lisp :tangle yes
 
-  (use-package ess 
-    :mode ("\\.R\\'" . R-mode)
-    :config
-    (add-hook 'ess-r-mode-hook 'smartparens-mode)
-    (setq-default ess-language "R")
-    (setq ess-default-style 'RRR))
+      (use-package ess 
+  	:mode ("\\.R\\'" . R-mode)
+  	:config
+  	(add-hook 'ess-r-mode-hook 'smartparens-mode)
+  	(setq-default ess-language "R")
+  	(setq ess-default-style 'RRR))
 
-  ;;   :init
-  ;;   (progn 
+      ;;   :init
+      ;;   (progn 
 
-  ;;
-  ;;     (require 'ess-r-mode)
-
-
-  ;;     (setq ess-smart-S-assign-key ";")
-  ;;     (ess-toggle-S-assign nil)
-  ;;     (ess-toggle-S-assign nil)
-  ;;     (ess-toggle-underscore nil)))
+      ;;
+      ;;     (require 'ess-r-mode)
 
 
+      ;;     (setq ess-smart-S-assign-key ";")
+      ;;     (ess-toggle-S-assign nil)
+      ;;     (ess-toggle-S-assign nil)
+      ;;     (ess-toggle-underscore nil))
+
+      ;; (projectile-register-project-type 'r '("package.json")
+      ;; 				    :project-file "package.json"
+      ;; 				  :compile "npm install"
+
+      ;; 				  :test "npm test"
+      ;; 				  :run "npm start"
+      ;; 				  :test-suffix ".spec")
 
 
-  ;; (use-package poly-markdown
-  ;;   :ensure t)
+      ;; (use-package poly-markdown
+      ;;   :ensure t)
 
 
-  ;; (use-package poly-R
-  ;;   :ensure t)
+      ;; (use-package poly-R
+      ;;   :ensure t)
 
-  ;; (use-package polymode 
-  ;;   :ensure t
-  ;;   :mode
-  ;;   ("\\.Snw" . poly-noweb+r-mode)
-  ;;   ("\\.Rnw" . poly-noweb+r-mode)
-  ;;   ("\\.Rmd" . poly-markdown+r-mode))
+      ;; (use-package polymode 
+      ;;   :ensure t
+      ;;   :mode
+      ;;   ("\\.Snw" . poly-noweb+r-mode)
+      ;;   ("\\.Rnw" . poly-noweb+r-mode)
+      ;;   ("\\.Rmd" . poly-markdown+r-mode))
 #+end_src
 
 ** Lua
@@ -1605,16 +1628,16 @@ org-mode.
     (defun gtk/elpy-send-line-or-region ()
       (interactive)
       (if (region-active-p)
-          (call-interactively 'elpy-shell-send-region-or-buffer)
-        (let ((region (elpy-shell--region-without-indentation
-                       (line-beginning-position) (line-end-position))))
-          (when (string-match "\t" region)
-            (warn (format-message
-                   "%s (%d): line or region contained tabs, this might cause weird errors"
-                   (buffer-name)
-                   (line-number-at-pos))))
-          (python-shell-send-string region)
-          (next-line))))
+	  (call-interactively 'elpy-shell-send-region-or-buffer)
+	(let ((region (elpy-shell--region-without-indentation
+		       (line-beginning-position) (line-end-position))))
+	  (when (string-match "\t" region)
+	    (warn (format-message
+		   "%s (%d): line or region contained tabs, this might cause weird errors"
+		   (buffer-name)
+		   (line-number-at-pos))))
+	  (python-shell-send-string region)
+	  (next-line))))
 
   (when (load "flycheck" t t)
     (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
@@ -1643,15 +1666,6 @@ org-mode.
   ;(require 'js2-mode)
 #+end_src
 
-
-* Company mode
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package company
-    :config
-    (setq company-idle-delay 0 )
-    (add-hook 'after-init-hook 'global-company-mode))
-#+END_SRC
 
 * Git
 CLOSED: [2022-05-25 Wed 13:00]
@@ -1701,6 +1715,94 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 
 
+* Org roam
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package org-roam
+    :ensure t
+    :custom
+    (org-roam-directory (expand-file-name  "roam/" org-directory))
+    (org-roam-complete-everywhere t)
+    (org-roam-capture-templates
+     '(("d" "default" plain "%?"
+        :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)
+       ("l" "programming languages" plain
+        "* Characteristics:\n\n- Family: %?\n- Inspired by: \n\n* Reference\n\n"
+        :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)))
+    :bind
+    (("C-c n l" . org-roam-buffer-toggle)
+     ("C-c n f" . org-roam-node-find)
+     ("C-c n i" . org-roam-node-insert)
+     ("C-c n c" . completion-at-point)
+     )
+    :config (org-roam-setup))
+
+
+#+end_src
+
+* Themes
+
+This is my modus stuff How well does this work? Let’s see what we can get if we make this somewhat wider
+
+#+begin_src emacs-lisp :tangle yes
+
+    (use-package modus-themes
+      :config
+      (setq modus-themes-mode-line '(accented borderless padded)
+	    modus-themes-paren-match '(bold rainbow)
+	    modus-themes-mixed-fonts t
+	    modus-themes-deuteranopia t
+	    modus-themes-slanted-constructs t
+	    modus-themes-intense-mouseovers t
+	    modus-themes-bold-constructs t
+	    modus-themes-org-blocks 'grayscale-background
+	    modus-themes-headings '((1 . (rainbow background overline bold 1.3))
+				    (2 . (rainbow background 1.2))
+				    (3 . (rainbow bold 1.1))
+				    (t . (semilight 1.0)))
+	    )
+      )
+
+  ;(set-face-attribute 'modus-themes-fixed-pitch nil :inherit 'fixed-pitch :height 0.9)
+;  (set-face-attribute 'modus-themes-variable-pitch nil :inherit 'variable-pitch :height 1.0)
+
+#+end_src
+
+
+* Draft
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package org-modern
+    :ensure t
+    :init
+    (org-indent-mode -1)
+    (modify-all-frames-parameters
+     '((right-divider-width . 20)
+       (internal-border-width . 20)))
+    (dolist (face '(window-divider
+                    window-divider-first-pixel
+                    window-divider-last-pixel))
+      (face-spec-reset-face face)
+      (set-face-foreground face (face-attribute 'default :background)))
+    (set-face-background 'fringe (face-attribute 'default :background))
+    :custom
+    (org-auto-align-tags nil)
+    (org-tags-column 0)
+    (org-catch-invisible-edits 'show-and-error)
+    (org-special-ctrl-a/e t)
+    (org-insert-heading-respect-content t)
+    (org-hide-emphasis-markers t)
+    (org-agenda-block-separator ?─)
+    (org-pretty-entities t)
+    :config
+    (global-org-modern-mode))
+
+#+end_src
+
+How does /this/ look?
+
 * Draft
 
 
@@ -1729,7 +1831,7 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 #+END_SRC
 
 
-
+** Org present
 #+begin_src emacs-lisp :tangle yes
 
   (use-package hide-mode-line)
@@ -1740,25 +1842,38 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
     (org-show-children))
 
   (defun gtk/org-present-hook ()
-    (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
-                                       (header-line (:height 4.5) variable-pitch)
-                                       (org-document-title (:height 1.75) org-document-title)
-                                       (org-code (:height 1.55) org-code)
-                                       (org-verbatim (:height 1.55) org-verbatim)
-                                       (org-block (:height 1.25) org-block)
-                                       (org-block-begin-line (:height 0.7) org-block)))
-    (setq header-line-format " ")
-    (org-display-inline-images)
-    (org-appear-mode -1)
     (gtk/org-present-prepare-slide)
     )
 
-  (defun gtk/org-present-quit-hook ()
-    (setq-local face-remapping-alist '((default variable-pitch default)))
+  (defun gtk/org-present-start ()
+    (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
+				       (header-line (:height 6.5) variable-pitch)
+				       (org-document-title (:height 3.75) org-document-title)
+				       (org-level-1 (:height 2.0) org-level-1)
+				       (org-code (:height 1.0  org-code))
+				       (org-verbatim (:height 1.0) org-verbatim)
+				       (org-block (:height 1.25) org-block)
+				       (org-block-begin-line (:height 0.7) org-block)))
+    (visual-fill-column-mode 1)
+    (setq header-line-format " ")
+    (org-display-inline-images)
+    (org-appear-mode -1)
+    (git-gutter-mode -1)
+    (visual-line-mode 1))
+
+  (defun gtk/org-present-end ()
+    (visual-fill-column-mode -1)
+    (visual-line-mode -1)
     (setq header-line-format nil)
-    (org-present-small)
     (org-remove-inline-images)
-    (org-appear-mode 1))
+    (org-appear-mode 1)
+    (setq-local face-remapping-alist '((default variable-pitch default)))
+    )
+
+
+  (defun gtk/org-present-quit-hook ()
+    (org-present-small)
+    )
 
 
   (defun gtk/org-present-prev ()
@@ -1775,10 +1890,11 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
   (use-package org-present
     :bind (:map org-present-mode-keymap
-                ("C-c C-j" . gtk/org-present-next)
-                ("C-c C-k" . gtk/org-present-prev))
+		("C-c C-j" . gtk/org-present-next)
+		("C-c C-k" . gtk/org-present-prev))
     :config
-    (add-hook 'org-present-mode-quit-hook #'gtk/org-present-quit-hook))
+    (add-hook 'org-present-mode-hook #'gtk/org-present-start)
+    (add-hook 'org-present-mode-quit-hook #'gtk/org-present-end))
 
 
 
@@ -1786,13 +1902,10 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 #+end_src
 
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package org-ref
-      :after org)
-  (define-key org-mode-map (kbd "C-c ]") 'org-ref-insert-link)
-#+END_SRC
+** Other stuff
 
-
+/some other stuff/ this 
+/some stuff/
 
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -1851,67 +1964,44 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 #+end_src
 
 
-* Org roam
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package org-roam
-    :ensure t
-    :custom
-    (org-roam-directory (expand-file-name  "roam/" org-directory))
-    (org-roam-complete-everywhere t)
-    (org-roam-capture-templates
-     '(("d" "default" plain "%?"
-        :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-        :unnarrowed t)
-       ("l" "programming languages" plain
-        "* Characteristics:\n\n- Family: %?\n- Inspired by: \n\n* Reference\n\n"
-        :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-        :unnarrowed t)))
-    :bind
-    (("C-c n l" . org-roam-buffer-toggle)
-     ("C-c n f" . org-roam-node-find)
-     ("C-c n i" . org-roam-node-insert)
-     ("C-c n c" . completion-at-point)
-     )
-    :config (org-roam-setup))
-
-
-#+end_src
-
-* Draft
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package org-modern
-    :ensure t
-    :init
-    (org-indent-mode -1)
-    (modify-all-frames-parameters
-     '((right-divider-width . 20)
-       (internal-border-width . 20)))
-    (dolist (face '(window-divider
-                    window-divider-first-pixel
-                    window-divider-last-pixel))
-      (face-spec-reset-face face)
-      (set-face-foreground face (face-attribute 'default :background)))
-    (set-face-background 'fringe (face-attribute 'default :background))
-    :custom
-    (org-auto-align-tags nil)
-    (org-tags-column 0)
-    (org-catch-invisible-edits 'show-and-error)
-    (org-special-ctrl-a/e t)
-    (org-insert-heading-respect-content t)
-    (org-hide-emphasis-markers t)
-    (org-agenda-block-separator ?─)
-    (org-pretty-entities t)
-    :config
-    (global-org-modern-mode)
-    (modus-themes-load-operandi)
-    )
-#+end_src
-
-
 * Go!
 
 #+begin_src emacs-lisp :tangle yes
   (modus-themes-load-operandi)
 #+end_src
+
+
+* Quarto
+
+#+begin_src emacs-lisp :tangle yes :eval yes
+  (use-package request)
+  (use-package polymode)
+  (use-package poly-markdown)
+  (use-package markdown-mode)
+
+    (use-package quarto-mode
+    :mode
+    (("\\.Rmd" . poly-quarto-mode)))
+
+#+end_src
+
+* Docker
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package dockerfile-mode)
+#+end_src
+
+
+* Conda
+
+#+begin_src emacs-lisp :tangle yes
+
+  (setenv "WORKON_HOME" "~/miniforge3/envs")
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package sparql-mode
+    :mode
+    (("\\.sparql" . sparql-mode)))
+#+end_src
+
