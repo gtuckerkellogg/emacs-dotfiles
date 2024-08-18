@@ -33,6 +33,10 @@
 (use-package exec-path-from-shell)
 
 ;(when (memq system-type '(gnu/linux darwin gnu))
+<<<<<<< HEAD
+=======
+;  (setq exec-path-from-shell-arguments nil)
+>>>>>>> b10fd034ccfb831cd4808d540f41eaab723ec820
 ;  (exec-path-from-shell-initialize))
 
 (use-package org)

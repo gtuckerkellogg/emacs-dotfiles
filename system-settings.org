@@ -1,8 +1,9 @@
 #+PROPERTY: header-args :tangle yes :eval yes :results silent
 
 
-#+begin_src emacs-lisp 
-  
+#+begin_src emacs-lisp
+  (setenv "WORKON_HOME" "~/miniforge3/envs")
+
 #+end_src
 
 
