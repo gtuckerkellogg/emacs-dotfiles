@@ -36,7 +36,7 @@
 ;  (setq exec-path-from-shell-arguments nil)
 ;  (exec-path-from-shell-initialize))
 
-(use-package org)
+;;(use-package org)
 (org-reload)
 
 
