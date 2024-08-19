@@ -7,6 +7,7 @@
 #+DESCRIPTION:
 #+PROPERTY: header-args :tangle no :results silent
 #+KEYWORDS:
+#+STARTUP: noindent
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
@@ -110,7 +111,7 @@ I have some keys that I'd like to be always bound
   (menu-bar-mode +1)
   (scroll-bar-mode -1)
   (setq visible-bell t)
-  (setq-default fill-column 100)
+  (setq-default fill-column 110)
   (setq custom-file (gtk/emacs-path "custom.el"))
   (load custom-file)
   (global-auto-revert-mode)
@@ -258,10 +259,7 @@ This is my modus stuff
     (setq-default mode-line-format
 
                   `("%e"
-                    ;;     ,(when dw/exwm-enabled
-                    ;;         '(:eval (format "[%d] " exwm-workspace-current-index)))
                     mode-line-front-space
-                    ;;       evil-mode-line-tag
                     mode-line-mule-info
                     mode-line-client
                     mode-line-modified
@@ -357,7 +355,7 @@ This is my modus stuff
 
 
 
-  ;;(fresh-load-theme 'doom-moonlight t)
+  ;;(fresh-load-theme 'doom-moonlight)
   ;;(fresh-load-theme 'doom-tomorrow-night t)
   ;;(fresh-load-theme 'doom-wilmersdorf t)
   ;;(fresh-load-theme 'modus-operandi t)
@@ -374,7 +372,6 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 #+begin_src emacs-lisp :tangle yes
 
-  
   (use-package all-the-icons)
 
   (use-package minions
@@ -411,25 +408,25 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 
 * Org mode
 
-** Org modules 
+** Org modules and backends
 
 #+begin_src emacs-lisp :tangle yes
-  (add-to-list 'org-modules 'org-sticky-header)
-  (add-to-list 'org-modules 'ox-latex)
-  (add-to-list 'org-modules 'ox-odt)
-  (add-to-list 'org-modules 'ox-extra)
-  (add-to-list 'org-modules 'org-tempo)
-  (add-to-list 'org-modules 'org-agenda)
-  (add-to-list 'org-modules 'org-habit)
-  (add-to-list 'org-modules 'org-ref)
-  (add-to-list 'org-modules 'ol) 
-  (add-to-list 'org-export-backends 'beamer :append)
-  (add-to-list 'org-export-backends 'odt :append)
+    (mapcar
+     (lambda (x) (add-to-list 'org-modules x))
+     '(org-sticky-header
+       ox-latex
+       ox-odt
+       ox-extra
+       org-tempo
+       org-agenda
+       org-habit
+       org-habit
+       org-ref
+       ol
+       ox
+       org-indent
+       ))
   (org-reload)
-  ;; (use-package org-sticky-header
-  ;;   :ensure t
-  ;;   :hook
-  ;;   (org-mode . org-sticky-header-mode))
 
   (org-export-define-derived-backend 'beamer 'latex
   :menu-entry
@@ -467,15 +464,37 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
   		     (radio-target . org-beamer-radio-target)
   		     (template . org-beamer-template)))
 
-  
+  (use-package org-contrib)
+  (use-package ox-extra)
   (use-package org-sticky-header)
   (use-package org-ref)
 
-  (use-package org-auto-tangle
-    :defer t
-    :hook (org-mode . org-auto-tangle-mode)
-    :config
-    (setq org-auto-tangle-default t))
+
+    (mapcar
+     (lambda (x) (add-to-list 'org-export-backends x :append))
+     '(beamer
+       odt))
+
+    (defun org-beamer-bold (bold contents _info)
+    "Transcode BLOCK object into Beamer code.
+  CONTENTS is the text being bold.  INFO is a plist used as
+  a communication channel."
+    (format "\\textbf%s{%s}"
+  	  (or (org-beamer--element-has-overlay-p bold) "")
+  	  contents))
+
+
+    (org-reload)
+    ;; (use-package org-sticky-header
+    ;;   :ensure t
+    ;;   :hook
+    ;;   (org-mode . org-sticky-header-mode))
+
+    (use-package org-auto-tangle
+      :defer t
+      :hook (org-mode . org-auto-tangle-mode)
+      :config
+      (setq org-auto-tangle-default t))
 
 #+end_src
 
@@ -836,6 +855,10 @@ This is some stuff
 			    :height 1.0
 			    )
 
+  (set-face-attribute 'fixed-pitch nil
+		      :font "JetBrains Mono"
+		      :height 1.0
+		      )
 
 	(set-face-attribute 'variable-pitch nil
 			    ;; :font "Cantarell"
@@ -845,29 +868,32 @@ This is some stuff
 
   (set-face-attribute 'org-default nil :inherit 'variable-pitch)
 
-	(dolist (face '((org-level-1 . 1.2)
-			(org-level-2 . 1.1)
-			(org-level-3 . 1.05)
-			(org-level-4 . 1.0)
-			(org-level-5 . 1.1)
-			(org-level-6 . 1.1)
-			(org-level-7 . 1.1)))
-	  (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
-  (set-face-attribute 'org-level-1 nil :weight 'bold)
-  (set-face-attribute 'org-level-2 nil :weight 'bold)
-  (set-face-attribute 'modus-themes-fixed-pitch nil :inherit 'fixed-pitch :height 0.9)
-  (set-face-attribute 'modus-themes-variable-pitch nil :inherit 'variable-pitch :height 1.0)
-  (set-face-attribute 'org-block-begin-line nil :inherit '(shadow) :height 1.0 :weight 'bold)
+  (set-face-attribute 'default nil :font "JetBrains Mono" :weight 'light)
 
-  ;     (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-       (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
-       (set-face-attribute 'org-drawer nil  :inherit '(font-lock-comment-face fixed-pitch) :height 0.8)
-      ;;   (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-      ;;   (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-      ;;   (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-      ;;   (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-      ;;   (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-      ;;   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+  (dolist (face '((org-level-1 . 1.2)
+		  (org-level-2 . 1.1)
+		  (org-level-3 . 1.05)
+		  (org-level-4 . 1.0)
+		  (org-level-5 . 1.1)
+		  (org-level-6 . 1.1)
+		  (org-level-7 . 1.1)))
+    (set-face-attribute (car face) nil :inherit 'variable-pitch :weight 'regular :height (cdr face)))
+  (set-face-attribute 'org-level-1 nil :weight 'normal)
+  (set-face-attribute 'org-level-2 nil :weight 'bold)
+(set-face-attribute 'org-block-begin-line nil :inherit '(shadow) :height 1.0 :weight 'bold)  
+(set-face-attribute 'modus-themes-fixed-pitch nil :inherit 'fixed-pitch :height 0.9)
+  (set-face-attribute 'modus-themes-variable-pitch nil :inherit 'variable-pitch :height 1.0)
+  
+
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-drawer nil  :inherit '(font-lock-comment-face fixed-pitch) :height 0.8)
+  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
 
 #+end_src
 
@@ -879,14 +905,14 @@ Chinese character 今 for today, and a ☺ for completed habits
          org-habit-graph-column 80
          org-habit-show-habits-only-for-today t
          org-habit-today-glyph 20170  
-         org-hide-leading-stars nil
+         org-hide-leading-stars t
          org-pretty-entities nil)
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
     (setq org-attach-method 'ln)
   (require 'org-faces)
-      (setq org-use-property-inheritance '("PRIORITY" "STYLE" "CATEGORY"))
+  (setq org-use-property-inheritance '("PRIORITY" "STYLE" "CATEGORY"))
     (setq org-agenda-start-day "0d")
     (setq org-agenda-span 'week)
     (setq org-agenda-start-on-weekday nil)
@@ -897,19 +923,19 @@ Chinese character 今 for today, and a ☺ for completed habits
     (defun org-column-view-uses-fixed-width-face ()
       ;; copy from org-faces.el
       (when (fboundp 'set-face-attribute)
-        ;; Make sure that a fixed-width face is used when we have a column
-        ;; table.
-        (set-face-attribute 'org-column nil
-                            :height (face-attribute 'default :height)
-                            :family (face-attribute 'default :family))
-        (set-face-attribute 'org-column-title nil
-                            :height (face-attribute 'default :height)
-                            :family (face-attribute 'default :family)
-                            )))
+	;; Make sure that a fixed-width face is used when we have a column
+	;; table.
+	(set-face-attribute 'org-column nil
+			    :height (face-attribute 'default :height)
+			    :family (face-attribute 'default :family))
+	(set-face-attribute 'org-column-title nil
+			    :height (face-attribute 'default :height)
+			    :family (face-attribute 'default :family)
+			    )))
 
 
-      ;; (when (and (fboundp 'daemonp) (daemonp))
-      ;;   (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face))
+  (when (and (fboundp 'daemonp) (daemonp))
+      (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face))
       ;; (add-hook 'org-mode-hook 'org-column-view-uses-fixed-width-face)
 
 #+end_src
@@ -918,25 +944,36 @@ Chinese character 今 for today, and a ☺ for completed habits
 
 ** General export
 
+*** Latex
+
+#+begin_src emacs-lisp :tangle yes
+  (setq org-latex-pdf-process
+	'("latexmk -f -pdf -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
+
+ 	
+(use-package auctex
+  :defer t
+  :ensure t)
+
+
+
+#+end_src
+
 *** org-memoir
 
 #+begin_src emacs-lisp :tangle yes
-
-  (setq org-latex-pdf-process '("latexmk -shell-escape -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f")
-	)
-
   (add-to-list 'org-latex-classes  `("memoir-article"
-	 (,@ (concat  "\\documentclass[11pt,article,oneside,a4paper,x11names]{memoir}\n"
-		      "% -- DEFAULT PACKAGES \n[DEFAULT-PACKAGES]\n"
-		      "% -- PACKAGES \n[PACKAGES]\n"
-		      "% -- EXTRA \n[EXTRA]\n"
-		      "\\counterwithout{section}{chapter}\n"
-		      ))
-	 ("\\section{%s}" . "\\section{%s}")
-	 ("\\subsection{%s}" . "\\subsection{%s}")
-	 ("\\subsubsection{%s}" . "\\subsubsection{%s}")
-	 ("\\paragraph{%s}" . "\\paragraph{%s}")
-	 ("\\subparagraph{%s}" . "\\subparagraph{%s}")))
+         (,@ (concat  "\\documentclass[11pt,article,oneside,a4paper,x11names]{memoir}\n"
+                      "% -- DEFAULT PACKAGES \n[DEFAULT-PACKAGES]\n"
+                      "% -- PACKAGES \n[PACKAGES]\n"
+                      "% -- EXTRA \n[EXTRA]\n"
+                      "\\counterwithout{section}{chapter}\n"
+                      ))
+         ("\\section{%s}" . "\\section{%s}")
+         ("\\subsection{%s}" . "\\subsection{%s}")
+         ("\\subsubsection{%s}" . "\\subsubsection{%s}")
+         ("\\paragraph{%s}" . "\\paragraph{%s}")
+         ("\\subparagraph{%s}" . "\\subparagraph{%s}")))
 
 #+end_src
 
@@ -1012,6 +1049,7 @@ Chinese character 今 for today, and a ☺ for completed habits
 	(org-cite-insert nil)))
 
   (define-key org-mode-map (kbd "C-c ]") 'org-ref-insert-link)
+
   ;  (use-package ivy-bibtex
   ;    :init
   ;    (Setq bibtex-completion-bibliography '((concat (getenv "BIBINPUTS") "/library.bib"))
@@ -1218,27 +1256,25 @@ This is yasnippet behavior, cribbed from emacswiki.
 ** RefTeX
 
 #+begin_src emacs-lisp :tangle yes
-  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-(use-package tex
-  :straight auctex)
+(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 
-  (setq TeX-view-program-selection
-	'((output-dvi "DVI Viewer")
-	  (output-pdf "PDF Viewer")
-	  (output-html "Google Chrome")))
-  (setq TeX-view-program-list
-	'(("DVI Viewer" "evince %o")
-	  ("PDF Viewer" "open %o")
-	  ("Google Chrome" "google-chrome %o")))
+(setq TeX-view-program-selection
+      '((output-dvi "DVI Viewer")
+        (output-pdf "PDF Viewer")
+        (output-html "Google Chrome")))
+(setq TeX-view-program-list
+      '(("DVI Viewer" "evince %o")
+        ("PDF Viewer" "open %o")
+        ("Google Chrome" "google-chrome %o")))
 
-  (setq reftex-plug-into-AUCTeX t)
-  (defun org-mode-reftex-setup ()
-    (load-library "reftex")
-    (and (buffer-file-name)
-	 (file-exists-p (buffer-file-name))
-	 (reftex-parse-all))
-    (define-key org-mode-map (kbd "C-c )") 'reftex-citation))
-  (add-hook 'org-mode-hook 'org-mode-reftex-setup)
+(setq reftex-plug-into-AUCTeX t)
+(defun org-mode-reftex-setup ()
+  (load-library "reftex")
+  (and (buffer-file-name)
+       (file-exists-p (buffer-file-name))
+       (reftex-parse-all))
+  (define-key org-mode-map (kbd "C-c )") 'reftex-citation))
+(add-hook 'org-mode-hook 'org-mode-reftex-setup)
 #+end_src
 
 
@@ -1351,7 +1387,7 @@ This is yasnippet behavior, cribbed from emacswiki.
 
 					    ;(add-hook 'markdown-mode-hook 'pandoc-mode)
 
-;; rec-letter.tex
+
 
 #+END_SRC
 
@@ -1466,15 +1502,24 @@ A citation link
 * Projectile
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-    (use-package projectile
-      :ensure    projectile
-      :config
-      (projectile-global-mode t)
-      (setq projectile-create-missing-test-files t)
-      :custom
-      (projectile-completion-system 'ivy)
-      :bind-keymap ("C-c p" . projectile-command-map)
-      :diminish   projectile-mode)
+  (use-package projectile
+    :ensure    projectile
+    :config
+    (projectile-global-mode t)
+    (projectile-create-missing-test-files 't)
+    :bind-keymap ("C-c p ". projectile-command-map)
+    :diminish   projectile-mode
+    :custom
+    (projectile-completion-system 'ivy)
+    :config
+    (projectile-register-project-type 'r
+  					'("DESCRIPTION")
+  					:project-file "DESCRIPTION"
+  					:compile: "R CMD build"
+  					:src-dir "R/"
+  					:test-dir "tests/"
+  					:test-prefix "test-")
+    )
 #+END_SRC
 
 * Ivy, not ido or helm
@@ -1536,12 +1581,12 @@ use paredit for lispy languages
 
 
 #+begin_src emacs-lisp :tangle yes
-    (use-package smartparens
-      :init
-      (require 'smartparens-config)
-      (add-hook 'org-mode-hook 'smartparens-mode)
-      (add-hook 'text-mode-hook 'smartparens-mode)
-      (add-hook 'markdown-mode-hook 'smartparens-mode))
+  (use-package smartparens
+    :init
+    (require 'smartparens-config)
+    (add-hook 'org-mode-hook 'smartparens-mode)
+    (add-hook 'text-mode-hook 'smartparens-mode)
+    (add-hook 'markdown-mode-hook 'smartparens-mode))
 #+end_src
 
 #+begin_src emacs-lisp :tangle yes
@@ -1586,12 +1631,12 @@ use paredit for lispy languages
 #+name: R and ess
 #+begin_src emacs-lisp :tangle yes
 
-   (use-package ess 
-     :mode ("\\.R\\'" . R-mode)
-     :config
-     (add-hook 'ess-r-mode-hook 'smartparens-mode)
-     (setq-default ess-language "R")
-     (setq ess-default-style 'RRR))
+      (use-package ess 
+  	:mode ("\\.R\\'" . R-mode)
+  	:config
+  	(add-hook 'ess-r-mode-hook 'smartparens-mode)
+  	(setq-default ess-language "R")
+  	(setq ess-default-style 'RRR))
 
   (with-eval-after-load 'projectile
     (projectile-register-project-type
@@ -1605,35 +1650,10 @@ use paredit for lispy languages
 
 
 
-   ;;   :init
-   ;;   (progn 
-
-   ;;
-   ;;     (require 'ess-r-mode)
-
-
-   ;;     (setq ess-smart-S-assign-key ";")
-   ;;     (ess-toggle-S-assign nil)
-   ;;     (ess-toggle-S-assign nil)
-   ;;     (ess-toggle-underscore nil)))
-
-
-
-
-   ;; (use-package poly-markdown
-   ;;   :ensure t)
 
 
  (use-package poly-R
      :ensure t)
-
-   ;; (use-package polymode 
-   ;;   :ensure t
-   ;;   :mode
-   ;;   ("\\.Snw" . poly-noweb+r-mode)
-   ;;   ("\\.Rnw" . poly-noweb+r-mode)
-   ;;   ("\\.Rmd" . poly-markdown+r-mode))
-
 
   (use-package quarto-mode
   :mode (("\\.Rmd" . poly-quarto-mode)
@@ -1833,6 +1853,94 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
 
 
+* Org roam
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package org-roam
+    :ensure t
+    :custom
+    (org-roam-directory (expand-file-name  "roam/" org-directory))
+    (org-roam-complete-everywhere t)
+    (org-roam-capture-templates
+     '(("d" "default" plain "%?"
+        :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)
+       ("l" "programming languages" plain
+        "* Characteristics:\n\n- Family: %?\n- Inspired by: \n\n* Reference\n\n"
+        :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)))
+    :bind
+    (("C-c n l" . org-roam-buffer-toggle)
+     ("C-c n f" . org-roam-node-find)
+     ("C-c n i" . org-roam-node-insert)
+     ("C-c n c" . completion-at-point)
+     )
+    :config (org-roam-setup))
+
+
+#+end_src
+
+* Themes
+
+This is my modus stuff How well does this work? Let’s see what we can get if we make this somewhat wider
+
+#+begin_src emacs-lisp :tangle yes
+
+    (use-package modus-themes
+      :config
+      (setq modus-themes-mode-line '(accented borderless padded)
+	    modus-themes-paren-match '(bold rainbow)
+	    modus-themes-mixed-fonts t
+	    modus-themes-deuteranopia t
+	    modus-themes-slanted-constructs t
+	    modus-themes-intense-mouseovers t
+	    modus-themes-bold-constructs t
+	    modus-themes-org-blocks 'grayscale-background
+	    modus-themes-headings '((1 . (rainbow background overline bold 1.3))
+				    (2 . (rainbow background 1.2))
+				    (3 . (rainbow bold 1.1))
+				    (t . (semilight 1.0)))
+	    )
+      )
+
+  ;(set-face-attribute 'modus-themes-fixed-pitch nil :inherit 'fixed-pitch :height 0.9)
+;  (set-face-attribute 'modus-themes-variable-pitch nil :inherit 'variable-pitch :height 1.0)
+
+#+end_src
+
+
+* Draft
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package org-modern
+    :ensure t
+    :init
+    (org-indent-mode -1)
+    (modify-all-frames-parameters
+     '((right-divider-width . 20)
+       (internal-border-width . 20)))
+    (dolist (face '(window-divider
+                    window-divider-first-pixel
+                    window-divider-last-pixel))
+      (face-spec-reset-face face)
+      (set-face-foreground face (face-attribute 'default :background)))
+    (set-face-background 'fringe (face-attribute 'default :background))
+    :custom
+    (org-auto-align-tags nil)
+    (org-tags-column 0)
+    (org-catch-invisible-edits 'show-and-error)
+    (org-special-ctrl-a/e t)
+    (org-insert-heading-respect-content t)
+    (org-hide-emphasis-markers t)
+    (org-agenda-block-separator ?─)
+    (org-pretty-entities t)
+    :config
+    (global-org-modern-mode))
+
+#+end_src
+
+How does /this/ look?
+
 * Draft
 
 
@@ -1872,6 +1980,10 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
     (org-show-children))
 
   (defun gtk/org-present-hook ()
+    (gtk/org-present-prepare-slide)
+    )
+
+  (defun gtk/org-present-start ()
     (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
                                        (header-line (:height 4.5) variable-pitch)
                                        (org-document-title (:height 1.75) org-document-title)
@@ -1882,8 +1994,18 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
     (setq header-line-format " ")
     (org-display-inline-images)
     (org-appear-mode -1)
-    (gtk/org-present-prepare-slide)
+    (git-gutter-mode -1)
+    (visual-line-mode 1))
+
+  (defun gtk/org-present-end ()
+    (visual-fill-column-mode -1)
+    (visual-line-mode -1)
+    (setq header-line-format nil)
+    (org-remove-inline-images)
+    (org-appear-mode 1)
+    (setq-local face-remapping-alist '((default variable-pitch default)))
     )
+
 
   (defun gtk/org-present-quit-hook ()
     (setq-local face-remapping-alist '((default variable-pitch default)))
@@ -1907,10 +2029,11 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 
   (use-package org-present
     :bind (:map org-present-mode-keymap
-                ("C-c C-j" . gtk/org-present-next)
-                ("C-c C-k" . gtk/org-present-prev))
+		("C-c C-j" . gtk/org-present-next)
+		("C-c C-k" . gtk/org-present-prev))
     :config
-    (add-hook 'org-present-mode-quit-hook #'gtk/org-present-quit-hook))
+    (add-hook 'org-present-mode-hook #'gtk/org-present-start)
+    (add-hook 'org-present-mode-quit-hook #'gtk/org-present-end))
 
 
 
@@ -1983,36 +2106,31 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 #+end_src
 
 
-* Org roam
+* Go!
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package org-roam
-    :ensure t
-    :custom
-    (org-roam-directory (expand-file-name  "roam/" org-directory))
-    (org-roam-complete-everywhere t)
-    (org-roam-capture-templates
-     '(("d" "default" plain "%?"
-        :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-        :unnarrowed t)
-       ("l" "programming languages" plain
-        "* Characteristics:\n\n- Family: %?\n- Inspired by: \n\n* Reference\n\n"
-        :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-        :unnarrowed t)))
-    :bind
-    (("C-c n l" . org-roam-buffer-toggle)
-     ("C-c n f" . org-roam-node-find)
-     ("C-c n i" . org-roam-node-insert)
-     ("C-c n c" . completion-at-point)
-     )
-    :config (org-roam-setup))
+  (modus-themes-load-operandi)
+#+end_src
 
+
+* Quarto
+
+#+begin_src emacs-lisp :tangle yes :eval yes
+  (use-package request)
+  (use-package polymode)
+  (use-package poly-markdown)
+  (use-package markdown-mode)
+
+    (use-package quarto-mode
+    :mode
+    (("\\.Rmd" . poly-quarto-mode)))
 
 #+end_src
 
 * Draft
 
 #+begin_src emacs-lisp :tangle yes
+  (use-package dockerfile-mode)
   (use-package org-modern
     :ensure t
     :init
@@ -2042,90 +2160,16 @@ The moment I evaluate this, I can’t enter an R buffer without “error in proc
 #+end_src
 
 
-* Go!
-
-#+begin_src emacs-lisp :tangle yes
-  (modus-themes-load-operandi)
-#+end_src
-
-
-* Docker
+* Conda
 
 #+begin_src emacs-lisp :tangle yes
 
-  (use-package dockerfile-mode)
+  (setenv "WORKON_HOME" "~/miniforge3/envs")
 #+end_src
 
-
-* Quarto
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package quarto-mode)
+#+begin_src emacs-lisp
+  (use-package sparql-mode
+    :mode
+    (("\\.sparql" . sparql-mode)))
 #+end_src
 
-* Snakemake
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package snakemake-mode
-    :hook
-    (snakemake-mode . lsp)
-    :config
-    (add-to-list 'lsp-language-id-configuration '(snakemake-mode . "python") 'append))
-#+end_src
-
-
-
-* Rust
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package toml-mode)
-
-  (use-package rust-mode
-    :hook (rust-mode . lsp)
-    :bind
-    ("C-c g" . rust-run)
-    ("C-c t" . rust-test)
-    ("C-c b" . cargo-process-build)
-    :init
-    (which-function-mode 1)
-    (setq compilation-error-regexp-alist-alist
-	(cons '(cargo "^\\([^ \n]+\\):\\([0-9]+\\):\\([0-9]+\\): \\([0-9]+\\):\\([0-9]+\\) \\(?:[Ee]rror\\|\\([Ww]arning\\)\\):" 1 (2 . 4) (3 . 5) (6))
-	  compilation-error-regexp-alist-alist))
-    :config
-    (setq rust-format-on-save t))
-
-
-  (use-package cargo
-    :hook (rust-mode . cargo-minor-mode)
-    :diminish cargo-minor-mode)
-
-  (use-package flycheck-rust
-    :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
-
-  (straight-use-package '(nextflow-mode :type git :host github :repo "emiller88/nextflow-mode"))
-#+end_src
-
-* Github copilot
-
-#+begin_src emacs-lisp :tangle no
-
-  (use-package copilot
-    :straight (:host github :repo "zerolfx/copilot.el")
-    :ensure t)
-  (setq copilot-node-executable "/home/gtk/.nvm/versions/node/v20.8.0/bin/node")
-  (add-hook 'prog-mode-hook 'copilot-mode)
-  (defun my-tab ()
-    (interactive)
-    (or (copilot-accept-completion)
-	(company-indent-or-complete-common nil)))
-
-					  ; modify company-mode behaviors
-  (with-eval-after-load 'company
-    ; disable inline previews
-    (delq 'company-preview-if-just-one-frontend company-frontends)
-    ; enable tab completion
-    (define-key company-mode-map (kbd "<tab>") 'my-tab)
-    (define-key company-mode-map (kbd "TAB") 'my-tab)
-    (define-key company-active-map (kbd "<tab>") 'my-tab)
-    (define-key company-active-map (kbd "TAB") 'my-tab))
-#+end_src
