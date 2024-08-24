@@ -982,34 +982,35 @@ Chinese character 今 for today, and a ☺ for completed habits
 
 #+begin_src emacs-lisp :tangle yes
 
-  (setq org-latex-src-block-backend 'minted)
-  ;(setq org-latex-packages-alist '())
-  ;(add-to-list 'org-latex-packages-alist '("cache=false" "minted"))
-  (add-to-list 'org-latex-packages-alist '("" "color"))
-;  (add-to-list 'org-latex-packages-alist '("" "gtkminted") 'append)
-  (add-to-list 'org-latex-packages-alist '("" "csquotes"))
-  (add-to-list 'org-latex-minted-langs '(groovy "groovy"))
-  (add-to-list 'org-latex-minted-langs '(R "r"))
-  (add-to-list 'org-latex-minted-langs '(clojure "clojure"))
+    (setq org-latex-src-block-backend 'minted)
+    ;(setq org-latex-packages-alist '())
+    ;(add-to-list 'org-latex-packages-alist '("cache=false" "minted"))
+    (add-to-list 'org-latex-packages-alist '("" "color"))
+  ;  (add-to-list 'org-latex-packages-alist '("" "gtkminted") 'append)
+    (add-to-list 'org-latex-packages-alist '("" "csquotes"))
+    (add-to-list 'org-latex-minted-langs '(groovy "groovy"))
+    (add-to-list 'org-latex-minted-langs '(R "r"))
+    (add-to-list 'org-latex-minted-langs '(clojure "clojure"))
 
 
-    (setq org-latex-minted-options
-	    '(("linenos" "true")
-	      ("fontsize" "\\small")
-	      ("stepnumber" "1")
-	      ("numbersep" "10pt")
-	      ))
+      (setq org-latex-minted-options
+  	    '(("linenos" "true")
+  	      ("fontsize" "\\small")
+  	      ("stepnumber" "1")
+  	      ("bgcolor" )
+  	      ("numbersep" "10pt")
+  	      ))
 
-  (setq my-org-minted-config (concat "%% minted package configuration settings\n"
-				       "\\definecolor{bg}{HTML}{E5E5E5}\n" 
-				       "\\usemintedstyle{trac}\n"
-				       "\\usepackage{upquote}\n"
-				       "\\renewcommand{\\theFancyVerbLine}{\\sffamily\\tiny \\textcolor[rgb]{1.0,0,0}{\\arabic{FancyVerbLine}}}\n"
-				       "\\AtBeginDocument{%\n"
-				       "%\\def\\PYZsq{\\textquotesingle}%\n"
-				       "}\n"
-				       "%% end minted package configuration"
-					))
+    (setq my-org-minted-config (concat "%% minted package configuration settings\n"
+  				       "\\definecolor{bg}{HTML}{E5E5E5}\n" 
+  				       "\\usemintedstyle{trac}\n"
+  				       "\\usepackage{upquote}\n"
+  				       "\\renewcommand{\\theFancyVerbLine}{\\sffamily\\tiny \\textcolor[rgb]{1.0,0,0}{\\arabic{FancyVerbLine}}}\n"
+  				       "\\AtBeginDocument{%\n"
+  				       "%\\def\\PYZsq{\\textquotesingle}%\n"
+  				       "}\n"
+  				       "%% end minted package configuration"
+  					))
 
 
 #+end_src
