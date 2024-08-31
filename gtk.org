@@ -413,15 +413,15 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 #+begin_src emacs-lisp :tangle yes
     (mapcar
      (lambda (x) (add-to-list 'org-modules x))
-     '(org-sticky-header
+     '(;org-sticky-header
        ox-latex
        ox-odt
-       ox-extra
+;;       ox-extra
        org-tempo
        org-agenda
        org-habit
        org-habit
-       org-ref
+;;       org-ref
        ol
        ox
        org-indent
@@ -951,12 +951,6 @@ Chinese character 今 for today, and a ☺ for completed habits
 	'("latexmk -f -pdf -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
 
  	
-(use-package auctex
-  :defer t
-  :ensure t)
-
-
-
 #+end_src
 
 *** org-memoir
@@ -2174,3 +2168,17 @@ How does /this/ look?
     (("\\.sparql" . sparql-mode)))
 #+end_src
 
+
+
+* Some extra
+
+#+begin_src emacs-lisp
+    ;  (setq org-beamer-environments-extra
+  					;        ())
+
+
+  (use-package snakemake-mode
+    :vc (:fetcher github :repo kyleam/snakemake-mode
+  		))
+
+#+end_src
