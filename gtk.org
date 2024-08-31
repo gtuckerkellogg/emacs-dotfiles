@@ -381,7 +381,7 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
   (use-package doom-modeline
     :ensure t
     :init (doom-modeline-mode 1)
-    :hook (after-init . doom-modeline-init)
+    :hook (after-init . doom-modeline-mode)
     :custom-face
     (mode-line ((t (:height 1.0))))
     (mode-line-inactive ((t (:height 0.85))))
