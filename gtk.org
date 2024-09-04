@@ -544,12 +544,15 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
     (org-startup-folded 'nofold)
     (org-completion-use-ido nil)
     (org-outline-path-complete-in-steps nil)
+    (org-latex-prefer-user-labels t)
     :config
     (with-eval-after-load 'ox-extra
       (ox-extras-activate '(latex-header-blocks ignore-headlines)))
     :bind
     (("C-c C-x C-2" . org-cite-insert)
      ("C-c C-x C-3" . ivy-immediate-done)))
+
+
 
  #+end_src
 
@@ -991,7 +994,6 @@ Chinese character 今 for today, and a ☺ for completed habits
   	    '(("linenos" "true")
   	      ("fontsize" "\\small")
   	      ("stepnumber" "1")
-  	      ("bgcolor" )
   	      ("numbersep" "10pt")
   	      ))
 
