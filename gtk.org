@@ -413,15 +413,15 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 #+begin_src emacs-lisp :tangle yes
     (mapcar
      (lambda (x) (add-to-list 'org-modules x))
-     '(org-sticky-header
+     '(;org-sticky-header
        ox-latex
        ox-odt
-       ox-extra
+;;       ox-extra
        org-tempo
        org-agenda
        org-habit
        org-habit
-       org-ref
+;;       org-ref
        ol
        ox
        org-indent
@@ -544,12 +544,15 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
     (org-startup-folded 'nofold)
     (org-completion-use-ido nil)
     (org-outline-path-complete-in-steps nil)
+    (org-latex-prefer-user-labels t)
     :config
     (with-eval-after-load 'ox-extra
       (ox-extras-activate '(latex-header-blocks ignore-headlines)))
     :bind
     (("C-c C-x C-2" . org-cite-insert)
      ("C-c C-x C-3" . ivy-immediate-done)))
+
+
 
  #+end_src
 
@@ -951,12 +954,6 @@ Chinese character 今 for today, and a ☺ for completed habits
 	'("latexmk -f -pdf -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
 
  	
-(use-package auctex
-  :defer t
-  :ensure t)
-
-
-
 #+end_src
 
 *** org-memoir
@@ -997,7 +994,6 @@ Chinese character 今 for today, and a ☺ for completed habits
   	    '(("linenos" "true")
   	      ("fontsize" "\\small")
   	      ("stepnumber" "1")
-  	      ("bgcolor" )
   	      ("numbersep" "10pt")
   	      ))
 
@@ -1350,17 +1346,17 @@ This is yasnippet behavior, cribbed from emacswiki.
     (save-excursion
       (goto-char (1- (point)))
       (not (or (markdown-code-block-at-point-p)
-  	       (markdown-inline-code-at-point-p)
-  	       (markdown-citation-at-point-p)
-  	       (markdown-in-comment-p)
-  	       (let ((faces (get-text-property (point) 'face)))
-  		 (if (listp faces)
-  		     (or (memq 'markdown-reference-face faces)
-  			 (memq 'markdown-markup-face faces)
-  			 (memq 'markdown-url-face faces))
-  		   (memq faces '(markdown-reference-face
-  				 markdown-markup-face
-  				 markdown-url-face))))))))
+	       (markdown-inline-code-at-point-p)
+	       (markdown-citation-at-point-p)
+	       (markdown-in-comment-p)
+	       (let ((faces (get-text-property (point) 'face)))
+		 (if (listp faces)
+		     (or (memq 'markdown-reference-face faces)
+			 (memq 'markdown-markup-face faces)
+			 (memq 'markdown-url-face faces))
+		   (memq faces '(markdown-reference-face
+				 markdown-markup-face
+				 markdown-url-face))))))))
 
   (add-hook 'markdown-mode-hook (lambda () (setq flyspell-generic-check-word-predicate 'markdown-flyspell-check-word-p)))
   (put 'markdown-mode-hook 'flyspell-generic-check-word-predicate 'markdown-flyspell-check-word-p)
@@ -1379,12 +1375,12 @@ This is yasnippet behavior, cribbed from emacswiki.
       :config
       (setq auto-insert-directory (gtk/emacs-path "insert"))
       (add-to-list 'auto-insert-alist '(("letter\\.tex" . "a letter") .
-  					"letter-template.tex"
-  					))
+					"letter-template.tex"
+					))
 
       )
 
-  					    ;(add-hook 'markdown-mode-hook 'pandoc-mode)
+					    ;(add-hook 'markdown-mode-hook 'pandoc-mode)
 
 
 
@@ -2172,8 +2168,16 @@ How does /this/ look?
     (("\\.sparql" . sparql-mode)))
 #+end_src
 
+
+
+* Some extra
+
 #+begin_src emacs-lisp
   (setq org-beamer-environments-extra
         '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}"))
   	)
+
+(use-package snakemake-mode
+    :vc (:fetcher github :repo kyleam/snakemake-mode
+  		))
 #+end_src
