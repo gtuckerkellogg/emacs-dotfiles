@@ -1285,11 +1285,11 @@ This is yasnippet behavior, cribbed from emacswiki.
 
     (defvar markdown-cite-format)
     (setq markdown-cite-format
-	  '(
-	    (?\C-m . "[@%l]")
-	    (?p . "[@%l]")
-	    (?t . "@%l")
-	    ))
+  	  '(
+  	    (?\C-m . "[@%l]")
+  	    (?p . "[@%l]")
+  	    (?t . "@%l")
+  	    ))
 
     ;; (defun markdown-reftex-citation ()
     ;;   (interactive)
@@ -1302,8 +1302,8 @@ This is yasnippet behavior, cribbed from emacswiki.
       :ensure t
       :commands (markdown-mode gfm-mode)
       :mode (("README\\.md\\'" . gfm-mode)
-	     ("\\.md\\'" . markdown-mode)
-	     ("\\.markdown\\'" . markdown-mode))
+  	     ("\\.md\\'" . markdown-mode)
+  	     ("\\.markdown\\'" . markdown-mode))
       :init
       (setq markdown-command "pandoc"))
 
@@ -1350,29 +1350,27 @@ This is yasnippet behavior, cribbed from emacswiki.
     (save-excursion
       (goto-char (1- (point)))
       (not (or (markdown-code-block-at-point-p)
-	       (markdown-inline-code-at-point-p)
-	       (markdown-citation-at-point-p)
-	       (markdown-in-comment-p)
-	       (let ((faces (get-text-property (point) 'face)))
-		 (if (listp faces)
-		     (or (memq 'markdown-reference-face faces)
-			 (memq 'markdown-markup-face faces)
-			 (memq 'markdown-url-face faces))
-		   (memq faces '(markdown-reference-face
-				 markdown-markup-face
-				 markdown-url-face))))))))
+  	       (markdown-inline-code-at-point-p)
+  	       (markdown-citation-at-point-p)
+  	       (markdown-in-comment-p)
+  	       (let ((faces (get-text-property (point) 'face)))
+  		 (if (listp faces)
+  		     (or (memq 'markdown-reference-face faces)
+  			 (memq 'markdown-markup-face faces)
+  			 (memq 'markdown-url-face faces))
+  		   (memq faces '(markdown-reference-face
+  				 markdown-markup-face
+  				 markdown-url-face))))))))
 
   (add-hook 'markdown-mode-hook (lambda () (setq flyspell-generic-check-word-predicate 'markdown-flyspell-check-word-p)))
   (put 'markdown-mode-hook 'flyspell-generic-check-word-predicate 'markdown-flyspell-check-word-p)
 
 
-    (use-package pandoc-mode
-      :hook markdown-mode
-      :config 'pandoc-load-default-settings)
-
-
-    ;; (use-package reftex-mode
-    ;;   :hook (LaTeX-mode markdown-mode))
+  (use-package pandoc-mode
+    :mode (("\\.md" . markdown-mode)
+  	 ("\\.latex" . latex-mode))
+    :hook (latex-mode  . pandoc-mode))
+;;  :config 'pandoc-load-default-settings)
 
 
     (add-hook 'text-mode-hook 'turn-on-auto-fill)
@@ -1381,12 +1379,12 @@ This is yasnippet behavior, cribbed from emacswiki.
       :config
       (setq auto-insert-directory (gtk/emacs-path "insert"))
       (add-to-list 'auto-insert-alist '(("letter\\.tex" . "a letter") .
-					"letter-template.tex"
-					))
+  					"letter-template.tex"
+  					))
 
       )
 
-					    ;(add-hook 'markdown-mode-hook 'pandoc-mode)
+  					    ;(add-hook 'markdown-mode-hook 'pandoc-mode)
 
 
 
@@ -2174,3 +2172,8 @@ How does /this/ look?
     (("\\.sparql" . sparql-mode)))
 #+end_src
 
+#+begin_src emacs-lisp
+  (setq org-beamer-environments-extra
+        '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}"))
+  	)
+#+end_src
