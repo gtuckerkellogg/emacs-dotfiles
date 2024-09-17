@@ -13,9 +13,9 @@
 
 (setq package-enable-at-startup nil)
 
-(unless (package-installed-p 'vc-use-package)
-  (package-vc-install "https://github.com/slotThe/vc-use-package"))
-(require 'vc-use-package)
+;; (unless (package-installed-p 'vc-use-package)
+;;   (package-vc-install "https://github.com/slotThe/vc-use-package"))
+;; (require 'vc-use-package)
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
