@@ -2172,7 +2172,7 @@ How does /this/ look?
 
 * Some extra
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :eval yes :tangle yes
   (setq org-beamer-environments-extra
         '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}"))
   	)
