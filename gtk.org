@@ -1287,11 +1287,11 @@ This is yasnippet behavior, cribbed from emacswiki.
 
     (defvar markdown-cite-format)
     (setq markdown-cite-format
-	  '(
-	    (?\C-m . "[@%l]")
-	    (?p . "[@%l]")
-	    (?t . "@%l")
-	    ))
+  	  '(
+  	    (?\C-m . "[@%l]")
+  	    (?p . "[@%l]")
+  	    (?t . "@%l")
+  	    ))
 
     ;; (defun markdown-reftex-citation ()
     ;;   (interactive)
@@ -1304,8 +1304,8 @@ This is yasnippet behavior, cribbed from emacswiki.
       :ensure t
       :commands (markdown-mode gfm-mode)
       :mode (("README\\.md\\'" . gfm-mode)
-	     ("\\.md\\'" . markdown-mode)
-	     ("\\.markdown\\'" . markdown-mode))
+  	     ("\\.md\\'" . markdown-mode)
+  	     ("\\.markdown\\'" . markdown-mode))
       :init
       (setq markdown-command "pandoc"))
 
@@ -1368,13 +1368,11 @@ This is yasnippet behavior, cribbed from emacswiki.
   (put 'markdown-mode-hook 'flyspell-generic-check-word-predicate 'markdown-flyspell-check-word-p)
 
 
-    (use-package pandoc-mode
-      :hook markdown-mode
-      :config 'pandoc-load-default-settings)
-
-
-    ;; (use-package reftex-mode
-    ;;   :hook (LaTeX-mode markdown-mode))
+  (use-package pandoc-mode
+    :mode (("\\.md" . markdown-mode)
+  	 ("\\.latex" . latex-mode))
+    :hook (latex-mode  . pandoc-mode))
+;;  :config 'pandoc-load-default-settings)
 
 
     (add-hook 'text-mode-hook 'turn-on-auto-fill)
@@ -2180,12 +2178,11 @@ How does /this/ look?
 * Some extra
 
 #+begin_src emacs-lisp
-    ;  (setq org-beamer-environments-extra
-  					;        ())
+  (setq org-beamer-environments-extra
+        '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}"))
+  	)
 
-
-  (use-package snakemake-mode
+(use-package snakemake-mode
     :vc (:fetcher github :repo kyleam/snakemake-mode
   		))
-
 #+end_src
