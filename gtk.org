@@ -998,10 +998,8 @@ Chinese character 今 for today, and a ☺ for completed habits
 
       (setq org-latex-minted-options
   	    '(("linenos" "true")
-  	      ("fontsize" "\\small")
-  	      ("stepnumber" "1")
-  	      ("numbersep" "10pt")
-  	      ))
+  	      ("fontsize" "\\scriptsize")
+  	      ("stepnumber" "1")))
 
     (setq my-org-minted-config (concat "%% minted package configuration settings\n"
   				       "\\definecolor{bg}{HTML}{E5E5E5}\n" 
