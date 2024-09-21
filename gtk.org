@@ -472,8 +472,8 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
   (use-package org
     :custom
     (org-latex-image-default-option "keepaspectratio,height=0.8\\textheight")
-    (org-latex-image-default-width "0.9\\linewidth")
-    (org-latex-image-default-height "0.8\\textheight")
+    (org-latex-image-default-width "0.8\\linewidth")
+    (org-latex-image-default-height "0.75\\textheight")
     )
 
       (mapcar
