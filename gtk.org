@@ -2,6 +2,8 @@
 #+TITLE:     Greg Tucker-Kellogg's Emacs configuration
 #+AUTHOR:    Greg Tucker-Kellogg
 
+* 
+
 
 * Front matter :ignore:
 #+DESCRIPTION:
@@ -472,8 +474,8 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
   (use-package org
     :custom
     (org-latex-image-default-option "keepaspectratio,height=0.8\\textheight")
-    (org-latex-image-default-width "0.9\\linewidth")
-    (org-latex-image-default-height "0.8\\textheight")
+    (org-latex-image-default-width "0.8\\linewidth")
+    (org-latex-image-default-height "0.75\\textheight")
     )
 
       (mapcar
@@ -986,11 +988,12 @@ Chinese character 今 for today, and a ☺ for completed habits
 #+begin_src emacs-lisp :tangle yes
 
     (setq org-latex-src-block-backend 'minted)
-    ;(setq org-latex-packages-alist '())
+;
+    (setq org-latex-packages-alist '())
     ;(add-to-list 'org-latex-packages-alist '("cache=false" "minted"))
     (add-to-list 'org-latex-packages-alist '("" "color"))
   ;  (add-to-list 'org-latex-packages-alist '("" "gtkminted") 'append)
-    (add-to-list 'org-latex-packages-alist '("" "csquotes"))
+;;    (add-to-list 'org-latex-packages-alist '("" "csquotes"))
     (add-to-list 'org-latex-minted-langs '(groovy "groovy"))
     (add-to-list 'org-latex-minted-langs '(R "r"))
     (add-to-list 'org-latex-minted-langs '(clojure "clojure"))
@@ -1662,18 +1665,18 @@ use paredit for lispy languages
 
 ** Lua
 
-#+BEGIN_SRC emacs-lisp :eval yes
-      (use-package lua-mode
-        :ensure t
-        :mode (("\\.lua\\'" . lua-mode))
-        :bind (:map lua-mode-map
-                    ("C-c C-n" . (lambda ()
-                                   (interactive)
-                                   (lua-send-current-line)
-                                   (forward-line)))
-                    ("C-c C-r" . lua-send-region)
+#+BEGIN_SRC emacs-lisp :eval yes :tangle yes
+  (use-package lua-mode
+    :ensure t
+    :mode (("\\.lua\\'" . lua-mode))
+    :bind (:map lua-mode-map
+                ("C-c C-n" . (lambda ()
+                               (interactive)
+                               (lua-send-current-line)
+                               (forward-line)))
+                ("C-c C-r" . lua-send-region))
+    :defer 1)
 
-  ))
 #+END_SRC
 
 
@@ -2175,12 +2178,14 @@ How does /this/ look?
 
 * Some extra
 
-#+begin_src emacs-lisp
-  (setq org-beamer-environments-extra
-        '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}"))
-  	)
+#+begin_src emacs-lisp :tangle yes
+    (setq org-beamer-environments-extra
+          '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}"))
+    	)
 
-(use-package snakemake-mode
-    :vc (:fetcher github :repo kyleam/snakemake-mode
-  		))
+  (use-package snakemake-mode
+      :vc (:fetcher github :repo kyleam/snakemake-mode
+    		))
+
+  (use-package rust-mode)
 #+end_src
