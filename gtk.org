@@ -2,8 +2,6 @@
 #+TITLE:     Greg Tucker-Kellogg's Emacs configuration
 #+AUTHOR:    Greg Tucker-Kellogg
 
-* 
-
 
 * Front matter :ignore:
 #+DESCRIPTION:
@@ -993,7 +991,7 @@ Chinese character 今 for today, and a ☺ for completed habits
     ;(add-to-list 'org-latex-packages-alist '("cache=false" "minted"))
     (add-to-list 'org-latex-packages-alist '("" "color"))
   ;  (add-to-list 'org-latex-packages-alist '("" "gtkminted") 'append)
-;;    (add-to-list 'org-latex-packages-alist '("" "csquotes"))
+    (add-to-list 'org-latex-packages-alist '("" "csquotes"))
     (add-to-list 'org-latex-minted-langs '(groovy "groovy"))
     (add-to-list 'org-latex-minted-langs '(R "r"))
     (add-to-list 'org-latex-minted-langs '(clojure "clojure"))
@@ -1666,17 +1664,17 @@ use paredit for lispy languages
 ** Lua
 
 #+BEGIN_SRC emacs-lisp :eval yes :tangle yes
-  (use-package lua-mode
-    :ensure t
-    :mode (("\\.lua\\'" . lua-mode))
-    :bind (:map lua-mode-map
-                ("C-c C-n" . (lambda ()
-                               (interactive)
-                               (lua-send-current-line)
-                               (forward-line)))
-                ("C-c C-r" . lua-send-region))
-    :defer 1)
+      (use-package lua-mode
+        :ensure t
+        :mode (("\\.lua\\'" . lua-mode))
+        :bind (:map lua-mode-map
+                    ("C-c C-n" . (lambda ()
+                                   (interactive)
+                                   (lua-send-current-line)
+                                   (forward-line)))
+                    ("C-c C-r" . lua-send-region)
 
+  ))
 #+END_SRC
 
 
@@ -1747,37 +1745,32 @@ I had to remove cython and yasnippet extensions to not screw up
 org-mode.
 
 #+BEGIN_SRC emacs-lisp :eval yes :tangle yes
-  (use-package elpy
-    :ensure t
-    :config
-    (setq elpy-rpc-python-command "python3")
-    :init
-    (elpy-enable)
-    )
 
-    (defun gtk/elpy-send-line-or-region ()
-      (interactive)
-      (if (region-active-p)
-	  (call-interactively 'elpy-shell-send-region-or-buffer)
-	(let ((region (elpy-shell--region-without-indentation
-		       (line-beginning-position) (line-end-position))))
-	  (when (string-match "\t" region)
-	    (warn (format-message
-		   "%s (%d): line or region contained tabs, this might cause weird errors"
-		   (buffer-name)
-		   (line-number-at-pos))))
-	  (python-shell-send-string region)
-	  (next-line))))
 
-  (when (load "flycheck" t t)
-    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-    (add-hook 'elpy-mode-hook 'flycheck-mode))
+          (use-package conda
+            :ensure t
+            :init
+            (conda-env-autoactivate-mode t)
+            :custom
+            (conda-anaconda-home (expand-file-name "~/miniforge3"))    
+            (conda-env-home-directory (expand-file-name "~/miniforge3/"))
 
-    (global-hl-line-mode t)
+            )
+  (add-to-list 'load-path "~/.emacs.d")
+  ;;  (require 'pet)
+    ;;        (add-hook 'python-base-mode-hook 'pet-mode -10)
 
-    (use-package expand-region
-      :config
-      (bind-key "C-=" 'er/expand-region))
+  ;;      (use-package pet
+    ;;      :vc (:fetcher github :repo "wyuenho/emacs-pet")
+  ;;        :config
+
+
+
+              (global-hl-line-mode t
+      )
+              (use-package expand-region
+                :config
+                (bind-key "C-=" 'er/expand-region))
 #+END_SRC
 
 
@@ -2066,17 +2059,18 @@ How does /this/ look?
 
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package lsp-mode
-    :init
-    (setq lsp-keymap-prefix "C-c C-l")
-    :hook (python-mode . lsp)
-    :commands lsp)
+  ;; (use-package lsp-mode
+  ;;   :init
+  ;;   (setq lsp-keymap-prefix "C-c C-l")
+  ;;   :hook (python-mode . lsp)
+  ;;   :commands lsp)
 
   ;; optionally
-  (use-package lsp-ui :commands lsp-ui-mode)
-  (use-package company-lsp :commands company-lsp)
+  ;(use-package lsp-ui :commands lsp-ui-mode)
+  ;(use-package company-lsp :commands company-lsp)
   ;;(use-package helm-lsp :commands helm-lsp-workspace-symbol)
-  (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+  ;(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+
   ;; optionally if you want to use debugger
   ;;(use-package dap-mode)
 
@@ -2183,9 +2177,38 @@ How does /this/ look?
           '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}"))
     	)
 
-  (use-package snakemake-mode
-      :vc (:fetcher github :repo kyleam/snakemake-mode
-    		))
+    (use-package snakemake-mode
+        :vc (:fetcher github :repo kyleam/snakemake-mode
+      		))
 
-  (use-package rust-mode)
-#+end_src
+    (use-package rustic
+    :ensure
+    :bind (:map rustic-mode-map
+                ("M-j" . lsp-ui-imenu)
+                ("M-?" . lsp-find-references)
+                ("C-c C-c l" . flycheck-list-errors)
+                ("C-c C-c a" . lsp-execute-code-action)
+                ("C-c C-c r" . lsp-rename)
+                ("C-c C-c q" . lsp-workspace-restart)
+                ("C-c C-c Q" . lsp-workspace-shutdown)
+                ("C-c C-c s" . lsp-rust-analyzer-status))
+    :config
+    ;; uncomment for less flashiness
+    ;; (setq lsp-eldoc-hook nil)
+    ;; (setq lsp-enable-symbol-highlighting nil)
+    ;; (setq lsp-signature-auto-activate nil)
+
+    ;; comment to disable rustfmt on save
+    (setq rustic-format-on-save t)
+    (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+
+  (defun rk/rustic-mode-hook ()
+    ;; so that run C-c C-c C-r works without having to confirm, but don't try to
+    ;; save rust buffers that are not file visiting. Once
+    ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
+    ;; no longer be necessary.
+    (when buffer-file-name
+      (setq-local buffer-save-without-query t))
+    (add-hook 'before-save-hook 'lsp-format-buffer nil t))
+  
+  #+end_src
