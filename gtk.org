@@ -1747,30 +1747,21 @@ org-mode.
 #+BEGIN_SRC emacs-lisp :eval yes :tangle yes
 
 
-          (use-package conda
-            :ensure t
-            :init
-            (conda-env-autoactivate-mode t)
-            :custom
-            (conda-anaconda-home (expand-file-name "~/miniforge3"))    
-            (conda-env-home-directory (expand-file-name "~/miniforge3/"))
-
-            )
-  (add-to-list 'load-path "~/.emacs.d")
-  ;;  (require 'pet)
-    ;;        (add-hook 'python-base-mode-hook 'pet-mode -10)
-
-  ;;      (use-package pet
-    ;;      :vc (:fetcher github :repo "wyuenho/emacs-pet")
-  ;;        :config
+  (use-package conda
+                 :ensure t
+                 :custom
+                 (conda-anaconda-home (expand-file-name "~/miniforge3"))
+  	       (conda-env-home-directory (expand-file-name "~/miniforge3/")))
 
 
+    (add-to-list 'load-path (gtk/emacs-path "lisp/"))
+    (require 'pet)
+    (add-hook 'python-base-mode-hook 'pet-mode -10)
 
-              (global-hl-line-mode t
-      )
-              (use-package expand-region
-                :config
-                (bind-key "C-=" 'er/expand-region))
+      (global-hl-line-mode t)
+      (use-package expand-region
+        :config
+        (bind-key "C-=" 'er/expand-region))
 #+END_SRC
 
 
