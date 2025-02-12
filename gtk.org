@@ -55,6 +55,8 @@ These are almost trivial functions, but I find them useful What is going on here
   (defun  gtk/emacs-path (path)
     (expand-file-name path user-emacs-directory))
 
+  (add-to-list 'load-path (gtk/emacs-path "lisp/"))
+
   (defalias 'gtk/emacs-subdir 'gtk/emacs-path)
 
   (defun turn-off-cua-mode ()
@@ -1798,11 +1800,11 @@ org-mode.
                  (conda-anaconda-home (expand-file-name "~/miniforge3"))
   	       (conda-env-home-directory (expand-file-name "~/miniforge3/")))
 
-
-    (add-to-list 'load-path (gtk/emacs-path "lisp/"))
     (require 'pet)
-    (add-hook 'python-base-mode-hook 'pet-mode -10)
+#+END_src
 
+** Expand region
+#+begin_src emacs-lisp :eval yes :tangle yes
       (global-hl-line-mode t)
       (use-package expand-region
         :config
