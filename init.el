@@ -30,14 +30,13 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(straight-use-package 'org)
 ;; Configure use-package to use straight.el by default
 (use-package straight
   :custom (straight-use-package-by-default t))
+(straight-use-package 'org)
 
 (use-package exec-path-from-shell)
 
-(org-reload)
 
 
 (org-babel-load-file (expand-file-name (concat (getenv "USER") ".org") user-emacs-directory))

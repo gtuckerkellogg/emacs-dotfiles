@@ -32,15 +32,13 @@
 #+END_SRC
 
 
-
-
 * General Emacs behaviour
 
 ** Information only
 
 #+name: me
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (setq user-full-name "Greg Tucker-Kellogg"
+  (setq user-full-name "Greg Tucker-Kellogg" 
         user-mail-address "dbsgtk@gmail.com")
   (require 'cl-lib)
 #+END_SRC
@@ -101,7 +99,7 @@ I have some keys that I'd like to be always bound
 
 
 
-** emacs client and window behaviour
+** Emacs client and window behaviour
 
 
 
@@ -118,6 +116,9 @@ I have some keys that I'd like to be always bound
   (load custom-file)
   (global-auto-revert-mode)
 #+END_SRC
+
+** vc-use package
+
 
 ** Visual fill column
 
@@ -414,96 +415,95 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
 ** Org modules and backends
 
 #+begin_src emacs-lisp :tangle yes
-      (mapcar
-       (lambda (x) (add-to-list 'org-modules x))
-       '(;org-sticky-header
-         ox-latex
-         ox-odt
-  ;;       ox-extra
-         org-tempo
-         org-agenda
-         org-habit
-         org-habit
-  ;;       org-ref
-         ol
-         ox
-         org-indent
-         ))
-    (org-reload)
+        (mapcar
+         (lambda (x) (add-to-list 'org-modules x))
+         '(;org-sticky-header
+           ox-latex
+           ox-odt
+    ;;       ox-extra
+           org-tempo
+           org-agenda
+           org-habit
+           org-habit
+    ;;       org-ref
+           ol
+           ox
+           org-indent
+           ))
+  (require 'ox)
 
-    (org-export-define-derived-backend 'beamer 'latex
-    :menu-entry
-    '(?l 1
-         ((?B "As LaTeX buffer (Beamer)" org-beamer-export-as-latex)
-    	(?b "As LaTeX file (Beamer)" org-beamer-export-to-latex)
-    	(?P "As PDF file (Beamer)" org-beamer-export-to-pdf)
-    	(?O "As PDF file and open (Beamer)"
-    	    (lambda (a s v b)
-    	      (if a (org-beamer-export-to-pdf t s v b)
-    		(org-open-file (org-beamer-export-to-pdf nil s v b)))))))
-    :options-alist
-    '((:headline-levels nil "H" org-beamer-frame-level)
-      (:latex-class "LATEX_CLASS" nil "beamer" t)
-      (:beamer-subtitle-format nil nil org-beamer-subtitle-format)
-      (:beamer-column-view-format "COLUMNS" nil org-beamer-column-view-format)
-      (:beamer-theme "BEAMER_THEME" nil org-beamer-theme)
-      (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
-      (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
-      (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
-      (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
-      (:beamer-header "BEAMER_HEADER" nil nil newline)
-      (:beamer-environments-extra nil nil org-beamer-environments-extra)
-      (:beamer-frame-default-options nil nil org-beamer-frame-default-options)
-      (:beamer-outline-frame-options nil nil org-beamer-outline-frame-options)
-      (:beamer-outline-frame-title nil nil org-beamer-outline-frame-title))
-    :translate-alist '((strike-through . org-beamer-bold)
-    		     (export-block . org-beamer-export-block)
-    		     (export-snippet . org-beamer-export-snippet)
-    		     (headline . org-beamer-headline)
-    		     (item . org-beamer-item)
-    		     (keyword . org-beamer-keyword)
-    		     (link . org-beamer-link)
-    		     (plain-list . org-beamer-plain-list)
-    		     (radio-target . org-beamer-radio-target)
-    		     (template . org-beamer-template)))
+      (org-export-define-derived-backend 'beamer 'latex
+      :menu-entry
+      '(?l 1
+           ((?B "As LaTeX buffer (Beamer)" org-beamer-export-as-latex)
+      	(?b "As LaTeX file (Beamer)" org-beamer-export-to-latex)
+      	(?P "As PDF file (Beamer)" org-beamer-export-to-pdf)
+      	(?O "As PDF file and open (Beamer)"
+      	    (lambda (a s v b)
+      	      (if a (org-beamer-export-to-pdf t s v b)
+      		(org-open-file (org-beamer-export-to-pdf nil s v b)))))))
+      :options-alist
+      '((:headline-levels nil "H" org-beamer-frame-level)
+        (:latex-class "LATEX_CLASS" nil "beamer" t)
+        (:beamer-subtitle-format nil nil org-beamer-subtitle-format)
+        (:beamer-column-view-format "COLUMNS" nil org-beamer-column-view-format)
+        (:beamer-theme "BEAMER_THEME" nil org-beamer-theme)
+        (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
+        (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
+        (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
+        (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
+        (:beamer-header "BEAMER_HEADER" nil nil newline)
+        (:beamer-environments-extra nil nil org-beamer-environments-extra)
+        (:beamer-frame-default-options nil nil org-beamer-frame-default-options)
+        (:beamer-outline-frame-options nil nil org-beamer-outline-frame-options)
+        (:beamer-outline-frame-title nil nil org-beamer-outline-frame-title))
+      :translate-alist '((strike-through . org-beamer-bold)
+      		     (export-block . org-beamer-export-block)
+      		     (export-snippet . org-beamer-export-snippet)
+      		     (headline . org-beamer-headline)
+      		     (item . org-beamer-item)
+      		     (keyword . org-beamer-keyword)
+      		     (link . org-beamer-link)
+      		     (plain-list . org-beamer-plain-list)
+      		     (radio-target . org-beamer-radio-target)
+      		     (template . org-beamer-template)))
 
-    (use-package org-contrib)
-    (use-package ox-extra)
-    (use-package org-sticky-header)
-    (use-package org-ref)
+      (use-package org-contrib)
+      (use-package ox-extra)
+      (use-package org-sticky-header)
+      (use-package org-ref)
 
-  (use-package org
-    :custom
-    (org-latex-image-default-option "keepaspectratio,height=0.8\\textheight")
-    (org-latex-image-default-width "0.8\\linewidth")
-    (org-latex-image-default-height "0.75\\textheight")
-    )
+    (use-package org
+      :custom
+      (org-latex-image-default-option "keepaspectratio,height=0.8\\textheight")
+      (org-latex-image-default-width "0.8\\linewidth")
+      (org-latex-image-default-height "0.75\\textheight")
+      )
 
-      (mapcar
-       (lambda (x) (add-to-list 'org-export-backends x :append))
-       '(beamer
-         odt))
+        (mapcar
+         (lambda (x) (add-to-list 'org-export-backends x :append))
+         '(beamer
+           odt))
 
-      (defun org-beamer-bold (bold contents _info)
-      "Transcode BLOCK object into Beamer code.
-    CONTENTS is the text being bold.  INFO is a plist used as
-    a communication channel."
-      (format "\\textbf%s{%s}"
-    	  (or (org-beamer--element-has-overlay-p bold) "")
-    	  contents))
+        (defun org-beamer-bold (bold contents _info)
+        "Transcode BLOCK object into Beamer code.
+      CONTENTS is the text being bold.  INFO is a plist used as
+      a communication channel."
+        (format "\\textbf%s{%s}"
+      	  (or (org-beamer--element-has-overlay-p bold) "")
+      	  contents))
 
 
-      (org-reload)
-      ;; (use-package org-sticky-header
-      ;;   :ensure t
-      ;;   :hook
-      ;;   (org-mode . org-sticky-header-mode))
+        ;; (use-package org-sticky-header
+        ;;   :ensure t
+        ;;   :hook
+        ;;   (org-mode . org-sticky-header-mode))
 
-      (use-package org-auto-tangle
-        :defer t
-        :hook (org-mode . org-auto-tangle-mode)
-        :config
-        (setq org-auto-tangle-default t))
+        (use-package org-auto-tangle
+          :defer t
+          :hook (org-mode . org-auto-tangle-mode)
+          :config
+          (setq org-auto-tangle-default t))
 
 #+end_src
 
@@ -796,9 +796,13 @@ But project tags should never be inherited
 ** Bullets
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package org-bullets
+  ;; (use-package org-bullets
+  ;;   :after org
+  ;;   :hook (org-mode . org-bullets-mode))
+
+  (use-package org-superstar
     :after org
-    :hook (org-mode . org-bullets-mode))
+    :hook (org-mode . org-superstar-mode))
 #+end_src
 
 
@@ -862,52 +866,49 @@ This is some stuff
 
 #+begin_src emacs-lisp :tangle yes
 
-  	(set-face-attribute 'fixed-pitch nil
-  			    :font "Fira Code Retina"
+              (set-face-attribute 'default nil :font "Open Sans" :weight 'medium) 
+
+          (set-face-attribute 'fixed-pitch nil
+  			    :font "Input Mono Narrow"
+  			    :weight 'light
   			    :height 1.0
-  			    )
+            		    )
 
-    (set-face-attribute 'fixed-pitch nil
-  		      :font "JetBrains Mono"
-  		      :height 1.0
-  		      )
+          (set-face-attribute 'variable-pitch nil
+            			    :font "Open Sans")
 
-  	;; (set-face-attribute 'variable-pitch nil
-  	;; 		    ;; :font "Cantarell"
-  	;; 		    :font "Cantarell"
-  	;; 		    :weight 'light
-  	;; 		    :height 1.1)
 
-    (set-face-attribute 'org-default nil :inherit 'variable-pitch)
+              (set-face-attribute 'org-default nil :inherit 'variable-pitch)
 
-    (set-face-attribute 'default nil :font "JetBrains Mono" :weight 'light)
+  (face-all-attributes 'fixed-pitch)
 
-    (dolist (face '((org-level-1 . 1.2)
-  		  (org-level-2 . 1.1)
-  		  (org-level-3 . 1.05)
-  		  (org-level-4 . 1.0)
-  		  (org-level-5 . 1.1)
-  		  (org-level-6 . 1.1)
-  		  (org-level-7 . 1.1)))
-      (set-face-attribute (car face) nil :inherit 'variable-pitch :weight 'regular :height (cdr face)))
-    (set-face-attribute 'org-level-1 nil :weight 'normal)
-    (set-face-attribute 'org-level-2 nil :weight 'bold)
-  (set-face-attribute 'org-block-begin-line nil :inherit '(shadow) :height 1.0 :weight 'bold)  
-  (set-face-attribute 'modus-themes-fixed-pitch nil :inherit 'fixed-pitch :height 0.9)
+              (dolist (face '((org-level-1 . 1.3)
+            		  (org-level-2 . 1.2)
+            		  (org-level-3 . 1.1)
+            		  (org-level-4 . 1.1)
+            		  (org-level-5 . 1.1)
+            		  (org-level-6 . 1.1)
+            		  (org-level-7 . 1.1)))
+                (set-face-attribute (car face) nil :inherit 'variable-pitch :weight 'regular :height (cdr face)))
+              (set-face-attribute 'org-level-1 nil :weight 'normal)
+              (set-face-attribute 'org-level-2 nil :weight 'bold)
+            (set-face-attribute 'org-block-begin-line nil :inherit '(shadow fixed-pitch) :height 0.8 :weight 'bold)  
+            (set-face-attribute 'modus-themes-fixed-pitch nil :inherit 'fixed-pitch :height 0.9)
 
-    
+              
 
-    (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-    (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'org-drawer nil  :inherit '(font-lock-comment-face fixed-pitch) :height 0.8)
-    (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-    (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+              (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+              (set-face-attribute 'org-table nil  :inherit 'fixed-pitch)
+              (set-face-attribute 'org-drawer nil  :inherit '(font-lock-comment-face fixed-pitch) :height 0.8)
+              (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+              (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+              (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+              (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+              (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+              (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
 
 #+end_src
+
 
 I want the habits display to be a little to the right. I'll use the
 Chinese character 今 for today, and a ☺ for completed habits
@@ -1023,9 +1024,28 @@ Chinese character 今 for today, and a ☺ for completed habits
 *** Removing captions in Beamer
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (defun gtk/unnumbered-beamer-caption (contents backend info)
-    (when (eq backend 'beamer)
-      (replace-regexp-in-string "\\\\caption\{" "\\\\caption*{" contents)))
+      (defun gtk/unnumbered-beamer-caption (contents backend info)
+        (when (eq backend 'beamer)
+          (replace-regexp-in-string "\\\\caption\{" "\\\\caption*{" contents)))
+
+#+end_SRC
+
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+
+  (defun my/unnumbered-captions-p ()
+  (let* ((props (org-collect-keywords '("PROPERTY")))
+         (entries (cdr (assoc "PROPERTY" props)))
+         val)
+    (dolist (entry entries)
+      (when (string-match "\\`unnumbered-captions\\s-+\\([^ \t\r\n]+\\)" entry)
+        (setq val (match-string 1 entry))))
+    (and val (not (member (downcase val) '("nil" "no" "false" "0"))))))
+
+  (defun gtk/unnumbered-latex-captions (contents backend info)
+    (when (and (my/unnumbered-captions-p) (eq backend 'latex))
+          (replace-regexp-in-string "\\\\caption\{" "\\\\caption*{" contents)))
+
 #+END_SRC
 
 
@@ -2134,8 +2154,8 @@ How does /this/ look?
 #+begin_src emacs-lisp :tangle yes
   (use-package org-contrib)
   (require 'org-checklist)
-  (org-reload)
   (add-to-list 'org-export-filter-final-output-functions 'gtk/unnumbered-beamer-caption)
+  (add-to-list 'org-export-filter-final-output-functions 'gtk/unnumbered-latex-captions)  
   (add-to-list 'org-export-filter-parse-tree-functions 'org-export-ignore-headlines)
 #+end_src
 
@@ -2212,14 +2232,19 @@ How does /this/ look?
 
 * Some extra
 
+
+#+begin_src emacs-lisp
+(use-package groovy-mode)
+  
+#+end_src
+
 #+begin_src emacs-lisp :tangle yes
     (setq org-beamer-environments-extra
-          '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}"))
+          '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}")
+  	  ("fill" "D" "{\\molochset{block=fill}\\noop \\\\ \\begin{block}%a{%h}" "\\end{block}}"))
     	)
 
-    (use-package snakemake-mode
-        :vc (:fetcher github :repo kyleam/snakemake-mode
-      		))
+    (use-package snakemake-mode)
 
     (use-package rustic
     :ensure
@@ -2250,5 +2275,5 @@ How does /this/ look?
     (when buffer-file-name
       (setq-local buffer-save-without-query t))
     (add-hook 'before-save-hook 'lsp-format-buffer nil t))
-  
+
   #+end_src
