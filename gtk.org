@@ -398,14 +398,10 @@ In order to use this, you must run ~(all-the-icons-install-fonts)~ after install
     (doom-modeline-minor-modes t)
     (doom-modeline-persp-name nil)
     (doom-modeline-buffer-file-name-style 'truncate-except-project)
-    (doom-modeline-major-mode-icon t))
+   (doom-modeline-major-mode-icon t))
 #+end_src
 
 
-
-#+begin_src emacs-lisp :eval no :tangle no
-  (org-babel-load-file (gtk/emacs-path "exwm.org"))
-#+end_src
 
 
 
@@ -796,9 +792,9 @@ But project tags should never be inherited
 ** Bullets
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package org-bullets
+  (use-package org-superstar
     :after org
-    :hook (org-mode . org-bullets-mode))
+    :hook (org-mode . org-superstar-mode))
 #+end_src
 
 
@@ -862,25 +858,19 @@ This is some stuff
 
 #+begin_src emacs-lisp :tangle yes
 
-  	(set-face-attribute 'fixed-pitch nil
-  			    :font "Fira Code Retina"
-  			    :height 1.0
-  			    )
-
     (set-face-attribute 'fixed-pitch nil
   		      :font "JetBrains Mono"
   		      :height 1.0
   		      )
 
-  	;; (set-face-attribute 'variable-pitch nil
-  	;; 		    ;; :font "Cantarell"
-  	;; 		    :font "Cantarell"
-  	;; 		    :weight 'light
-  	;; 		    :height 1.1)
+  (set-face-attribute 'variable-pitch nil
+  			    :font "Open Sans"
+  			    :weight 'light
+  			    :height 1.1)
 
     (set-face-attribute 'org-default nil :inherit 'variable-pitch)
 
-    (set-face-attribute 'default nil :font "JetBrains Mono" :weight 'light)
+    (set-face-attribute 'default nil :font "Open Sans" :weight 'light)
 
     (dolist (face '((org-level-1 . 1.2)
   		  (org-level-2 . 1.1)
@@ -960,9 +950,13 @@ Chinese character 今 for today, and a ☺ for completed habits
 
 #+begin_src emacs-lisp :tangle yes
   (setq org-latex-pdf-process
-	'("latexmk -f -pdf -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
+  	'("latexmk -f -pdf -%latex -interaction=nonstopmode -shell-escape -output-directory=%o %f"))
 
- 	
+
+
+    (eval-after-load "tex"
+      (setq TeX-command "LaTeXmk"))
+
 #+end_src
 
 *** org-memoir
@@ -992,9 +986,9 @@ Chinese character 今 for today, and a ☺ for completed habits
 ;
     (setq org-latex-packages-alist '())
     ;(add-to-list 'org-latex-packages-alist '("cache=false" "minted"))
-    (add-to-list 'org-latex-packages-alist '("" "color"))
+    (add-to-list 'org-latex-packages-alist '("" "xcolor"))
   ;  (add-to-list 'org-latex-packages-alist '("" "gtkminted") 'append)
-    (add-to-list 'org-latex-packages-alist '("" "csquotes"))
+;    (add-to-list 'org-latex-packages-alist '("" "csquotes"))
     (add-to-list 'org-latex-minted-langs '(groovy "groovy"))
     (add-to-list 'org-latex-minted-langs '(R "r"))
     (add-to-list 'org-latex-minted-langs '(clojure "clojure"))
@@ -1211,27 +1205,31 @@ This is yasnippet behavior, cribbed from emacswiki.
 
 
 #+begin_src emacs-lisp :tangle yes
-    (use-package flyspell
-      :init
-      (bind-key "S-<f8>" 'flyspell-mode)
-      :config
-      (defun gtk/flyspell-check-next-error ()
-	(interactive)
-	(flyspell-goto-next-error)
-	(ispell-word))
-      (bind-keys :map flyspell-mode-map
-		 ("<f8>" . gtk/flyspell-check-next-error)
-		 ("M-S-<f8>" . flyspell-prog-mode))
-      (setq ispell-extra-args nil)
-      (setq ispell-program-name "hunspell")
-      (ispell-set-spellchecker-params)
-  ;    (ispell-hunspell-add-multi-dic "en_GB,en_med_glut")
-  ;    (ispell-hunspell-add-multi-dic "en_US,en_med_glut")
-      (setq ispell-dictionary "en_GB")
-      )
+      (use-package flyspell
+        :init
+        (bind-key "S-<f8>" 'flyspell-mode)
+        :config
+        (defun gtk/flyspell-check-next-error ()
+    	(interactive)
+    	(flyspell-goto-next-error)
+    	(ispell-word))
+        (bind-keys :map flyspell-mode-map
+    		 ("<f8>" . gtk/flyspell-check-next-error)
+  		 ("C-<f8>" . flyspell-buffer)
+    		 ("M-S-<f8>" . flyspell-prog-mode))
+        (setq ispell-extra-args nil)
+        (setq ispell-program-name "hunspell")
+        (ispell-set-spellchecker-params)
+  ;      (add-to-list 'ispell-hunspell-dict-paths-alist '("en_med_glut" "/usr/share/hunspell/en_med_glut.aff"))
+;        (ispell-hunspell-add-multi-dic "en_GB,en_med_glut")
+    ;    (ispell-hunspell-add-multi-dic "en_US,en_med_glut")
+        (setq ispell-dictionary "en_GB")
+        )
 
-    (setq ispell-personal-dictionary "~/.hunspell_personal")
-
+;;    (setq ispell-local-dictionary-alist '(("en_GB" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_GB,en_med_glut") nil utf-8)))
+      (setq ispell-personal-dictionary (expand-file-name "~/.hunspell_personal" (getenv "HOME")))
+;;  (when (boundp 'ispell-hunspell-dictionary-alist)
+;;        (setq ispell-hunspell-dictionary-alist ispell-local-dictionary-alist))
 
 
 #+end_src
@@ -2214,11 +2212,13 @@ How does /this/ look?
 
 #+begin_src emacs-lisp :tangle yes
     (setq org-beamer-environments-extra
-          '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}"))
+          '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}")
+  	  ("fill" "D" "\\molochset{block=fill}\\begin{block}%a{%h}" "\\end{block}")
+  	    )
     	)
 
     (use-package snakemake-mode
-        :vc (:fetcher github :repo kyleam/snakemake-mode
+        :vc (:url "https://github.com/kyleam/snakemake-mode"
       		))
 
     (use-package rustic
@@ -2250,5 +2250,5 @@ How does /this/ look?
     (when buffer-file-name
       (setq-local buffer-save-without-query t))
     (add-hook 'before-save-hook 'lsp-format-buffer nil t))
-  
+
   #+end_src
