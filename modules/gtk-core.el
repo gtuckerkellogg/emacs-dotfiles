@@ -3,7 +3,6 @@
 ;; Built-in settings and pure helpers. No external packages, no use-package,
 ;; so this file loads standalone (and is unit-testable in -q --batch).
 ;;; Code:
-(require 'cl-lib)
 
 (defun gtk/emacs-path (path)
   "Expand PATH relative to `user-emacs-directory'."
@@ -16,7 +15,6 @@
 (prefer-coding-system 'utf-8)
 (setq sentence-end-double-space nil
       visible-bell t
-      ring-bell-function #'ignore
       inhibit-startup-message t
       require-final-newline t)
 (setq-default fill-column 110
@@ -25,12 +23,10 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (tooltip-mode -1)
-(show-paren-mode 1)
 (global-auto-revert-mode 1)
 (setq global-auto-revert-non-file-buffers t)
-(setq scroll-step 0 scroll-conservatively 10000 auto-window-vscroll nil)
+(setq scroll-conservatively 10000 auto-window-vscroll nil)
 (setq diff-switches "-u")
-(auto-compression-mode 1)
 
 (let ((backup-dir (gtk/emacs-path "backups/"))
       (auto-dir   (gtk/emacs-path "auto-save/")))
