@@ -11,7 +11,7 @@ tangle:
 
 ## Fast ERT unit tests for pure helpers (no package install, no network).
 test-units:
-	$(EMACS) -q --batch -L $(ROOT)/lisp -L $(ROOT)/modules \
+	$(EMACS) -q --init-directory=$(ROOT) --batch -L $(ROOT)/lisp -L $(ROOT)/modules \
 	  -l $(ROOT)/lisp/gtk-loader.el \
 	  -l $(ROOT)/modules/gtk-core.el \
 	  -l $(ROOT)/modules/gtk-platform.el \

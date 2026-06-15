@@ -4,6 +4,7 @@
 /elpa/
 /auto-save-list/
 /backups/
+/auto-save/
 /transient/
 /var/
 /.cache/
@@ -18,3 +19,4 @@
 /.lsp-session-v1
 /.mc-lists.el
 /places
+/history
