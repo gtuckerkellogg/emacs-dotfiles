@@ -2,8 +2,6 @@
 ;;; Commentary:
 ;; Standalone (no package deps) so it is unit-testable in `-q --batch'.
 ;;; Code:
-(require 'cl-lib)
-
 (defvar gtk/modules
   '(gtk-core
     gtk-platform

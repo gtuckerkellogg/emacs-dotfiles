@@ -1,5 +1,6 @@
 ;;; gtk-loader-test.el --- tests for the module loader  -*- lexical-binding: t; -*-
 (require 'ert)
+(require 'cl-lib)
 (require 'gtk-loader)
 
 (ert-deftest gtk-loader-returns-t-on-success ()
