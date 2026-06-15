@@ -34,5 +34,10 @@ compile:
 	  -l $(ROOT)/early-init.el -l $(ROOT)/init.el \
 	  --eval "(byte-recompile-directory (expand-file-name \"modules\" user-emacs-directory) 0 t)"
 
+## checkdoc lint over modules (no external packages needed).
+lint:
+	$(EMACS) -Q --batch \
+	  --eval "(dolist (f (directory-files (expand-file-name \"modules\" \"$(ROOT)\") t \"\\\\.el\\\\'\")) (checkdoc-file f))"
+
 clean:
 	rm -f $(ROOT)/modules/*.elc $(ROOT)/lisp/*.elc
