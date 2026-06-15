@@ -10,14 +10,14 @@
 
 ;; Per-system build dir keeps multiple machines/Emacs versions from clashing.
 (defconst gtk/system-string
-  (concat (replace-regexp-in-string "/" "-" (format "%s" system-type))
+  (concat (replace-regexp-in-string "/" "-" (symbol-name system-type))
           "-emacs-" emacs-version))
 
 ;; --- straight.el bootstrap -------------------------------------------------
 (setq straight-use-package-by-default t
       straight-recipes-gnu-elpa-use-mirror t
-      straight-repository-branch "develop"
-      straight-build-dir (concat "straight/build-" gtk/system-string))
+      straight-repository-branch "develop" ; track straight.el's develop branch (long-standing choice)
+      straight-build-dir (concat "build-" gtk/system-string))
 
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -35,9 +35,10 @@
 
 (straight-use-package 'use-package)
 (require 'use-package)
-(setq use-package-always-defer nil)
 
 ;; exec-path-from-shell early so GUI/daemon sessions see the user's PATH.
+;; In a -nw terminal Emacs PATH is inherited from the launching shell, so this
+;; is intentionally skipped there.
 (use-package exec-path-from-shell
   :if (or (memq window-system '(mac ns x pgtk)) (daemonp))
   :config (exec-path-from-shell-initialize))
