@@ -1,0 +1,32 @@
+** Spelling
+
+
+#+begin_src emacs-lisp :tangle yes
+    (use-package flyspell
+      :init
+      (bind-key "S-<f8>" 'flyspell-mode)
+      :config
+      (defun gtk/flyspell-check-next-error ()
+  	(interactive)
+  	(flyspell-goto-next-error)
+  	(ispell-word))
+      (bind-keys :map flyspell-mode-map
+  		 ("<f8>" . gtk/flyspell-check-next-error)
+  		 ("C-<f8>" . flyspell-buffer)
+  		 ("M-S-<f8>" . flyspell-prog-mode))
+      (setq ispell-extra-args nil)
+      (setq ispell-program-name "hunspell")
+      (ispell-set-spellchecker-params)
+  ;    (ispell-hunspell-add-multi-dic "en_GB,en_med_glut")
+  ;    (ispell-hunspell-add-multi-dic "en_US,en_med_glut")
+      (setq ispell-dictionary "en_GB")
+      )
+
+    (setq ispell-personal-dictionary "~/.hunspell_personal")
+
+
+  (use-package jinx)
+  (setq jinx-languages "en_GB en-Acamedic")
+
+#+end_src
+

@@ -1,10 +1,20 @@
-/code-functions.el
-/gtk.el
-/places
-/shells-and-terminals.el
-/system-settings.el
+# Runtime / build artifacts
 /straight/
+/eln-cache/
+/elpa/
+/auto-save-list/
+/backups/
 /transient/
-/projectile-bookmarks.eld
-/bookmarks
+/var/
+/.cache/
+*.elc
+
+# Machine-local and Customize state
+/local.el
 /custom.el
+/bookmarks
+/projectile-bookmarks.eld
+/.org-id-locations
+/.lsp-session-v1
+/.mc-lists.el
+/places
