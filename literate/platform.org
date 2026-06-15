@@ -1,0 +1,77 @@
+#+title: Platform detection and per-system behavior
+#+property: header-args:emacs-lisp :tangle ../modules/gtk-platform.el :results silent
+
+* Header
+#+begin_src emacs-lisp
+;;; gtk-platform.el --- OS/WSL/GUI detection and per-system glue  -*- lexical-binding: t; -*-
+;;; Commentary:
+;; Pure marker predicate plus thin wrappers, then branch browser/PDF/clipboard.
+;; Loads standalone (no use-package, guarded straight) so it stays testable.
+;;; Code:
+#+end_src
+
+* Pure marker predicate (unit-tested)
+#+begin_src emacs-lisp
+(defun gtk//string-has-wsl-marker-p (s)
+  "Return non-nil if S contains a WSL/Microsoft kernel marker."
+  (and (stringp s) (string-match-p "[Mm]icrosoft" s) t))
+#+end_src
+
+* Detection predicates
+#+begin_src emacs-lisp
+(defvar gtk/wsl-p
+  (and (eq system-type 'gnu/linux)
+       (file-readable-p "/proc/version")
+       (gtk//string-has-wsl-marker-p
+        (with-temp-buffer (insert-file-contents "/proc/version") (buffer-string))))
+  "Non-nil when running under WSL.")
+
+(defun gtk/gui-p () "Non-nil in a graphical frame." (display-graphic-p))
+(defun gtk/linux-p () "Non-nil on GNU/Linux." (eq system-type 'gnu/linux))
+(defun gtk/macos-p () "Non-nil on macOS." (eq system-type 'darwin))
+#+end_src
+
+* Browser, PDF viewer, file apps
+#+begin_src emacs-lisp
+(setq browse-url-browser-function 'browse-url-default-browser)
+(when gtk/wsl-p
+  (setq browse-url-generic-program "wslview"
+        browse-url-browser-function 'browse-url-generic))
+
+(setq org-file-apps
+      '((auto-mode . emacs)
+        (directory . "setsid xdg-open \"%s\"")
+        ("\\.x?html?\\'" . default)
+        ("\\.pdf\\'" . "xdg-open \"%s\"")
+        ("\\.pdf::\\([0-9]+\\)\\'" . "xdg-open \"%s\"")
+        ("\\.docx?\\'" . "xdg-open \"%s\"")))
+#+end_src
+
+* Clipboard
+#+begin_src emacs-lisp
+;; In TTY frames on Linux, route kill/yank through the system clipboard when a
+;; helper exists (xclip in X, clip.exe under WSL). All paths are guarded so the
+;; module still loads with neither straight nor the helpers present.
+(when (and (gtk/linux-p) (not (display-graphic-p)))
+  (cond
+   (gtk/wsl-p
+    (when (executable-find "clip.exe")
+      (setq interprogram-cut-function
+            (lambda (text)
+              (let ((p (make-process :name "clip" :command '("clip.exe")
+                                     :connection-type 'pipe)))
+                (process-send-string p text) (process-send-eof p))))))
+   ((executable-find "xclip")
+    (when (fboundp 'straight-use-package) (straight-use-package 'xclip))
+    (when (require 'xclip nil t) (xclip-mode 1)))))
+#+end_src
+
+* Footer
+#+begin_src emacs-lisp
+(provide 'gtk-platform)
+;;; gtk-platform.el ends here
+#+end_src
+
+# Local Variables:
+# eval: (add-hook 'after-save-hook #'org-babel-tangle nil t)
+# End:
