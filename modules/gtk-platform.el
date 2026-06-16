@@ -5,7 +5,7 @@
 ;;; Code:
 
 (defun gtk//string-has-wsl-marker-p (s)
-  "Return non-nil if S contains a WSL/Microsoft kernel marker."
+  "Return non-nil when S contains a WSL/Microsoft kernel marker."
   (and (stringp s) (string-match-p "[Mm]icrosoft" s) t))
 
 (defvar gtk/wsl-p
@@ -24,13 +24,17 @@
   (setq browse-url-generic-program "wslview"
         browse-url-browser-function 'browse-url-generic))
 
-(setq org-file-apps
-      '((auto-mode . emacs)
-        (directory . "setsid xdg-open \"%s\"")
-        ("\\.x?html?\\'" . default)
-        ("\\.pdf\\'" . "xdg-open \"%s\"")
-        ("\\.pdf::\\([0-9]+\\)\\'" . "xdg-open \"%s\"")
-        ("\\.docx?\\'" . "xdg-open \"%s\"")))
+;; External openers are xdg-open-based, so only on Linux.  `setsid' detaches the
+;; child so it survives Emacs exit; the `pdf::N' entry routes page-links to
+;; xdg-open too (page number is dropped) rather than falling back to doc-view.
+(when (gtk/linux-p)
+  (setq org-file-apps
+        '((auto-mode . emacs)
+          (directory . "setsid xdg-open \"%s\"")
+          ("\\.x?html?\\'" . default)
+          ("\\.pdf\\'" . "xdg-open \"%s\"")
+          ("\\.pdf::\\([0-9]+\\)\\'" . "xdg-open \"%s\"")
+          ("\\.docx?\\'" . "xdg-open \"%s\""))))
 
 ;; In TTY frames on Linux, route kill/yank through the system clipboard when a
 ;; helper exists (xclip in X, clip.exe under WSL). All paths are guarded so the
