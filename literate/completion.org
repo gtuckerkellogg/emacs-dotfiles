@@ -1,0 +1,68 @@
+#+title: Completion — the Vertico stack
+#+property: header-args:emacs-lisp :tangle ../modules/gtk-completion.el :results silent
+
+* Header
+#+begin_src emacs-lisp
+;;; gtk-completion.el --- minibuffer and in-buffer completion  -*- lexical-binding: t; -*-
+;;; Commentary:
+;; Vertico stack: vertico + orderless + marginalia + consult (minibuffer) and
+;; corfu + cape (in-buffer).  Replaces the legacy ivy/counsel/swiper/icomplete.
+;; savehist is enabled in gtk-core, so it is not repeated here.
+;;; Code:
+#+end_src
+
+* Minibuffer UI: vertico
+#+begin_src emacs-lisp
+(use-package vertico
+  :init (vertico-mode)
+  :custom (vertico-cycle t))
+#+end_src
+
+* Matching: orderless
+#+begin_src emacs-lisp
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+#+end_src
+
+* Annotations: marginalia
+#+begin_src emacs-lisp
+(use-package marginalia
+  :init (marginalia-mode))
+#+end_src
+
+* Commands: consult
+#+begin_src emacs-lisp
+(use-package consult
+  :bind (("C-s"   . consult-line)
+         ("C-x b" . consult-buffer)
+         ("M-y"   . consult-yank-pop)
+         ("M-g g" . consult-goto-line)
+         ("M-s r" . consult-ripgrep)))
+#+end_src
+
+* In-buffer completion: corfu + cape
+#+begin_src emacs-lisp
+(use-package corfu
+  :init (global-corfu-mode)
+  :custom
+  (corfu-auto t)
+  (corfu-auto-delay 0.1)
+  (corfu-cycle t))
+
+(use-package cape
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file))
+#+end_src
+
+* Footer
+#+begin_src emacs-lisp
+(provide 'gtk-completion)
+;;; gtk-completion.el ends here
+#+end_src
+
+# Local Variables:
+# eval: (add-hook 'after-save-hook #'org-babel-tangle nil t)
+# End:
