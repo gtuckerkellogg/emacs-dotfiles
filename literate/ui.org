@@ -39,6 +39,8 @@
 
 
   (defun fresh-load-theme (theme &optional no-confirm)
+    "Disable all enabled themes, then load and enable THEME.
+With NO-CONFIRM non-nil, skip the safety prompt for unsafe themes."
     (interactive
      (list
       (intern (completing-read "Load custom theme: "
@@ -110,6 +112,7 @@
 
 * Modeline + icons
 #+begin_src emacs-lisp
+;; Glyphs need the Nerd Fonts installed once per machine: M-x nerd-icons-install-fonts
 (use-package nerd-icons)
 (use-package minions :config (minions-mode 1))
 (use-package doom-modeline

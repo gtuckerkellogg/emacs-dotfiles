@@ -22,33 +22,35 @@
 (add-hook 'server-after-make-frame-hook #'gtk/apply-fonts)
 
 (defun disable-all-themes ()
-  "Disable all active themes."
-  (dolist (i custom-enabled-themes)
-    (disable-theme i)))
+    "Disable all active themes."
+    (dolist (i custom-enabled-themes)
+      (disable-theme i)))
 
 
-(defun fresh-load-theme (theme &optional no-confirm)
-  (interactive
-   (list
-    (intern (completing-read "Load custom theme: "
+  (defun fresh-load-theme (theme &optional no-confirm)
+    "Disable all enabled themes, then load and enable THEME.
+With NO-CONFIRM non-nil, skip the safety prompt for unsafe themes."
+    (interactive
+     (list
+      (intern (completing-read "Load custom theme: "
 			       (mapcar #'symbol-name
 				       (custom-available-themes))))
-    nil
-    ))
-  (unless (custom-theme-name-valid-p theme)
-    (error "Invalid theme name `%s'" theme))
-  (message (concat "Theme is: " (symbol-name theme)))
-  (when (custom-theme-p theme)
-    (put theme 'theme-settings nil)
-    (put theme 'theme-feature nil)
-    (put theme 'theme-documentation nil))
-  (let ((file (locate-file (concat (symbol-name theme) "-theme.el")
+      nil
+      ))
+    (unless (custom-theme-name-valid-p theme)
+      (error "Invalid theme name `%s'" theme))
+    (message (concat "Theme is: " (symbol-name theme)))
+    (when (custom-theme-p theme)
+      (put theme 'theme-settings nil)
+      (put theme 'theme-feature nil)
+      (put theme 'theme-documentation nil))
+    (let ((file (locate-file (concat (symbol-name theme) "-theme.el")
 			     (custom-theme--load-path)
 			     '("" "c")))
 	  (custom--inhibit-theme-enable t))
-    ;; Check file safety with `custom-safe-themes', prompting the
-    ;; user if necessary.
-    (cond ((not file)
+      ;; Check file safety with `custom-safe-themes', prompting the
+      ;; user if necessary.
+      (cond ((not file)
 	     (error "Unable to find theme file for `%s'" theme))
 	    ((or no-confirm
 		 (eq custom-safe-themes t)
@@ -66,23 +68,23 @@
 		   t))))
 	    (t
 	     (error "Unable to load theme `%s'" theme))))
-  ;; Optimization: if the theme changes the `default' face, put that
-  ;; entry first.  This avoids some `frame-set-background-mode' rigmarole
-  ;; by assigning the new background immediately.
-  (let* ((settings (get theme 'theme-settings))
+    ;; Optimization: if the theme changes the `default' face, put that
+    ;; entry first.  This avoids some `frame-set-background-mode' rigmarole
+    ;; by assigning the new background immediately.
+    (let* ((settings (get theme 'theme-settings))
 	   (tail settings)
 	   found)
-    (while (and tail (not found))
+      (while (and tail (not found))
 	(and (eq (nth 0 (car tail)) 'theme-face)
 	     (eq (nth 1 (car tail)) 'default)
 	     (setq found (car tail)))
 	(setq tail (cdr tail)))
-    (when found
+      (when found
 	(put theme 'theme-settings (cons found (delq found settings)))))
-  ;; Finally, enable the theme.
-  (disable-all-themes)
-  (enable-theme theme)
-  t)
+    ;; Finally, enable the theme.
+    (disable-all-themes)
+    (enable-theme theme)
+    t)
 
 (use-package modus-themes
   :custom
@@ -93,6 +95,7 @@
   :config
   (load-theme 'modus-operandi :no-confirm))
 
+;; Glyphs need the Nerd Fonts installed once per machine: M-x nerd-icons-install-fonts
 (use-package nerd-icons)
 (use-package minions :config (minions-mode 1))
 (use-package doom-modeline
