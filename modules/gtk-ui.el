@@ -1,0 +1,122 @@
+;;; gtk-ui.el --- theme, modeline, fonts, icons, which-key  -*- lexical-binding: t; -*-
+;;; Commentary:
+;; Visual layer: modus themes + a theme switcher, doom-modeline + minions,
+;; fonts with graceful fallback, nerd-icons, which-key, visual-fill-column.
+;;; Code:
+
+(defun gtk/font-available-p (name)
+  "Return non-nil when font NAME is installed."
+  (and name (find-font (font-spec :name name))))
+
+(defun gtk/apply-fonts ()
+  "Apply fonts from local.el when present and available."
+  (when (display-graphic-p)
+    (when (and (boundp 'gtk/variable-font) (gtk/font-available-p gtk/variable-font))
+      (set-face-attribute 'default nil :font gtk/variable-font :weight 'light)
+      (set-face-attribute 'variable-pitch nil :font gtk/variable-font))
+    (when (and (boundp 'gtk/fixed-font) (gtk/font-available-p gtk/fixed-font))
+      (set-face-attribute 'fixed-pitch nil :font gtk/fixed-font :weight 'light :height 1.0))))
+
+(add-hook 'emacs-startup-hook #'gtk/apply-fonts)
+;; Re-apply for daemon clients when the first graphical frame appears.
+(add-hook 'server-after-make-frame-hook #'gtk/apply-fonts)
+
+(defun disable-all-themes ()
+  "Disable all active themes."
+  (dolist (i custom-enabled-themes)
+    (disable-theme i)))
+
+
+(defun fresh-load-theme (theme &optional no-confirm)
+  (interactive
+   (list
+    (intern (completing-read "Load custom theme: "
+			       (mapcar #'symbol-name
+				       (custom-available-themes))))
+    nil
+    ))
+  (unless (custom-theme-name-valid-p theme)
+    (error "Invalid theme name `%s'" theme))
+  (message (concat "Theme is: " (symbol-name theme)))
+  (when (custom-theme-p theme)
+    (put theme 'theme-settings nil)
+    (put theme 'theme-feature nil)
+    (put theme 'theme-documentation nil))
+  (let ((file (locate-file (concat (symbol-name theme) "-theme.el")
+			     (custom-theme--load-path)
+			     '("" "c")))
+	  (custom--inhibit-theme-enable t))
+    ;; Check file safety with `custom-safe-themes', prompting the
+    ;; user if necessary.
+    (cond ((not file)
+	     (error "Unable to find theme file for `%s'" theme))
+	    ((or no-confirm
+		 (eq custom-safe-themes t)
+		 (and (memq 'default custom-safe-themes)
+		      (equal (file-name-directory file)
+			     (expand-file-name "themes/" data-directory))))
+	     ;; Theme is safe; load byte-compiled version if available.
+	     (load (file-name-sans-extension file) nil t nil t))
+	    ((with-temp-buffer
+	       (insert-file-contents file)
+	       (let ((hash (secure-hash 'sha256 (current-buffer))))
+		 (when (or (member hash custom-safe-themes)
+			   (custom-theme-load-confirm hash))
+		   (eval-buffer nil nil file)
+		   t))))
+	    (t
+	     (error "Unable to load theme `%s'" theme))))
+  ;; Optimization: if the theme changes the `default' face, put that
+  ;; entry first.  This avoids some `frame-set-background-mode' rigmarole
+  ;; by assigning the new background immediately.
+  (let* ((settings (get theme 'theme-settings))
+	   (tail settings)
+	   found)
+    (while (and tail (not found))
+	(and (eq (nth 0 (car tail)) 'theme-face)
+	     (eq (nth 1 (car tail)) 'default)
+	     (setq found (car tail)))
+	(setq tail (cdr tail)))
+    (when found
+	(put theme 'theme-settings (cons found (delq found settings)))))
+  ;; Finally, enable the theme.
+  (disable-all-themes)
+  (enable-theme theme)
+  t)
+
+(use-package modus-themes
+  :custom
+  (modus-themes-italic-constructs t)
+  (modus-themes-bold-constructs t)
+  (modus-themes-mixed-fonts t)
+  (modus-themes-org-blocks 'gray-background)
+  :config
+  (load-theme 'modus-operandi :no-confirm))
+
+(use-package nerd-icons)
+(use-package minions :config (minions-mode 1))
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :custom
+  (doom-modeline-height 15)
+  (doom-modeline-minor-modes t)
+  (doom-modeline-buffer-file-name-style 'truncate-except-project))
+
+(use-package which-key
+  :init (which-key-mode)
+  :custom (which-key-idle-delay 0.3))
+
+(use-package visual-fill-column
+  :init (setq visual-fill-column-width 110 visual-fill-column-center-text t)
+  :config
+  (defun turn-on-visual-fill-column ()
+    "Enable visual-fill-column and visual-line modes."
+    (interactive)
+    (visual-fill-column-mode 1) (visual-line-mode 1))
+  (defun turn-off-visual-fill-column ()
+    "Disable visual-fill-column and visual-line modes."
+    (interactive)
+    (visual-fill-column-mode 0) (visual-line-mode 0)))
+
+(provide 'gtk-ui)
+;;; gtk-ui.el ends here
