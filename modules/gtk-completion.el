@@ -33,6 +33,9 @@
 
 (use-package cape
   :init
+  ;; `add-to-list' prepends, so the function added LAST ends up first.  Intended
+  ;; final order: cape-file (specific, path contexts) before cape-dabbrev
+  ;; (general word-completion fallback).
   (add-to-list 'completion-at-point-functions #'cape-dabbrev)
   (add-to-list 'completion-at-point-functions #'cape-file))
 
