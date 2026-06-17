@@ -19,11 +19,6 @@
   (setq-local comment-auto-fill-only-comments t)
   (auto-fill-mode 1))
 
-(defun gtk/turn-on-whitespace ()
-  "Enable `whitespace-mode' buffer-locally."
-  (make-local-variable 'whitespace-mode)
-  (whitespace-mode t))
-
 (add-hook 'gtk/prog-mode-hook #'gtk/local-column-number-mode)
 (add-hook 'gtk/prog-mode-hook #'gtk/local-comment-auto-fill)
 
