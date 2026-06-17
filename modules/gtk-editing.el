@@ -1,0 +1,93 @@
+;;; gtk-editing.el --- coding hooks, structural editing, keybindings  -*- lexical-binding: t; -*-
+;;; Commentary:
+;; A shared prog-mode hook stack, small editing helpers, global keybindings,
+;; and structural-editing/region packages.  Replaces legacy pretty-lambdas with
+;; prettify-symbols-mode and drops the per-buffer save-place helper (gtk-core
+;; enables save-place globally).
+;;; Code:
+
+(defvar gtk/prog-mode-hook nil
+  "Hook run in every code buffer via `gtk/run-prog-hook'.")
+
+(defun gtk/local-column-number-mode ()
+  "Enable `column-number-mode' buffer-locally."
+  (make-local-variable 'column-number-mode)
+  (column-number-mode t))
+
+(defun gtk/local-comment-auto-fill ()
+  "Auto-fill comments only, in the current buffer."
+  (setq-local comment-auto-fill-only-comments t)
+  (auto-fill-mode 1))
+
+(defun gtk/turn-on-whitespace ()
+  "Enable `whitespace-mode' buffer-locally."
+  (make-local-variable 'whitespace-mode)
+  (whitespace-mode t))
+
+(add-hook 'gtk/prog-mode-hook #'gtk/local-column-number-mode)
+(add-hook 'gtk/prog-mode-hook #'gtk/local-comment-auto-fill)
+
+(defun gtk/run-prog-hook ()
+  "Enable things that are convenient across all coding buffers."
+  (run-hooks 'gtk/prog-mode-hook))
+(add-hook 'prog-mode-hook #'gtk/run-prog-hook)
+
+(add-hook 'prog-mode-hook #'prettify-symbols-mode)
+
+(defun turn-on-visual-line-mode ()
+  "Enable `visual-line-mode'."
+  (interactive) (visual-line-mode 1))
+(defun turn-off-visual-line-mode ()
+  "Disable `visual-line-mode'."
+  (interactive) (visual-line-mode -1))
+(defun turn-off-cua-mode ()
+  "Disable `cua-mode'."
+  (cua-mode -1))
+
+(defun switch-to-minibuffer-window ()
+  "Select the active minibuffer window, if any."
+  (interactive)
+  (when (active-minibuffer-window) (select-window (active-minibuffer-window))))
+
+(defun unfill-paragraph (&optional region)
+  "Turn a multi-line paragraph into a single line; act on REGION if given."
+  (interactive (progn (barf-if-buffer-read-only) '(t)))
+  (let ((fill-column (point-max)) (emacs-lisp-docstring-fill-column t))
+    (fill-paragraph nil region)))
+
+(global-set-key (kbd "<f7>") #'switch-to-minibuffer-window)
+(global-set-key (kbd "C-z") #'undo)
+(global-set-key (kbd "C-c C-w") #'copy-region-as-kill)
+(global-set-key (kbd "C-c q") #'auto-fill-mode)
+(global-set-key (kbd "M-+") #'count-words)
+(global-set-key (kbd "C-+") #'text-scale-increase)
+(global-set-key (kbd "C--") #'text-scale-decrease)
+(global-set-key (kbd "M-/") #'hippie-expand)
+(global-set-key (kbd "C-x ^") #'join-line)
+(global-set-key (kbd "C-x C-m") #'execute-extended-command)
+(global-set-key (kbd "C-x \\") #'align-regexp)
+
+(use-package paredit
+  :hook ((emacs-lisp-mode lisp-mode clojure-mode cider-repl-mode) . enable-paredit-mode)
+  :bind (("M-[" . paredit-wrap-square) ("M-{" . paredit-wrap-curly)))
+
+(use-package smartparens
+  :hook ((org-mode text-mode markdown-mode) . smartparens-mode)
+  :config (require 'smartparens-config))
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package multiple-cursors
+  :bind (("C-M-c" . mc/edit-lines)
+         ("C->" . mc/mark-next-like-this)
+         ("C-<" . mc/mark-previous-like-this)
+         ("C-c C-<" . mc/mark-all-like-this)))
+
+(use-package expand-region
+  :bind ("C-=" . er/expand-region))
+
+(global-hl-line-mode 1)
+
+(provide 'gtk-editing)
+;;; gtk-editing.el ends here
