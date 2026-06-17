@@ -1,0 +1,180 @@
+;;; gtk-org-gtd.el --- GTD: agenda, capture, journal, refile -*- lexical-binding: t; -*-
+;;; Commentary:
+;; GTD configuration: directories, TODO keywords, areas of focus, agenda,
+;; org-super-agenda, habits, capture templates, org-journal, and refile.
+;; Depends on gtk-org for org core.  Export/citations are a separate module.
+;;; Code:
+
+(defvar gtk/dropbox-root (expand-file-name "~/Dropbox/")
+  "Root of synced files; normally set in local.el.")
+(setq org-directory (expand-file-name "_support/org" gtk/dropbox-root))
+(defun gtk/org-path (p) "Expand P under `org-directory'." (expand-file-name p org-directory))
+(defvar my/inbox (expand-file-name "_inbox/inbox.org" gtk/dropbox-root) "Inbox file.")
+(defvar my/organizer (gtk/org-path "organizer.org") "Main task list.")
+(setq org-default-notes-file my/inbox)
+(setq org-use-speed-commands
+      (lambda () (and (looking-at org-outline-regexp) (looking-back "^\\**" nil))))
+
+(setq org-todo-keywords
+           '((type "NEXT(n)" "TODO(t)" "PROJECT(p)" "|" "DONE(d@/!)")
+             (type "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
+
+(setq org-todo-state-tags-triggers
+      '(("CANCELLED" ("CANCELLED" . t))
+        ("WAITING" ("WAITING" . t))
+        ("HOLD" ("WAITING" . t) ("HOLD" . t))
+        (done ("WAITING") ("HOLD"))
+        ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
+        ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
+        ("DONE" ("WAITING") ("CANCELLED") ("HOLD"))))
+
+(setq org-log-into-drawer "LOGBOOK")
+
+(setq org-global-properties
+      '(("CATEGORY_ALL"
+         . "Family Finance Work Health Relationships Self Explore Other")))
+(setq org-columns-default-format "%35ITEM %TODO %3PRIORITY %20CATEGORY %TAGS")
+
+(setq org-tag-persistent-alist
+      '((:startgroup . nil)
+        ("@Office" . ?o)
+        ("@Computer" . ?c)
+        ("@Internet" . ?i)
+        ("@Home" . ?h)
+        ("@Errands" . ?e)
+        (:endgroup . nil)
+        (:startgroup . nil)
+        ("Project" . ?p)
+        ("Agenda" . ?a)
+        (:endgroup . nil)
+        ("FLAGGED" . ?f)
+        ("noexport" . ?n)
+        ("ignore" . ?I)
+        ))
+
+(setq org-tags-exclude-from-inheritance '("Project"))
+
+(setq org-agenda-files (expand-file-name "agenda-files" org-directory))
+(setq org-agenda-window-setup 'current-window)
+(setq org-agenda-start-with-log-mode t)
+
+(setq diary-file (expand-file-name "diary" gtk/dropbox-root))
+
+(setq org-agenda-custom-commands
+      '(("n" "Agenda and all TODOs"
+         ((agenda "")
+          (alltodo "")))
+        ("P" todo "PROJECT")
+        ))
+
+(add-hook 'org-agenda-mode-hook
+        (lambda ()
+          (buffer-face-set 'fixed-pitch)))
+
+(use-package org-super-agenda
+ :init
+ (org-super-agenda-mode))
+
+(setq org-super-agenda-groups
+      '(
+        (:name "Overdue items"
+               :order 1
+               :deadline past)
+        (:name "Lagging items"
+               :order 2
+               :scheduled past)
+        (:name "Today's items"
+               :scheduled today
+               :deadline today
+               :order 3)
+        (:name "High priority"
+               :priority "A"
+               :order 4)
+        (:name "Easy wins"
+               :effort< "0:30"
+               :order 5)
+        (:name "Medium priority or coming up"
+               :priority<= "B"
+               :scheduled future
+               :deadline future
+               :order 5)
+
+        (:name "Other next actions"
+               :todo ("NEXT")
+               :order 10
+               )
+        (:name "Unscheduled Projects"
+               :todo ("PROJECT")
+               :order 99)
+        (:name "Waiting for"
+               :todo ("WAITING")
+               :order 100)
+))
+
+(setq  org-agenda-skip-scheduled-if-deadline-is-shown t)
+(setq  org-agenda-skip-deadline-prewarning-if-scheduled t)
+
+(require 'org-faces)
+(setq  org-habit-completed-glyph 9786
+       org-habit-graph-column 80
+       org-habit-show-habits-only-for-today t
+       org-habit-today-glyph 20170)
+
+(setq org-attach-method 'ln)
+(setq org-agenda-start-day "0d")
+(setq org-agenda-span 'week)
+(setq org-agenda-start-on-weekday nil)
+(setq org-agenda-skip-scheduled-if-done t)
+(setq org-agenda-skip-deadline-if-done t)
+(setq org-fontify-done-headline t)
+
+(use-package org-journal
+  :ensure t
+  :defer nil
+  :custom
+  (org-journal-dir (gtk/org-path "journal/"))
+  (org-journal-date-format "%A, %d %B %Y")
+  (org-journal-file-type 'monthly)
+  :bind (("C-c M-j" . org-journal-new-entry)))
+
+
+(defun org-journal-find-location ()
+  ;; Open today's journal, but specify a non-nil prefix argument in order to
+  ;; inhibit inserting the heading; org-capture will insert the heading.
+  (org-journal-new-entry t)
+  ;; Position point on the journal's top-level heading so that org-capture
+  ;; will add the new entry as a child entry.
+  (goto-char (point-min)))
+
+(setq org-capture-templates
+      `(
+        ("w" "Todo items (work)" entry (file+olp my/organizer "Work" "Actions")
+         "* TODO %?\n  %i")
+
+        ("t" "Todo items" entry (file+headline my/organizer "Tasks")
+         "* TODO %?\n  %i")
+        ("T" "Todo items (with link)" entry (file+headline my/organizer "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("i" "Into the inbox" entry (file+datetree my/inbox)
+         "* %?\n\nEntered on %U\n  %i" )
+        ("j" "Journal entry" entry (function org-journal-find-location)
+         "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
+        ("R" "Weekly review"  entry (file+headline my/organizer  "Weekly Review")
+         (file ,(expand-file-name "templates/weekly-review.org" org-directory))
+         )
+        ))
+
+(setq org-refile-use-outline-path 'file
+      org-refile-use-cache nil)
+
+(setq org-refile-targets '((my/organizer :maxlevel . 1)
+                            (my/organizer :tag . "TAG")
+                            ))
+
+(global-set-key (kbd "C-c j") #'org-clock-goto)
+(global-set-key (kbd "C-c '") #'org-cycle-agenda-files)
+(global-set-key (kbd "C-c x") (lambda () (interactive) (org-capture nil "i")))
+(setq org-clock-into-drawer "CLOCKING")
+
+(provide 'gtk-org-gtd)
+;;; gtk-org-gtd.el ends here
