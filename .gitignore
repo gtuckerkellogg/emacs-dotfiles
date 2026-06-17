@@ -20,3 +20,6 @@
 /.mc-lists.el
 /places
 /history
+
+# External org-index tool (agenda/todo DB built by a directory watcher)
+/.vorg.db
