@@ -31,7 +31,6 @@
   (org-outline-path-complete-in-steps nil)
   (org-latex-prefer-user-labels t)
   (org-hide-leading-stars t)
-  (org-pretty-entities nil)
   (org-use-property-inheritance '("PRIORITY" "STYLE" "CATEGORY"))
   :config
   (org-babel-do-load-languages
@@ -80,7 +79,6 @@
                   (org-level-6 . 1.1)
                   (org-level-7 . 1.1)))
     (set-face-attribute (car spec) nil :weight 'regular :height (cdr spec)))
-  (set-face-attribute 'org-level-1 nil :weight 'normal)
   (set-face-attribute 'org-level-2 nil :weight 'bold)
   (dolist (face '(org-block org-table org-formula org-code org-verbatim
                   org-special-keyword org-meta-line org-checkbox
