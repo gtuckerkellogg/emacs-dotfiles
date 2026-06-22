@@ -49,17 +49,9 @@
         ("fontsize" "\\scriptsize")
         ("stepnumber" "1")))
 
-(setq my-org-minted-config (concat "%% minted package configuration settings\n"
-                                   "\\definecolor{bg}{HTML}{E5E5E5}\n"
-                                   "\\usemintedstyle{trac}\n"
-                                   "\\usepackage{upquote}\n"
-                                   "\\renewcommand{\\theFancyVerbLine}{\\sffamily\\tiny \\textcolor[rgb]{1.0,0,0}{\\arabic{FancyVerbLine}}}\n"
-                                   "\\AtBeginDocument{%\n"
-                                   "%\\def\\PYZsq{\\textquotesingle}%\n"
-                                   "}\n"
-                                   "%% end minted package configuration"
-                                   ))
-
+;; Load stock ox-beamer first so our derived backend and org-beamer-bold
+;; override (not race with) the stock definitions.
+(require 'ox-beamer)
 (org-export-define-derived-backend 'beamer 'latex
   :menu-entry
   '(?l 1
@@ -116,9 +108,21 @@ a communication channel."
       '(("ponly" "P" "\\begin{ponly}%a{%h}" "\\end{ponly}")
 	("fill" "D" "{\\molochset{block=fill}\\noop \\\\ \\begin{block}%a{%h}" "\\end{block}}")))
 
+(defun my/unnumbered-captions-p ()
+  "Non-nil when the buffer opts into unnumbered captions.
+Checks for a #+PROPERTY: unnumbered-captions <truthy-value> keyword."
+  (let* ((props (org-collect-keywords '("PROPERTY")))
+         (entries (cdr (assoc "PROPERTY" props)))
+         val)
+    (dolist (entry entries)
+      (when (string-match "\\`unnumbered-captions\\s-+\\([^ \t\r\n]+\\)" entry)
+        (setq val (match-string 1 entry))))
+    (and val (not (member (downcase val) '("nil" "no" "false" "0"))))))
+
 (defun gtk/unnumbered-latex-captions (contents backend _info)
-  "Make LaTeX captions unnumbered in CONTENTS when BACKEND is latex."
-  (when (eq backend 'latex)
+  "Unnumber LaTeX captions in CONTENTS for opted-in buffers.
+Applies only for the latex BACKEND when `my/unnumbered-captions-p' is non-nil."
+  (when (and (my/unnumbered-captions-p) (eq backend 'latex))
     (replace-regexp-in-string "\\\\caption{" "\\\\caption*{" contents)))
 
 (with-eval-after-load 'org
@@ -146,9 +150,10 @@ a communication channel."
   (org-link-set-parameters
    "TERM"
    :export (lambda (path desc format)
-             (cond ((eq format 'html) path)
-                   ((eq format 'latex)
-                    (format "%s\\nomenclature{%s}{%s}" desc path desc)))))
+             (let ((d (or desc path)))
+               (cond ((eq format 'html) d)
+                     ((eq format 'latex)
+                      (format "%s\\nomenclature{%s}{%s}" d path d))))))
   (org-link-set-parameters
    "Figure"
    :export (lambda (path _desc format)
