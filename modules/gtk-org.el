@@ -68,5 +68,10 @@
       (when (facep face)
         (set-face-attribute face nil :inherit 'fixed-pitch)))))
 
+;; org-tempo: `<s' TAB block expansions, plus a custom `<al' -> #+ATTR_LATEX.
+(with-eval-after-load 'org
+  (require 'org-tempo)
+  (add-to-list 'org-tempo-keywords-alist '("al" . "ATTR_LATEX")))
+
 (provide 'gtk-org)
 ;;; gtk-org.el ends here

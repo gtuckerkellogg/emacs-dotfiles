@@ -39,6 +39,7 @@
         version-control t))
 (add-to-list 'completion-ignored-extensions ".los")
 (recentf-mode 1)
+(global-set-key (kbd "C-x f") #'recentf-open)
 (save-place-mode 1)
 (savehist-mode 1)
 

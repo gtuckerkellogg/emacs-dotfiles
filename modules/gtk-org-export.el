@@ -15,7 +15,7 @@
   (require 'ox-md)
   (require 'ox-odt nil t))
 
-(setq org-latex-image-default-option "keepaspectratio,height=0.8\\textheight"
+(setq org-latex-image-default-option "keepaspectratio,height=0.9\\textheight"
       org-latex-image-default-width "0.8\\linewidth"
       org-latex-image-default-height "0.75\\textheight")
 

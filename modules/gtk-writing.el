@@ -15,7 +15,8 @@
     (interactive) (flyspell-goto-next-error) (ispell-word))
   (bind-keys :map flyspell-mode-map
              ("<f8>" . gtk/flyspell-check-next-error)
-             ("M-S-<f8>" . flyspell-prog-mode))
+             ("M-S-<f8>" . flyspell-prog-mode)
+             ("C-<f8>" . flyspell-buffer))
   (setq ispell-program-name "hunspell"
         ispell-dictionary "en_GB"
         ispell-personal-dictionary (expand-file-name "~/.hunspell_personal"))
@@ -105,6 +106,8 @@
 ;; Shift + scroll to change font size
 (global-set-key [C-mouse-4] 'text-scale-increase)
 (global-set-key [C-mouse-5] 'text-scale-decrease)
+(global-set-key [mouse-8] #'my-buffer-face-mode-fixed)
+(global-set-key [mouse-9] #'my-buffer-face-mode-variable)
 
 (defun markdown-citation-at-point-p ()
   "Return non-nil if point is inside a pandoc-style citation key."

@@ -89,6 +89,14 @@
         (set-face-attribute face nil :inherit 'fixed-pitch)))))
 #+end_src
 
+* org-tempo
+#+begin_src emacs-lisp
+;; org-tempo: `<s' TAB block expansions, plus a custom `<al' -> #+ATTR_LATEX.
+(with-eval-after-load 'org
+  (require 'org-tempo)
+  (add-to-list 'org-tempo-keywords-alist '("al" . "ATTR_LATEX")))
+#+end_src
+
 * Footer
 #+begin_src emacs-lisp
 (provide 'gtk-org)

@@ -14,6 +14,11 @@
 (setq org-default-notes-file my/inbox)
 (setq org-use-speed-commands
       (lambda () (and (looking-at org-outline-regexp) (looking-back "^\\**" nil))))
+(let ((gtk/clock-sound
+       (expand-file-name "share/sounds/good-idea-shiny-ding-3-SBA-300457978.wav"
+                         gtk/dropbox-root)))
+  (when (file-exists-p gtk/clock-sound)
+    (setq org-clock-sound gtk/clock-sound)))
 
 (setq org-todo-keywords
            '((type "NEXT(n)" "TODO(t)" "PROJECT(p)" "|" "DONE(d@/!)")
