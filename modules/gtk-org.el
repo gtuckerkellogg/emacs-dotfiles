@@ -73,6 +73,13 @@
   (require 'org-tempo)
   (add-to-list 'org-tempo-keywords-alist '("al" . "ATTR_LATEX")))
 
+;; Opt-in: a doc auto-tangles on save only if it has a `#+auto_tangle: t' header.
+;; (The config's own literate files self-tangle via a Local Variables hook, so
+;; they are deliberately NOT covered here -- no package dependency, no double
+;; tangling.)  org-auto-tangle-default is nil by default; we leave it.
+(use-package org-auto-tangle
+  :hook (org-mode . org-auto-tangle-mode))
+
 (use-package hide-mode-line)
 (use-package org-appear)
 
