@@ -36,6 +36,13 @@
 (straight-use-package 'use-package)
 (require 'use-package)
 
+;; Use Emacs's built-in versions of these core libraries instead of letting
+;; straight pull newer ELPA copies (which shadow the built-ins and break the
+;; built-in eglot/project pairing).  Must precede any package that depends on
+;; them so straight resolves the dependency to built-in.
+(dolist (pkg '(project xref seq let-alist jsonrpc external-completion))
+  (straight-use-package (list pkg :type 'built-in)))
+
 ;; exec-path-from-shell early so GUI/daemon sessions see the user's PATH.
 ;; In a -nw terminal Emacs PATH is inherited from the launching shell, so this
 ;; is intentionally skipped there.
