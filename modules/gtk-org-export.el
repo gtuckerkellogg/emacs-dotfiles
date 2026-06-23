@@ -99,6 +99,13 @@ a communication channel."
 (mapcar (lambda (x) (add-to-list 'org-export-backends x :append))
         '(beamer odt))
 
+;; Org -> Typst export.  ox-typst self-registers its backend on the export
+;; dispatcher (key `y') when loaded; we accept all package defaults (naive
+;; LaTeX-math conversion, `typst c' for PDF).  Typst *editing* lives in
+;; gtk-langs.el.
+(use-package ox-typst
+  :after org)
+
 (defun gtk/unnumbered-beamer-caption (contents backend info)
   "Make Beamer captions unnumbered in CONTENTS when BACKEND is beamer."
   (when (eq backend 'beamer)
