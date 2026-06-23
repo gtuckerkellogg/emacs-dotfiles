@@ -14,11 +14,5 @@
 (setq gtk/fixed-font    "Input Mono Narrow"
       gtk/variable-font "Open Sans")
 
-;; Bibliography directory (used by citations); nil to skip.
-(setq gtk/bib-dir nil)
-
-;; Org publish targets appended to org-publish-project-alist; nil for none.
-(setq gtk/extra-publish-projects nil)
-
 (provide 'local)
 ;;; local.example.el ends here

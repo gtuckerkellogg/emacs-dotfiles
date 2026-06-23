@@ -1,1 +1,131 @@
-* emacs-dotfiles
+#+title: emacs-dotfiles
+#+author: Greg Tucker-Kellogg
+
+* Overview
+
+A modular, literate Emacs configuration targeting Emacs 30+.
+
+Org files in =literate/= tangle to committed Emacs Lisp modules in =modules/gtk-*.el=.
+Those modules are loaded at startup by an ordered, fault-tolerant manifest in
+=lisp/gtk-loader.el=.  Package management uses straight.el with use-package;
+minibuffer completion is the Vertico stack (Vertico + Orderless + Marginalia +
+Consult + Corfu + Cape).
+
+Each module is independent enough that a load failure produces a warning rather
+than aborting the rest of the session.
+
+* Layout
+
+| Path                        | Purpose                                                       |
+|-----------------------------+---------------------------------------------------------------|
+| =early-init.el=             | Pre-GUI tuning (GC, package.el disabled, toolbar suppression) |
+| =init.el=                   | Bootstrap straight.el, load local.el, invoke gtk-loader       |
+| =lisp/gtk-loader.el=        | Ordered module list + fault-tolerant loader                   |
+| =literate/<name>.org=       | Literate source for each module                               |
+| =modules/gtk-<name>.el=     | Tangled, committed Emacs Lisp loaded at startup               |
+| =local.el=                  | Machine-specific variables — gitignored, per-machine          |
+| =local.example.el=          | Template for local.el; commit-tracked                         |
+| =straight/versions/default.el= | Package lockfile (commit-tracked)                          |
+| =legacy/=                   | Previous monolithic config kept for reference                 |
+| =Makefile=                  | Tangle, test, compile, lint targets                           |
+
+* First-time setup on a new machine
+
+1. Clone the repository into your Emacs config directory:
+   #+begin_src shell
+   git clone <repo-url> ~/.emacs.d
+   #+end_src
+
+2. Create a machine-local settings file and edit it:
+   #+begin_src shell
+   cp ~/.emacs.d/local.example.el ~/.emacs.d/local.el
+   $EDITOR ~/.emacs.d/local.el
+   #+end_src
+   Set =gtk/dropbox-root= (or equivalent synced-files root), =gtk/conda-home=
+   (path to your conda/mamba prefix, or =nil=), =gtk/fixed-font=, and
+   =gtk/variable-font= to fonts available on this machine.
+
+3. Start Emacs.  straight.el bootstraps itself and installs all packages on the
+   first launch — expect several minutes.
+
+4. After startup, install icon fonts once:
+   #+begin_example
+   M-x nerd-icons-install-fonts
+   #+end_example
+
+5. Optional — reproduce exact package versions from the committed lockfile:
+   #+begin_example
+   M-x straight-thaw-versions
+   #+end_example
+
+* Editing the configuration
+
+Edit the literate source in =literate/<name>.org=.  Each file contains a Local
+Variables block that triggers =org-babel-tangle= on save, so the corresponding
+=modules/gtk-<name>.el= is regenerated automatically.
+
+To tangle all files at once:
+#+begin_src shell
+make tangle
+#+end_src
+
+Emacs loads the committed =.el= files at startup; the =.org= files are never
+evaluated at runtime.
+
+* Make targets
+
+| Target         | What it does                                              |
+|----------------+-----------------------------------------------------------|
+| =make tangle=  | Tangle all =literate/*.org= to their modules              |
+| =make test=    | Run unit tests and a full batch load (both targets below) |
+| =make test-units= | Fast ERT tests for pure helpers (no packages needed)   |
+| =make test-load=  | Full batch startup; verifies the session reaches the sentinel |
+| =make compile= | Byte-compile all modules against a live init              |
+| =make lint=    | checkdoc over all =modules/*.el=                          |
+
+* Reproducibility
+
+The file =straight/versions/default.el= is a lockfile recording the exact git
+SHA for every installed package.  To snapshot the current state:
+#+begin_example
+M-x straight-freeze-versions
+#+end_example
+To restore the snapshotted versions on a new machine after package installation:
+#+begin_example
+M-x straight-thaw-versions
+#+end_example
+Commit =straight/versions/default.el= whenever you intentionally update packages.
+
+* Modules
+
+| Module            | Description                                             |
+|-------------------+---------------------------------------------------------|
+| =gtk-core=        | Built-in defaults, pure helpers, no external packages   |
+| =gtk-platform=    | OS/WSL/GUI detection and per-system glue                |
+| =gtk-completion=  | Vertico stack: minibuffer and in-buffer completion      |
+| =gtk-ui=          | Theme, modeline, fonts, icons, which-key                |
+| =gtk-editing=     | Prog-mode hooks, structural editing, keybindings        |
+| =gtk-org=         | Org core, babel, org-modern, typography                 |
+| =gtk-org-gtd=     | GTD: agenda, capture, journal, refile                   |
+| =gtk-org-export=  | LaTeX/Beamer/minted export, citations, links            |
+| =gtk-writing=     | Spelling, AUCTeX, Markdown, autoinsert                  |
+| =gtk-vc=          | Magit and git-gutter                                    |
+| =gtk-shells=      | vterm and eshell                                        |
+| =gtk-prog=        | Eglot (LSP), flycheck, snippets, projects               |
+| =gtk-langs=       | Per-language config: Python/conda, R/ESS, web, misc     |
+
+* Requirements and optional external tools
+
+The configuration degrades gracefully when optional tools are absent.
+
+| Tool                         | Used by                                          |
+|------------------------------+--------------------------------------------------|
+| hunspell                     | Spell-checking via flyspell (gtk-writing)        |
+| vale                         | Prose linting via flycheck bridge (gtk-prog)     |
+| latexmk + TeX with minted    | LaTeX/Beamer export and AUCTeX (gtk-org-export)  |
+| pygments                     | Syntax highlighting in minted LaTeX output       |
+| pandoc                       | Markdown processing (gtk-writing)                |
+| cmake                        | Required to build vterm (gtk-shells)             |
+| R                            | ESS integration (gtk-langs)                      |
+| conda / mamba                | Python environment switching (gtk-langs)         |
+| Language servers              | Eglot autocompletion/diagnostics (gtk-prog)      |
