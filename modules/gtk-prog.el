@@ -7,6 +7,19 @@
   :straight (:type built-in)
   :commands (eglot eglot-ensure))
 
+;; Prefer *-ts-mode for these languages when the grammar is built, falling back
+;; to the classic mode otherwise.  Deliberately selective: R (ESS), LaTeX
+;; (AUCTeX), Clojure (CIDER), Rust (rustic), and Markdown stay on their
+;; specialized modes.  Semantics come from eglot regardless.
+(use-package treesit-auto
+  :if (treesit-available-p)
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (setq treesit-auto-langs '(python yaml dockerfile json toml bash))
+  (treesit-auto-add-to-auto-mode-alist treesit-auto-langs)
+  (global-treesit-auto-mode))
+
 (use-package flycheck
   :init
   (defun gtk/disable-flycheck-in-org-src ()
