@@ -16,7 +16,7 @@
   :custom
   (treesit-auto-install 'prompt)
   :config
-  (setq treesit-auto-langs '(python yaml dockerfile json toml bash))
+  (setq treesit-auto-langs '(python yaml dockerfile json toml bash typst))
   (treesit-auto-add-to-auto-mode-alist treesit-auto-langs)
   (global-treesit-auto-mode))
 

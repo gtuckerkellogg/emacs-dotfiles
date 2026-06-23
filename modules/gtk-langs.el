@@ -125,5 +125,20 @@
 (use-package yaml-mode :hook (yaml-mode . (lambda () (auto-fill-mode -1))))
 (use-package dockerfile-mode)
 
+;; Typst (.typ): tree-sitter major mode, tinymist LSP when installed, and
+;; compile/preview/watch keys.  The grammar is managed by treesit-auto.
+(use-package typst-ts-mode
+  :mode ("\\.typ\\'" . typst-ts-mode)
+  :bind (:map typst-ts-mode-map
+              ("C-c C-c" . typst-ts-compile-and-preview)
+              ("C-c C-p" . typst-ts-preview)
+              ("C-c C-w" . typst-ts-watch-mode))
+  :config
+  ;; eglot + tinymist, but only when tinymist is actually on PATH.
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs '(typst-ts-mode . ("tinymist"))))
+  (add-hook 'typst-ts-mode-hook
+            (lambda () (when (executable-find "tinymist") (eglot-ensure)))))
+
 (provide 'gtk-langs)
 ;;; gtk-langs.el ends here
