@@ -62,16 +62,6 @@
 	 (window-width . 0.5)
 	 (reusable-frames . nil))))
 
-(with-eval-after-load 'projectile
-  (projectile-register-project-type
-   'r '("DESCRIPTION")
-   :project-file "DESCRIPTION"
-   :compile "R CMD INSTALL --with-keep.source ."
-   :test "R CMD check -o /tmp/ ."
-   :src-dir '("R/" "src/")
-   :test-dir "test/"
-   :test-prefix "test-"))
-
 (use-package poly-R
     :ensure t)
 
@@ -113,8 +103,6 @@
                    (point)))))
   :config
   (add-hook 'cider-mode-hook #'eldoc-mode)
-  (add-hook 'cider-mode-hook #'enable-paredit-mode)
-  (add-hook 'cider-mode-hook 'projectile-mode)
   (setq cider-repl-print-length 100
         cider-prompt-save-file-on-load nil
         cider-repl-result-prefix ";; => "

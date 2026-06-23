@@ -115,6 +115,7 @@
 (setq  org-agenda-skip-deadline-prewarning-if-scheduled t)
 
 (require 'org-faces)
+(require 'org-habit)
 (setq  org-habit-completed-glyph 9786
        org-habit-graph-column 80
        org-habit-show-habits-only-for-today t
@@ -155,7 +156,7 @@
          "* TODO %?\n  %i")
         ("T" "Todo items (with link)" entry (file+headline my/organizer "Tasks")
          "* TODO %?\n  %i\n  %a")
-        ("i" "Into the inbox" entry (file+datetree my/inbox)
+        ("i" "Into the inbox" entry (file+olp+datetree my/inbox)
          "* %?\n\nEntered on %U\n  %i" )
         ("j" "Journal entry" entry (function org-journal-find-location)
          "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
