@@ -50,21 +50,23 @@
 ;; Heading sizes and fixed-pitch for code/structural elements.  Font *families*
 ;; are owned by gtk-ui / local.el; here we only adjust heights and pitch so this
 ;; stays font-agnostic and never errors on a missing face.
-(when (display-graphic-p)
-  (dolist (spec '((org-level-1 . 1.3)
-                  (org-level-2 . 1.2)
-                  (org-level-3 . 1.1)
-                  (org-level-4 . 1.1)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)))
-    (set-face-attribute (car spec) nil :weight 'regular :height (cdr spec)))
-  (set-face-attribute 'org-level-2 nil :weight 'bold)
-  (dolist (face '(org-block org-table org-formula org-code org-verbatim
-                  org-special-keyword org-meta-line org-checkbox
-                  org-block-begin-line org-block-end-line org-drawer))
-    (when (facep face)
-      (set-face-attribute face nil :inherit 'fixed-pitch))))
+;; Run after org loads so org-level-* faces exist; GUI only.
+(with-eval-after-load 'org
+  (when (display-graphic-p)
+    (dolist (spec '((org-level-1 . 1.3)
+                    (org-level-2 . 1.2)
+                    (org-level-3 . 1.1)
+                    (org-level-4 . 1.1)
+                    (org-level-5 . 1.1)
+                    (org-level-6 . 1.1)
+                    (org-level-7 . 1.1)))
+      (set-face-attribute (car spec) nil :weight 'regular :height (cdr spec)))
+    (set-face-attribute 'org-level-2 nil :weight 'bold)
+    (dolist (face '(org-block org-table org-formula org-code org-verbatim
+                    org-special-keyword org-meta-line org-checkbox
+                    org-block-begin-line org-block-end-line org-drawer))
+      (when (facep face)
+        (set-face-attribute face nil :inherit 'fixed-pitch)))))
 
 (provide 'gtk-org)
 ;;; gtk-org.el ends here

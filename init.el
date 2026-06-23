@@ -45,10 +45,19 @@
 
 ;; exec-path-from-shell early so GUI/daemon sessions see the user's PATH.
 ;; In a -nw terminal Emacs PATH is inherited from the launching shell, so this
-;; is intentionally skipped there.
+;; is intentionally skipped there.  Use a non-interactive login shell ("-l", no
+;; "-i") so a noisy interactive bashrc can't corrupt the parsed output, and keep
+;; failure non-fatal.
 (use-package exec-path-from-shell
   :if (or (memq window-system '(mac ns x pgtk)) (daemonp))
-  :config (exec-path-from-shell-initialize))
+  :init (setq exec-path-from-shell-arguments '("-l"))
+  :config
+  (condition-case err
+      (exec-path-from-shell-initialize)
+    (error (display-warning 'gtk
+                            (format "exec-path-from-shell failed: %s"
+                                    (error-message-string err))
+                            :warning))))
 
 ;; --- machine-local settings ------------------------------------------------
 (let ((local (expand-file-name "local.el" user-emacs-directory)))
