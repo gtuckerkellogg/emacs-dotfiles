@@ -97,6 +97,65 @@
   (add-to-list 'org-tempo-keywords-alist '("al" . "ATTR_LATEX")))
 #+end_src
 
+* Presentations (org-present)
+#+begin_src emacs-lisp
+(use-package hide-mode-line)
+(use-package org-appear)
+
+(defun gtk/org-present-prepare-slide ()
+  "Reveal the current slide's heading, entry, and children."
+  (org-overview)
+  (org-fold-show-entry)
+  (org-fold-show-children))
+
+(defun gtk/org-present-start ()
+  "Style the current buffer for a presentation."
+  (setq-local face-remapping-alist
+              '((default (:height 1.5) variable-pitch)
+                (header-line (:height 4.5) variable-pitch)
+                (org-document-title (:height 1.75) org-document-title)
+                (org-code (:height 1.55) org-code)
+                (org-verbatim (:height 1.55) org-verbatim)
+                (org-block (:height 1.25) org-block)
+                (org-block-begin-line (:height 0.7) org-block)))
+  (setq header-line-format " ")
+  (org-display-inline-images)
+  (org-appear-mode -1)
+  (git-gutter-mode -1)
+  (visual-line-mode 1))
+
+(defun gtk/org-present-end ()
+  "Restore the buffer after a presentation."
+  (visual-fill-column-mode -1)
+  (visual-line-mode -1)
+  (setq header-line-format nil)
+  (org-remove-inline-images)
+  (org-appear-mode 1)
+  (setq-local face-remapping-alist '((default variable-pitch default))))
+
+(defun gtk/org-present-prev ()
+  "Go to the previous slide and reveal it."
+  (interactive)
+  (org-present-prev)
+  (gtk/org-present-prepare-slide))
+
+(defun gtk/org-present-next ()
+  "Go to the next slide, reveal it, and timestamp it if live-crafter is active."
+  (interactive)
+  (org-present-next)
+  (gtk/org-present-prepare-slide)
+  (when (fboundp 'live-crafter-add-timestamp)
+    (live-crafter-add-timestamp (substring-no-properties (org-get-heading t t t t)))))
+
+(use-package org-present
+  :bind (:map org-present-mode-keymap
+              ("C-c C-j" . gtk/org-present-next)
+              ("C-c C-k" . gtk/org-present-prev))
+  :config
+  (add-hook 'org-present-mode-hook #'gtk/org-present-start)
+  (add-hook 'org-present-mode-quit-hook #'gtk/org-present-end))
+#+end_src
+
 * Footer
 #+begin_src emacs-lisp
 (provide 'gtk-org)
