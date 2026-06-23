@@ -1,0 +1,73 @@
+#+title: Programming — eglot, flycheck, projectile, yasnippet
+#+property: header-args:emacs-lisp :tangle ../modules/gtk-prog.el :results silent
+
+* Header
+#+begin_src emacs-lisp
+;;; gtk-prog.el --- shared programming setup  -*- lexical-binding: t; -*-
+;;; Commentary:
+;; LSP (eglot), diagnostics (flycheck + eglot/vale bridges), snippets, projects.
+;;; Code:
+#+end_src
+
+* LSP: eglot
+#+begin_src emacs-lisp
+(use-package eglot
+  :straight (:type built-in)
+  :commands (eglot eglot-ensure))
+#+end_src
+
+* Diagnostics: flycheck
+#+begin_src emacs-lisp
+(use-package flycheck
+  :init
+  (defun gtk/disable-flycheck-in-org-src ()
+    "Disable the elisp-checkdoc checker inside org src edit buffers."
+    (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+  (add-hook 'org-src-mode-hook #'gtk/disable-flycheck-in-org-src)
+  :config
+  (global-flycheck-mode)
+  (setq flycheck-keymap-prefix (kbd "C-c f"))
+  (define-key flycheck-mode-map (kbd "C-c f") flycheck-command-map))
+
+;; Bridge eglot/LSP diagnostics into flycheck for one consistent UI.
+(use-package flycheck-eglot
+  :after (flycheck eglot)
+  :config (global-flycheck-eglot-mode 1))
+
+;; Prose linting via vale, when installed.
+(use-package flycheck-vale
+  :if (executable-find "vale")
+  :config (flycheck-vale-setup))
+#+end_src
+
+* Snippets: yasnippet
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :hook (prog-mode . yas-minor-mode))
+(use-package yasnippet-snippets :after yasnippet)
+#+end_src
+
+* Projects: projectile
+#+begin_src emacs-lisp
+(use-package projectile
+  :bind-keymap ("C-c p" . projectile-command-map)
+  :custom (projectile-create-missing-test-files t)
+  :config
+  (projectile-mode 1)
+  (projectile-register-project-type
+   'r '("DESCRIPTION")
+   :project-file "DESCRIPTION"
+   :compile "R CMD INSTALL --with-keep.source ."
+   :test "R CMD check -o /tmp/ ."
+   :src-dir '("R/" "src/") :test-dir "tests/" :test-prefix "test-"))
+#+end_src
+
+* Footer
+#+begin_src emacs-lisp
+(provide 'gtk-prog)
+;;; gtk-prog.el ends here
+#+end_src
+
+# Local Variables:
+# eval: (add-hook 'after-save-hook #'org-babel-tangle nil t)
+# End:

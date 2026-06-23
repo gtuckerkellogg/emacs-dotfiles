@@ -1,0 +1,48 @@
+;;; gtk-prog.el --- shared programming setup  -*- lexical-binding: t; -*-
+;;; Commentary:
+;; LSP (eglot), diagnostics (flycheck + eglot/vale bridges), snippets, projects.
+;;; Code:
+
+(use-package eglot
+  :straight (:type built-in)
+  :commands (eglot eglot-ensure))
+
+(use-package flycheck
+  :init
+  (defun gtk/disable-flycheck-in-org-src ()
+    "Disable the elisp-checkdoc checker inside org src edit buffers."
+    (setq-local flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+  (add-hook 'org-src-mode-hook #'gtk/disable-flycheck-in-org-src)
+  :config
+  (global-flycheck-mode)
+  (setq flycheck-keymap-prefix (kbd "C-c f"))
+  (define-key flycheck-mode-map (kbd "C-c f") flycheck-command-map))
+
+;; Bridge eglot/LSP diagnostics into flycheck for one consistent UI.
+(use-package flycheck-eglot
+  :after (flycheck eglot)
+  :config (global-flycheck-eglot-mode 1))
+
+;; Prose linting via vale, when installed.
+(use-package flycheck-vale
+  :if (executable-find "vale")
+  :config (flycheck-vale-setup))
+
+(use-package yasnippet
+  :hook (prog-mode . yas-minor-mode))
+(use-package yasnippet-snippets :after yasnippet)
+
+(use-package projectile
+  :bind-keymap ("C-c p" . projectile-command-map)
+  :custom (projectile-create-missing-test-files t)
+  :config
+  (projectile-mode 1)
+  (projectile-register-project-type
+   'r '("DESCRIPTION")
+   :project-file "DESCRIPTION"
+   :compile "R CMD INSTALL --with-keep.source ."
+   :test "R CMD check -o /tmp/ ."
+   :src-dir '("R/" "src/") :test-dir "tests/" :test-prefix "test-"))
+
+(provide 'gtk-prog)
+;;; gtk-prog.el ends here
