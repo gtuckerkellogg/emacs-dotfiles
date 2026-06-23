@@ -62,6 +62,8 @@
 	 (window-width . 0.5)
 	 (reusable-frames . nil))))
 
+(use-package polymode)
+(use-package poly-markdown)
 (use-package poly-R
     :ensure t)
 

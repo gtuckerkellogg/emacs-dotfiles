@@ -68,6 +68,14 @@
   (unless (server-running-p) (server-start)))
 #+end_src
 
+* Remote editing (tramp)
+#+begin_src emacs-lisp
+;; Edit remote files as root by hopping through ssh first
+;; (e.g. /sudo:host:/etc/... connects via /ssh:host: then sudo).
+(with-eval-after-load 'tramp
+  (setq tramp-default-proxies-alist '((".*" "\\`root\\'" "/ssh:%h:"))))
+#+end_src
+
 * Disabled-command unlocks
 #+begin_src emacs-lisp
 (put 'narrow-to-region 'disabled nil)

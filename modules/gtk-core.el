@@ -47,6 +47,11 @@
   (require 'server)
   (unless (server-running-p) (server-start)))
 
+;; Edit remote files as root by hopping through ssh first
+;; (e.g. /sudo:host:/etc/... connects via /ssh:host: then sudo).
+(with-eval-after-load 'tramp
+  (setq tramp-default-proxies-alist '((".*" "\\`root\\'" "/ssh:%h:"))))
+
 (put 'narrow-to-region 'disabled nil)
 (put 'set-goal-column 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)
