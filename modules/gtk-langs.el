@@ -37,10 +37,10 @@
 	(ess-R-fl-keyword:F&T . t)))
 
 (add-hook 'ess-r-mode-hook
-	  '(lambda ()
+	  (lambda ()
 	     (local-set-key (kbd "<f9>") #'ess-rdired)))
 (add-hook 'ess-rdired-mode-hook
-	  '(lambda ()
+	  (lambda ()
 	     (local-set-key (kbd "<f9>") #'kill-buffer-and-window)))
 
 (setq display-buffer-alist
@@ -114,10 +114,8 @@
   :config
   (add-hook 'cider-mode-hook #'eldoc-mode)
   (add-hook 'cider-mode-hook #'enable-paredit-mode)
-  (add-hook 'cider-repl-mode-hook #'enable-paredit-mode)
   (add-hook 'cider-mode-hook 'projectile-mode)
   (setq cider-repl-print-length 100
-        nrepl-hide-special-buffers t
         cider-prompt-save-file-on-load nil
         cider-repl-result-prefix ";; => "
         cider-repl-popup-stacktraces t
@@ -127,8 +125,9 @@
 
 (use-package rustic
   :mode ("\\.rs\\'" . rustic-mode)
-  :custom (rustic-format-on-save t)
-  :config (setq rustic-lsp-client 'eglot))
+  :custom
+  (rustic-format-on-save t)
+  (rustic-lsp-client 'eglot))
 
 (use-package stan-mode)
 (use-package snakemake-mode)
