@@ -9,7 +9,7 @@
   (expand-file-name path user-emacs-directory))
 
 (setq user-full-name "Greg Tucker-Kellogg"
-      user-mail-address "dbsgtk@gmail.com")
+      user-mail-address "dbsgtk@nus.edu.sg")
 
 (set-language-environment "UTF-8")
 (prefer-coding-system 'utf-8)

@@ -20,7 +20,7 @@
 * Identity
 #+begin_src emacs-lisp
 (setq user-full-name "Greg Tucker-Kellogg"
-      user-mail-address "dbsgtk@gmail.com")
+      user-mail-address "dbsgtk@nus.edu.sg")
 #+end_src
 
 * Sane defaults

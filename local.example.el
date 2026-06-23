@@ -14,5 +14,10 @@
 (setq gtk/fixed-font    "Input Mono Narrow"
       gtk/variable-font "Open Sans")
 
+;; AUCTeX PDF viewer command (%o expands to the output file).  Default xdg-open.
+;; For SyncTeX forward/inverse search, use a dedicated viewer, e.g. "zathura %o"
+;; (see AUCTeX's TeX-view-program-list for the full synctex form).
+(setq gtk/latex-pdf-viewer "xdg-open %o")
+
 (provide 'local)
 ;;; local.example.el ends here

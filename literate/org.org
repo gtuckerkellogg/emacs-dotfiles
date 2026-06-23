@@ -36,7 +36,8 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t) (R . t) (shell . t) (dot . t)
-     (python . t) (latex . t)))
+     (python . t) (latex . t) (clojure . t)))
+  (setq org-babel-clojure-backend 'cider)
   :bind (("C-c l" . org-store-link)
          ("C-c a" . org-agenda)
          ("C-c c" . org-capture)))

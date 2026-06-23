@@ -37,8 +37,8 @@
   (setq TeX-view-program-selection
         '((output-dvi "DVI Viewer") (output-pdf "PDF Viewer") (output-html "Browser"))
         TeX-view-program-list
-        '(("DVI Viewer" "xdg-open %o")
-          ("PDF Viewer" "xdg-open %o")
+        `(("DVI Viewer" "xdg-open %o")
+          ("PDF Viewer" ,(if (boundp 'gtk/latex-pdf-viewer) gtk/latex-pdf-viewer "xdg-open %o"))
           ("Browser" "xdg-open %o"))))
 
 (defun getpackage ()
