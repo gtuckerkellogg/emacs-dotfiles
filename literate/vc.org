@@ -1,0 +1,34 @@
+#+title: Version control — magit, git-gutter
+#+property: header-args:emacs-lisp :tangle ../modules/gtk-vc.el :results silent
+
+* Header
+#+begin_src emacs-lisp
+;;; gtk-vc.el --- magit and git-gutter  -*- lexical-binding: t; -*-
+;;; Commentary:
+;; Version-control UI: magit (with with-editor) and git-gutter.
+;;; Code:
+#+end_src
+
+* Magit
+#+begin_src emacs-lisp
+(use-package with-editor)
+(use-package magit
+  :bind (("C-c m" . magit-status)
+         ("C-c g" . magit-file-dispatch)))
+#+end_src
+
+* Git gutter
+#+begin_src emacs-lisp
+(use-package git-gutter
+  :config (global-git-gutter-mode 1))
+#+end_src
+
+* Footer
+#+begin_src emacs-lisp
+(provide 'gtk-vc)
+;;; gtk-vc.el ends here
+#+end_src
+
+# Local Variables:
+# eval: (add-hook 'after-save-hook #'org-babel-tangle nil t)
+# End:
