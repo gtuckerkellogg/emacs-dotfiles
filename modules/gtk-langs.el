@@ -1,0 +1,140 @@
+;;; gtk-langs.el --- per-language configuration -*- lexical-binding: t; -*-
+;;; Commentary:
+;; Declarative per-language config loaded last.
+;;; Code:
+
+(use-package elisp-slime-nav
+  :hook (emacs-lisp-mode . turn-on-elisp-slime-nav-mode))
+(add-hook 'emacs-lisp-mode-hook #'turn-on-eldoc-mode)
+(add-hook 'emacs-lisp-mode-hook #'gtk/run-prog-hook)
+(with-eval-after-load 'elisp-mode
+  (define-key emacs-lisp-mode-map (kbd "C-c v") #'eval-buffer)
+  (define-key emacs-lisp-mode-map (kbd "C-c C-c") #'eval-defun))
+
+(use-package ess
+  :mode ("\\.R\\'" . R-mode)
+  :custom
+  (ess-use-flymake nil)
+  :config
+  (add-hook 'ess-r-mode-hook 'smartparens-mode)
+  (setq-default ess-language "R")
+  (setq ess-default-style 'RRR))
+
+
+;; from https://github.com/ess-intro/presentation-ess-customization/blob/main/tutorial/ess-init.el
+(setq ess-R-font-lock-keywords
+      '((ess-R-fl-keyword:keywords . t)
+	(ess-R-fl-keyword:constants . t)
+	(ess-R-fl-keyword:modifiers . t)
+	(ess-R-fl-keyword:fun-defs . t)
+	(ess-R-fl-keyword:assign-ops . t)
+	(ess-R-fl-keyword:%op% . t)
+	(ess-fl-keyword:fun-calls . t)
+	(ess-fl-keyword:numbers . t)
+	(ess-fl-keyword:operators)
+	(ess-fl-keyword:delimiters)
+	(ess-fl-keyword:=)
+	(ess-R-fl-keyword:F&T . t)))
+
+(add-hook 'ess-r-mode-hook
+	  '(lambda ()
+	     (local-set-key (kbd "<f9>") #'ess-rdired)))
+(add-hook 'ess-rdired-mode-hook
+	  '(lambda ()
+	     (local-set-key (kbd "<f9>") #'kill-buffer-and-window)))
+
+(setq display-buffer-alist
+      '(("*R Dired"
+	 (display-buffer-reuse-window display-buffer-at-bottom)
+	 (window-width . 0.5)
+	 (window-height . 0.25)
+	 (reusable-frames . nil))
+	("*R"
+	 (display-buffer-reuse-window display-buffer-in-side-window)
+	 (side . right)
+	 (slot . -1)
+	 (window-width . 0.5)
+	 (reusable-frames . nil))
+	("*Help"
+	 (display-buffer-reuse-window display-buffer-in-side-window)
+	 (side . right)
+	 (slot . 1)
+	 (window-width . 0.5)
+	 (reusable-frames . nil))))
+
+(with-eval-after-load 'projectile
+  (projectile-register-project-type
+   'r '("DESCRIPTION")
+   :project-file "DESCRIPTION"
+   :compile "R CMD INSTALL --with-keep.source ."
+   :test "R CMD check -o /tmp/ ."
+   :src-dir '("R/" "src/")
+   :test-dir "test/"
+   :test-prefix "test-"))
+
+(use-package poly-R
+    :ensure t)
+
+(use-package quarto-mode
+  :mode (("\\.Rmd" . poly-quarto-mode)
+	 ("\\.qmd" . poly-quarto-mode)))
+
+(use-package conda
+  :if (and (boundp 'gtk/conda-home) gtk/conda-home (file-directory-p gtk/conda-home))
+  :custom
+  (conda-anaconda-home gtk/conda-home)
+  (conda-env-home-directory gtk/conda-home))
+(use-package pet
+  :hook (python-base-mode . pet-mode))
+
+(use-package cider
+  :init
+  (add-hook 'clojure-mode-hook #'cider-mode)
+  (autoload 'cider--make-result-overlay "cider-overlays")
+  (defun endless/eval-overlay (value point)
+    (cider--make-result-overlay (format "%S" value)
+      :where point
+      :duration 'command)
+    value)
+  (advice-add 'eval-region :around
+              (lambda (f beg end &rest r)
+                (endless/eval-overlay
+                 (apply f beg end r)
+                 end)))
+  (advice-add 'eval-last-sexp :filter-return
+              (lambda (r)
+                (endless/eval-overlay r (point))))
+  (advice-add 'eval-defun :filter-return
+              (lambda (r)
+                (endless/eval-overlay
+                 r
+                 (save-excursion
+                   (end-of-defun)
+                   (point)))))
+  :config
+  (add-hook 'cider-mode-hook #'eldoc-mode)
+  (add-hook 'cider-mode-hook #'enable-paredit-mode)
+  (add-hook 'cider-repl-mode-hook #'enable-paredit-mode)
+  (add-hook 'cider-mode-hook 'projectile-mode)
+  (setq cider-repl-print-length 100
+        nrepl-hide-special-buffers t
+        cider-prompt-save-file-on-load nil
+        cider-repl-result-prefix ";; => "
+        cider-repl-popup-stacktraces t
+        cider-auto-select-error-buffer t)
+
+  :bind (:map cider-mode-map ("C-c i" . cider-inspect-last-result)))
+
+(use-package rustic
+  :mode ("\\.rs\\'" . rustic-mode)
+  :custom (rustic-format-on-save t)
+  :config (setq rustic-lsp-client 'eglot))
+
+(use-package stan-mode)
+(use-package snakemake-mode)
+(use-package groovy-mode)
+(use-package yaml-mode :hook (yaml-mode . (lambda () (auto-fill-mode -1))))
+(use-package dockerfile-mode)
+
+(provide 'gtk-langs)
+;;; gtk-langs.el ends here
