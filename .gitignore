@@ -1,5 +1,6 @@
 # Runtime / build artifacts
 /straight/*
+/tree-sitter/
 !/straight/versions/
 /eln-cache/
 /elpa/
