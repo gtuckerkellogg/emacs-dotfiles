@@ -68,6 +68,20 @@
       (when (facep face)
         (set-face-attribute face nil :inherit 'fixed-pitch)))))
 
+;; In daemon sessions org column view (C-c C-x C-c) can render with the wrong
+;; face; align org-column/org-column-title with the default font.
+(defun gtk/org-column-fixed-width-faces ()
+  "Make org column-view faces match the default font's height and family."
+  (set-face-attribute 'org-column nil
+                      :height (face-attribute 'default :height)
+                      :family (face-attribute 'default :family))
+  (set-face-attribute 'org-column-title nil
+                      :height (face-attribute 'default :height)
+                      :family (face-attribute 'default :family)))
+
+(when (daemonp)
+  (add-hook 'org-mode-hook #'gtk/org-column-fixed-width-faces))
+
 ;; org-tempo: `<s' TAB block expansions, plus a custom `<al' -> #+ATTR_LATEX.
 (with-eval-after-load 'org
   (require 'org-tempo)
