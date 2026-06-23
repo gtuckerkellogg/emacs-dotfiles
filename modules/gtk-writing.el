@@ -79,7 +79,6 @@
   :init
   (setq markdown-command "pandoc"))
 
-(setq fill-column 90)
 (add-hook 'markdown-mode-hook 'flyspell-mode)
 (add-hook 'markdown-mode-hook 'turn-on-visual-line-mode)
 (add-hook 'markdown-mode-hook 'turn-off-auto-fill)
@@ -134,13 +133,9 @@ Used for `flyspell-generic-check-word-predicate'."
           (lambda ()
             (setq flyspell-generic-check-word-predicate
                   'markdown-flyspell-check-word-p)))
-(put 'markdown-mode-hook 'flyspell-generic-check-word-predicate
-     'markdown-flyspell-check-word-p)
 
 (use-package pandoc-mode
   :straight t
-  :mode (("\\.md" . markdown-mode)
-         ("\\.latex" . latex-mode))
   :hook (latex-mode . pandoc-mode))
 
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
@@ -150,7 +145,8 @@ Used for `flyspell-generic-check-word-predicate'."
   :config
   (setq auto-insert-directory (gtk/emacs-path "insert/"))
   (add-to-list 'auto-insert-alist
-               '(("letter\\.tex" . "a letter") . "letter-template.tex")))
+               '(("letter\\.tex" . "a letter") . "letter-template.tex"))
+  (auto-insert-mode 1))
 
 (provide 'gtk-writing)
 ;;; gtk-writing.el ends here
