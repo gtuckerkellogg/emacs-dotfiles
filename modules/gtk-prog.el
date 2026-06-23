@@ -15,8 +15,7 @@
   (add-hook 'org-src-mode-hook #'gtk/disable-flycheck-in-org-src)
   :config
   (global-flycheck-mode)
-  (setq flycheck-keymap-prefix (kbd "C-c f"))
-  (define-key flycheck-mode-map (kbd "C-c f") flycheck-command-map))
+  (customize-set-variable 'flycheck-keymap-prefix (kbd "C-c f")))
 
 ;; Bridge eglot/LSP diagnostics into flycheck for one consistent UI.
 (use-package flycheck-eglot
