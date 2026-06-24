@@ -2,7 +2,8 @@
 ;;; Commentary:
 ;; Declarative export pipeline: org-contrib/ox-extra, LaTeX image defaults,
 ;; memoir class, minted code, beamer derived backend, caption filters,
-;; citations (org-ref + oc-biblatex), and custom link types.
+;; citations (citar + native org-cite; oc-biblatex/oc-csl export), and
+;; custom link types.
 ;; Loaded after gtk-org; does NOT redefine org core settings.
 ;;; Code:
 
@@ -131,12 +132,36 @@ Applies only for the latex BACKEND when `my/unnumbered-captions-p' is non-nil."
   (add-to-list 'org-export-filter-final-output-functions #'gtk/unnumbered-latex-captions)
   (add-to-list 'org-export-filter-parse-tree-functions #'org-export-ignore-headlines))
 
-(use-package org-ref)
+;; Citations: native org-cite (`[cite:@key]') with citar as the
+;; completing-read UI for insert / follow / activate.  Per-document
+;; bibliographies are read from each file's `#+bibliography:' keyword,
+;; so no global bibliography is configured here.
+(use-package citar
+  :custom
+  (org-cite-insert-processor 'citar)
+  (org-cite-follow-processor 'citar)
+  (org-cite-activate-processor 'citar)
+  :bind (:map org-mode-map
+              ("C-c ]"       . org-cite-insert)
+              ("C-c C-x C-2" . org-cite-insert)))
+
+;; citeproc-el backs CSL export for the non-LaTeX backends.
+(use-package citeproc)
+
 (with-eval-after-load 'org
-  (require 'oc-biblatex)
-  (setq org-ref-insert-cite-function (lambda () (org-cite-insert nil)))
-  (define-key org-mode-map (kbd "C-c ]") #'org-ref-insert-link)
-  (define-key org-mode-map (kbd "C-c C-x C-2") #'org-cite-insert))
+  (require 'oc-biblatex)        ; LaTeX/Beamer -> biblatex + biber
+  (require 'oc-csl)             ; HTML/ODT/Markdown -> CSL via citeproc
+  ;; Choose the export processor per backend so citations render without
+  ;; a per-document #+cite_export keyword.  Beamer derives from latex but
+  ;; is listed explicitly because backend resolution does not reliably
+  ;; walk to the parent backend.
+  (setq org-cite-export-processors
+        '((latex  biblatex)
+          (beamer biblatex)
+          (html   csl)
+          (odt    csl)
+          (md     csl)
+          (t      csl))))
 
 (with-eval-after-load 'org
   (org-link-set-parameters
@@ -164,6 +189,13 @@ Applies only for the latex BACKEND when `my/unnumbered-captions-p' is non-nil."
    :export (lambda (path _desc format)
              (cond ((eq format 'html) path)
                    ((eq format 'latex) (format "Table~\\ref{tbl:%s}" path))))))
+
+;; ox-typst: export Org to Typst markup (and PDF via the `typst' CLI).
+;; Loading it registers the `typst' backend in the export dispatcher
+;; (C-c C-e t ...).  File/PDF export needs the `typst' binary on PATH;
+;; that is distinct from `tinymist', which is only the editor LSP.
+(use-package ox-typst
+  :after org)
 
 (provide 'gtk-org-export)
 ;;; gtk-org-export.el ends here
