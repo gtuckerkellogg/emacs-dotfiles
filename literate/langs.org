@@ -149,13 +149,51 @@
 * Typst
 #+begin_src emacs-lisp
 ;; Typst (.typ): tree-sitter major mode, tinymist LSP when installed, and
-;; compile/preview/watch keys.  The grammar is managed by treesit-auto.
+;; compile/preview/watch keys.
+;;
+;; The compiled grammar lives in ../tree-sitter/ (gitignored), so a fresh
+;; checkout has no grammar and `typst-ts-mode' would error on the first
+;; .typ open.  We can't lean on `treesit-install-language-grammar': the
+;; Ubuntu snap of Emacs patches it to compile via a snap-only gcc resolved
+;; through the EMACS_SNAP_DIR env var, which isn't reliably set and then
+;; fails with a cryptic "wrong-type-argument stringp nil".  So we build the
+;; grammar ourselves with cc in `:init' (before the mode activates; a mode
+;; hook would run too late, after tree-sitter init has already failed) and
+;; only when it is actually missing.
+(defun gtk/ensure-typst-grammar ()
+  "Build and install the Typst tree-sitter grammar if it is missing."
+  (when (and (treesit-available-p)
+             (not (treesit-language-available-p 'typst))
+             (executable-find "cc")
+             (executable-find "git"))
+    (let* ((tmp (make-temp-file "tree-sitter-typst" t))
+           (repo (expand-file-name "repo" tmp))
+           (out-dir (expand-file-name "tree-sitter" user-emacs-directory))
+           (lib (expand-file-name "libtree-sitter-typst.so" out-dir)))
+      (unwind-protect
+          (when (zerop (call-process "git" nil nil nil "clone" "--depth" "1"
+                                     "https://github.com/uben0/tree-sitter-typst"
+                                     repo))
+            (make-directory out-dir t)
+            (let* ((default-directory (expand-file-name "src" repo))
+                   (sources (append '("parser.c")
+                                    (when (file-exists-p "scanner.c")
+                                      '("scanner.c")))))
+              (if (zerop (apply #'call-process "cc" nil nil nil
+                                "-shared" "-fPIC" "-O2" "-I."
+                                (append sources (list "-o" lib))))
+                  (message "Built Typst tree-sitter grammar into %s" out-dir)
+                (message "Failed to compile Typst tree-sitter grammar"))))
+        (delete-directory tmp t)))))
+
 (use-package typst-ts-mode
   :mode ("\\.typ\\'" . typst-ts-mode)
   :bind (:map typst-ts-mode-map
               ("C-c C-c" . typst-ts-compile)
               ("C-c C-p" . typst-ts-preview)
               ("C-c C-w" . typst-ts-watch-mode))
+  :init
+  (gtk/ensure-typst-grammar)
   :config
   ;; eglot + tinymist, but only when tinymist is actually on PATH.
   (with-eval-after-load 'eglot
