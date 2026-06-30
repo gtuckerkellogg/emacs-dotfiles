@@ -84,5 +84,13 @@
 
 (global-hl-line-mode 1)
 
+;; Visible, buffer-local bookmarks (carried over from the legacy config).
+;; The legacy <f3>/S-<f3> next/previous bindings are intentionally dropped to
+;; leave <f3> free for keyboard-macro recording; navigation lives under C-c.
+(use-package bm
+  :bind (("C-c b" . bm-toggle)
+         ("C-c [" . bm-previous)
+         ("C-c ]" . bm-next)))
+
 (provide 'gtk-editing)
 ;;; gtk-editing.el ends here
